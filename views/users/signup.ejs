@@ -1,0 +1,127 @@
+<%- include('../partials/header.ejs') %> <%-
+include('../partials/page_header.ejs') %>
+
+<main class="main">
+  <!-- breadcrumbs -->
+  <div class="page-header breadcrumb-wrap pb-10 pt-10" style="padding: 0px">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html" rel="nofollow">Home</a>
+        <span></span> Pages <span></span> Login / Register
+      </div>
+    </div>
+  </div>
+  <section style="background-color: black">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          <div class="has-bg-img">
+            <img
+              src="/user_assets/imgs/sigup_login/signup.png"
+              alt=""
+              style="width: 2000px"
+            />
+          </div>
+        </div>
+        <div class="col-sm pt-10 pb-10" style="color: white">
+          <div
+            class="login_wrap widget-taber-content p-30 background-white border-radius-10 mb-md-5 mb-lg-0 mb-sm-5"
+            style="background-color: white"
+          >
+            <div class="bg-white mr-50 ml-50">
+              <div class="heading_s1">
+                <h3 class="mb-20 ml-120">Create an Account</h3>
+              </div>
+              <p class="mb-20 font-sm">
+                Your personal data will be used to support your experience
+                throughout this website, to manage access to your account, and
+                for other purposes described in our privacy policy
+              </p>
+              <form method="post">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    required=""
+                    name="username"
+                    placeholder="Username"
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="text"
+                    required=""
+                    name="email"
+                    placeholder="Email"
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    required=""
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    required=""
+                    type="password"
+                    name="password"
+                    placeholder="Confirm password"
+                  />
+                </div>
+                <div class="login_footer form-group">
+                  <div class="chek-form">
+                    <div class="custome-checkbox">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="checkbox"
+                        id="exampleCheckbox12"
+                        value=""
+                      />
+                      <label class="form-check-label" for="exampleCheckbox12"
+                        ><span>I agree to terms &amp; Policy.</span></label
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <button
+                    type="submit"
+                    class="btn btn-fill-out btn-block hover-up ml-130"
+                    name="login"
+                    style="background-color: black"
+                  >
+                    Submit &amp; Register
+                  </button>
+                </div>
+              </form>
+              <div class="divider-text-center mt-15 mb-15">
+                <span style="color: black"> or</span>
+              </div>
+              <ul class="btn-login list_none text-center mb-15">
+                <li>
+                  <a href="#" class="btn btn-facebook hover-up mb-lg-0 mb-sm-4"
+                    >Login With Facebook</a
+                  >
+                </li>
+                <li>
+                  <a href="#" class="btn btn-google hover-up"
+                    >Login With Google</a
+                  >
+                </li>
+              </ul>
+              <div class="text-muted text-center">
+                Already have an account? <a href="#">Sign in now</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/page_footer.ejs') %> <%-
+include('../partials/footer.ejs')%>
