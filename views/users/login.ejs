@@ -1,0 +1,83 @@
+<%- include('../partials/header.ejs') %> <%-
+include('../partials/page_header.ejs') %>
+
+<main class="main">
+  <!-- breadcrumbs -->
+  <div class="page-header breadcrumb-wrap pb-10 pt-10" style="padding: 0px">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html" rel="nofollow">Home</a>
+        <span></span> Pages <span></span> Login / Register
+      </div>
+    </div>
+  </div>
+  <section style="background-color: black">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="has-bg-img">
+            <img
+              src="/user_assets/imgs/sigup_login/login.png"
+              alt=""
+              style="width: 100%; height: 100%; object-fit: cover"
+            />
+          </div>
+        </div>
+        <div class="col-sm-6 pt-10 pb-10" style="color: white">
+          <div
+            class="login_wrap widget-taber-content p-30 background-white border-radius-10 mb-md-5 mb-lg-0 mb-sm-5 mt-200"
+            style="background-color: white; height: 400px"
+          >
+            <div
+              class="bg-white mr-50 ml-50"
+              style="
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <div style="width: 80%">
+                <div class="heading_s1">
+                  <h3 class="mb-20 text-center">Login</h3>
+                </div>
+                <form action="" method="post">
+                  <div class="form-group">
+                    <input
+                      type="text"
+                      required=""
+                      name="email"
+                      placeholder="Email"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <input
+                      required=""
+                      type="password"
+                      name="password"
+                      placeholder="Password"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <button
+                      type="submit"
+                      class="btn btn-fill-out btn-block hover-up ml-130"
+                      style="background-color: black"
+                    >
+                      Login
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/page_footer.ejs') %> <%-
+include('../partials/footer.ejs')%>

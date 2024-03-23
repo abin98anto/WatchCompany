@@ -37,66 +37,68 @@ include('../partials/page_header.ejs') %>
                 throughout this website, to manage access to your account, and
                 for other purposes described in our privacy policy
               </p>
-              <form method="post">
-                <div class="form-group">
-                  <input
-                    type="text"
-                    required=""
-                    name="username"
-                    placeholder="Username"
-                  />
-                </div>
-                <div class="form-group">
-                  <input
-                    type="text"
-                    required=""
-                    name="email"
-                    placeholder="Email"
-                  />
-                </div>
-                <div class="form-group">
-                  <input
-                    required=""
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                  />
-                </div>
-                <div class="form-group">
-                  <input
-                    required=""
-                    type="password"
-                    name="password"
-                    placeholder="Confirm password"
-                  />
-                </div>
-                <div class="login_footer form-group">
-                  <div class="chek-form">
-                    <div class="custome-checkbox">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        name="checkbox"
-                        id="exampleCheckbox12"
-                        value=""
-                      />
-                      <label class="form-check-label" for="exampleCheckbox12"
-                        ><span>I agree to terms &amp; Policy.</span></label
-                      >
-                    </div>
+              <form id="form" action="" method="post" class="mt-20">
+                <div class="form-group row">
+                  <div class="col">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="username"
+                      name="username"
+                      placeholder="Username"
+                    />
+                    <div id="nameError" class="mb-10 text-danger"></div>
                   </div>
                 </div>
-                <div class="form-group">
-                  <button
-                    type="submit"
-                    class="btn btn-fill-out btn-block hover-up ml-130"
-                    name="login"
-                    style="background-color: black"
-                  >
-                    Submit &amp; Register
-                  </button>
+                <div class="form-group row">
+                  <div class="col">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      placeholder="Email"
+                    />
+                    <div id="emailError" class="mb-10 text-danger"></div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="col">
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="password"
+                      name="password"
+                      placeholder="Password"
+                    />
+                    <div id="passwordError" class="mb-10 text-danger"></div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="col">
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="confirm_password"
+                      name="confirm_password"
+                      placeholder="Confirm Password"
+                    />
+                    <div id="confirmError" class="mb-10 text-danger"></div>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="col">
+                    <button
+                      type="submit"
+                      class="btn btn-lg"
+                      style="background-color: black"
+                    >
+                      Signup
+                    </button>
+                  </div>
                 </div>
               </form>
+
               <div class="divider-text-center mt-15 mb-15">
                 <span style="color: black"> or</span>
               </div>
@@ -107,13 +109,13 @@ include('../partials/page_header.ejs') %>
                   >
                 </li>
                 <li>
-                  <a href="#" class="btn btn-google hover-up"
+                  <a href="/auth/google" class="btn btn-google hover-up"
                     >Login With Google</a
                   >
                 </li>
               </ul>
               <div class="text-muted text-center">
-                Already have an account? <a href="#">Sign in now</a>
+                Already have an account? <a href="/login">Sign in now</a>
               </div>
             </div>
           </div>
@@ -123,5 +125,92 @@ include('../partials/page_header.ejs') %>
   </section>
 </main>
 
+<script>
+  const form = document.getElementById("form");
+  const username = document.getElementById("username");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const confirm_password = document.getElementById("confirm_password");
+  const nameError = document.getElementById("nameError");
+  const emailError = document.getElementById("emailError");
+  const passwordError = document.getElementById("passwordError");
+  const confirmError = document.getElementById("confirmError");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    let errors = false;
+
+    // Reset error messages
+    nameError.innerText = "";
+    emailError.innerText = "";
+    passwordError.innerText = "";
+    confirmError.innerText = "";
+
+    if (!/^[a-zA-Z]+$/.test(username.value.trim())) {
+      nameError.innerText = "Username must contain only alphabets.";
+      errors = true;
+    }
+
+    if (!isValidEmail(email.value.trim())) {
+      emailError.innerText = "Please enter a valid email address.";
+      errors = true;
+    }
+
+    if (password.value.trim().length < 6) {
+      passwordError.innerText = "Password must be at least 6 characters long.";
+      errors = true;
+    }
+
+    if (confirm_password.value.trim() !== password.value.trim()) {
+      confirmError.innerText = "Passwords do not match.";
+      errors = true;
+    }
+
+    if (errors) {
+      return; // Exit function if there are errors
+    }
+
+    // Check if email already exists in the database
+    try {
+      const emailExists = await checkEmailExists(email.value.trim());
+      if (emailExists) {
+        emailError.innerText = "This email is already registered.";
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking email existence:", error);
+      emailError.innerText =
+        "Error checking email existence. Please try again.";
+      return;
+    }
+
+    // Validation passed, proceed with form submission
+    form.submit();
+  });
+
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  async function checkEmailExists(email) {
+    try {
+      const response = await fetch("/check-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      return data.exists;
+    } catch (error) {
+      console.error("Error checking email existence:", error);
+      throw error;
+    }
+  }
+</script>
+
 <%- include('../partials/page_footer.ejs') %> <%-
-include('../partials/footer.ejs')%>
+include('../partials/footer.ejs') %>

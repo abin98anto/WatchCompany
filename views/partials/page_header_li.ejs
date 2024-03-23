@@ -178,7 +178,8 @@
             <!-- Account Icon -->
             <div class="header-action-icon-2">
               <ul>
-                <li><a href="/signup">SignUp/Login</a></li>
+                <li><a href="/profile">hello <%= user.name %></a></li>
+                <li><a href="/logout">Logout</a></li>
               </ul>
             </div>
 
@@ -197,104 +198,3 @@
     </div>
   </div>
 </header>
-
-<!-- mobile view -->
-<div class="mobile-header-active mobile-header-wrapper-style">
-  <div class="mobile-header-wrapper-inner">
-    <div class="mobile-header-top">
-      <div class="mobile-header-logo">
-        <a href="index.html"
-          ><img src="/user_assets/imgs/theme/logo.svg" alt="logo"
-        /></a>
-      </div>
-      <div
-        class="mobile-menu-close close-style-wrap close-style-position-inherit"
-      >
-        <button class="close-style search-close">
-          <i class="icon-top"></i>
-          <i class="icon-bottom"></i>
-        </button>
-      </div>
-    </div>
-    <div class="mobile-header-content-area">
-      <div class="mobile-search search-style-3 mobile-header-border">
-        <form action="#">
-          <input type="text" placeholder="Search for items…" />
-          <button type="submit"><i class="fi-rs-search"></i></button>
-        </form>
-      </div>
-      <div class="mobile-menu-wrap mobile-header-border">
-        <div class="main-categori-wrap mobile-header-border">
-          <a class="categori-button-active-2" href="#">
-            <span class="fi-rs-apps"></span> Browse Categories
-          </a>
-          <div class="categori-dropdown-wrap categori-dropdown-active-small">
-            <ul>
-              <li>
-                <a href="shop-grid-right.html"
-                  ><i class="evara-font-dress"></i>Women's Clothing</a
-                >
-              </li>
-              <!-- Add more categories as needed -->
-            </ul>
-          </div>
-        </div>
-        <!-- mobile menu start -->
-        <nav>
-          <ul class="mobile-menu">
-            <!-- Navigation Menu -->
-          </ul>
-        </nav>
-        <!-- mobile menu end -->
-      </div>
-      <div class="mobile-header-info-wrap mobile-header-border">
-        <div class="single-mobile-header-info mt-30">
-          <a href="page-contact.html"> Our location </a>
-        </div>
-        <div class="single-mobile-header-info">
-          <a href="page-login-register.html">Log In / Sign Up </a>
-        </div>
-        <div class="single-mobile-header-info">
-          <a href="#">(+01) - 2345 - 6789 </a>
-        </div>
-      </div>
-      <div class="mobile-social-icon">
-        <h5 class="mb-15 text-grey-4">Follow Us</h5>
-        <a href="#"
-          ><img src="/user_assets/imgs/theme/icons/icon-facebook.svg" alt=""
-        /></a>
-        <!-- Add more social media icons as needed -->
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Get the SVG icon and dropdown menu elements
-    var accountIcon = document.getElementById("account-icon");
-    var accountDropdown = document.getElementById("account-dropdown");
-
-    // Toggle dropdown menu visibility when SVG icon is clicked
-    accountIcon.addEventListener("click", function (event) {
-      // Prevent default link behavior
-      event.preventDefault();
-
-      // Toggle the 'show' class to display or hide the dropdown menu
-      accountDropdown.classList.toggle("show");
-    });
-
-    // Close the dropdown menu when clicking outside of it
-    window.addEventListener("click", function (event) {
-      if (!event.target.matches("#account-icon")) {
-        var dropdowns = document.getElementsByClassName("dropdown-menu");
-        for (var i = 0; i < dropdowns.length; i++) {
-          var openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains("show")) {
-            openDropdown.classList.remove("show");
-          }
-        }
-      }
-    });
-  });
-</script>
