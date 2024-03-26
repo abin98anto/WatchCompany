@@ -1,0 +1,151 @@
+<%- include('../partials/admin/admin_header.ejs') %>
+
+<aside class="navbar-aside" id="offcanvas_aside">
+  <div class="aside-top">
+    <a href="index.html" class="brand-wrap">
+      <img
+        src="/admin_assets/imgs/theme/watchcompany_logo.webp"
+        class="logo"
+        alt="Watch Company Dashboard"
+      />
+    </a>
+    <div>
+      <button class="btn btn-icon btn-aside-minimize">
+        <i class="text-muted material-icons md-menu_open"></i>
+      </button>
+    </div>
+  </div>
+  <nav>
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/dashboard">
+          <i class="icon material-icons md-home"></i>
+          <span class="text">Dashboard</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/product_management">
+          <i class="icon material-icons md-shopping_bag"></i>
+          <span class="text">Product Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/user_management">
+          <i class="icon material-icons md-person"></i>
+          <span class="text">User Management</span>
+        </a>
+      </li>
+      <li class="menu-item active">
+        <a class="menu-link" href="/admin/category_management">
+          <i class="icon material-icons md-stars"></i>
+          <span class="text">Category Management</span>
+        </a>
+      </li>
+    </ul>
+    <hr />
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/settings">
+          <i class="icon material-icons md-settings"></i>
+          <span class="text">Settings</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/logout">
+          <i class="icon material-icons md-local_offer"></i>
+          <span class="text"> Logout </span>
+        </a>
+      </li>
+    </ul>
+    <br />
+    <br />
+  </nav>
+</aside>
+
+<main class="main-wrap">
+  <section class="content-main">
+    <div class="content-header">
+      <div>
+        <h2 class="content-title card-title">Categories</h2>
+        <p>Add, edit or delete a category</p>
+      </div>
+      <div>
+        <input
+          type="text"
+          placeholder="Search Categories"
+          class="form-control bg-white"
+        />
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3">
+            <form>
+              <div class="mb-4">
+                <label for="product_name" class="form-label">Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter category name"
+                  class="form-control"
+                  id="category_name"
+                />
+              </div>
+              <div class="d-grid">
+                <button class="btn btn-primary">Create category</button>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-9">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Order</th>
+                    <th class="text-end">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>21</td>
+                    <td><b>Men clothes</b></td>
+                    <td>Men clothes</td>
+                    <td>1</td>
+                    <td class="text-end">
+                      <div class="dropdown">
+                        <a
+                          href="#"
+                          data-bs-toggle="dropdown"
+                          class="btn btn-light rounded btn-sm font-sm"
+                        >
+                          <i class="material-icons md-more_horiz"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                          <a class="dropdown-item" href="#">View detail</a>
+                          <a class="dropdown-item" href="#">Edit info</a>
+                          <a class="dropdown-item text-danger" href="#"
+                            >Delete</a
+                          >
+                        </div>
+                      </div>
+                      <!-- dropdown //end -->
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- .col// -->
+        </div>
+        <!-- .row // -->
+      </div>
+      <!-- card body .// -->
+    </div>
+    <!-- card .// -->
+  </section>
+</main>
+
+<%- include('../partials/admin/admin_footer.ejs') %>

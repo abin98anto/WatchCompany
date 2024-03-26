@@ -1,0 +1,231 @@
+<%- include('../partials/admin/admin_header.ejs') %>
+
+<!-- sidebar -->
+<aside class="navbar-aside" id="offcanvas_aside">
+  <div class="aside-top">
+    <a href="index.html" class="brand-wrap">
+      <img
+        src="/admin_assets/imgs/theme/watchcompany_logo.webp"
+        class="logo"
+        alt="Watch Company Dashboard"
+      />
+    </a>
+    <div>
+      <button class="btn btn-icon btn-aside-minimize">
+        <i class="text-muted material-icons md-menu_open"></i>
+      </button>
+    </div>
+  </div>
+  <nav>
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/dashboard">
+          <i class="icon material-icons md-home"></i>
+          <span class="text">Dashboard</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/product_management">
+          <i class="icon material-icons md-shopping_bag"></i>
+          <span class="text">Product Management</span>
+        </a>
+      </li>
+      <li class="menu-item active">
+        <a class="menu-link" href="/admin/user_management">
+          <i class="icon material-icons md-person"></i>
+          <span class="text">User Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/category_management">
+          <i class="icon material-icons md-stars"></i>
+          <span class="text">Category Management</span>
+        </a>
+      </li>
+    </ul>
+    <hr />
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/settings">
+          <i class="icon material-icons md-settings"></i>
+          <span class="text">Settings</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/logout">
+          <i class="icon material-icons md-local_offer"></i>
+          <span class="text"> Logout </span>
+        </a>
+      </li>
+    </ul>
+    <br />
+    <br />
+  </nav>
+</aside>
+
+<!-- block modal -->
+<div
+  class="modal fade"
+  id="confirmationModal"
+  tabindex="-1"
+  aria-labelledby="confirmationModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmationMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          No
+        </button>
+        <button type="button" class="btn btn-primary" id="confirmAction">
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- unblock modal -->
+
+<!-- main content -->
+<main class="main-wrap">
+  <section class="content-main">
+    <div class="content-header">
+      <h2 class="content-title">Users list</h2>
+    </div>
+    <div class="card mb-4">
+      <header class="card-header">
+        <div class="row gx-3">
+          <div class="col-lg-4 col-md-6 me-auto">
+            <input type="text" placeholder="Search..." class="form-control" />
+          </div>
+          <div class="col-lg-2 col-md-3 col-6">
+            <select class="form-select">
+              <option>Show all</option>
+              <option>Active</option>
+              <option>Blocked</option>
+            </select>
+          </div>
+        </div>
+      </header>
+      <!-- card-header end// -->
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>User Name</th>
+                <th>Email</th>
+                <th class="status">Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% users.forEach((user) => { %>
+              <tr>
+                <td width="40%">
+                  <a href="#" class="itemside">
+                    <div class="info pl-3">
+                      <h6 class="mb-0 title"><%= user.name %></h6>
+                    </div>
+                  </a>
+                </td>
+                <td><%= user.email %></td>
+                <td>
+                  <% if (user.isBlocked) { %>
+                  <span class="rounded-pill alert-danger">Blocked</span>
+                  <% } else { %>
+                  <span class="rounded-pill alert-success">Active</span>
+                  <% } %>
+                </td>
+                <td class="text-end">
+                  <% if (user.isBlocked === false) { %>
+                  <form action="/admin/block?id=<%= user._id %>" method="get">
+                    <input type="hidden" name="id" value="<%= user._id %>" />
+                    <button
+                      type="submit"
+                      class="btn btn-danger"
+                      style="width: 80px; font-size: small"
+                    >
+                      Block
+                    </button>
+                  </form>
+                  <% } else { %>
+                  <form action="/admin/unblock?id=<%= user._id %>" method="get">
+                    <input type="hidden" name="id" value="<%= user._id %>" />
+                    <button
+                      type="submit"
+                      class="btn btn-success"
+                      style="width: 80px; font-size: small"
+                    >
+                      Unblock
+                    </button>
+                  </form>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const blockButtons = document.querySelectorAll(".block-button");
+
+    blockButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const userId = button.getAttribute("data-user-id");
+        const isBlocked = button.getAttribute("data-is-blocked");
+
+        let confirmationMessage =
+          isBlocked === "true"
+            ? "Are you sure you want to unblock this user?"
+            : "Are you sure you want to block this user?";
+
+        document.getElementById("confirmationMessage").innerText =
+          confirmationMessage;
+
+        const confirmAction = document.getElementById("confirmAction");
+        confirmAction.addEventListener("click", async () => {
+          try {
+            const response = await fetch("/admin/user_management/block", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userId, isBlocked: isBlocked === "true" }),
+            });
+
+            if (response.ok) {
+              // Reload the page to reflect the changes
+              window.location.reload();
+            } else {
+              throw new Error("Failed to perform the action");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<%- include('../partials/admin/admin_footer.ejs') %>

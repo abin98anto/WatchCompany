@@ -2,7 +2,6 @@
 include('../partials/page_header.ejs') %>
 
 <main class="main">
-  <!-- breadcrumbs -->
   <div class="page-header breadcrumb-wrap pb-10 pt-10" style="padding: 0px">
     <div class="container">
       <div class="breadcrumb">
@@ -41,12 +40,13 @@ include('../partials/page_header.ejs') %>
                 <div class="heading_s1">
                   <h3 class="mb-20 text-center">Login</h3>
                 </div>
-                <form action="" method="post">
+                <form id="loginForm" method="post">
                   <div class="form-group">
                     <input
                       type="text"
                       required=""
                       name="email"
+                      id="email"
                       placeholder="Email"
                       class="form-control"
                     />
@@ -56,6 +56,7 @@ include('../partials/page_header.ejs') %>
                       required=""
                       type="password"
                       name="password"
+                      id="password"
                       placeholder="Password"
                       class="form-control"
                     />
@@ -63,6 +64,7 @@ include('../partials/page_header.ejs') %>
                   <div class="form-group">
                     <button
                       type="submit"
+                      id="loginButton"
                       class="btn btn-fill-out btn-block hover-up ml-130"
                       style="background-color: black"
                     >
@@ -70,6 +72,13 @@ include('../partials/page_header.ejs') %>
                     </button>
                   </div>
                 </form>
+                <% if (message) { %>
+                <p><%= message %></p>
+                <% } %>
+                <div
+                  id="errorMessage"
+                  style="color: red; display: none"
+                ></div>
               </div>
             </div>
           </div>
@@ -78,6 +87,15 @@ include('../partials/page_header.ejs') %>
     </div>
   </section>
 </main>
+
+<script>
+  const errorMessage = document.getElementById("error-message");
+  if (errorMessage && errorMessage.value) {
+    // Display the message (e.g., using innerText)
+    document.getElementById("errorMessage").style.display = "block";
+    document.getElementById("errorMessage").innerText = errorMessage.value;
+  }
+</script>
 
 <%- include('../partials/page_footer.ejs') %> <%-
 include('../partials/footer.ejs')%>
