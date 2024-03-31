@@ -1,13 +1,13 @@
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
-require("dotenv").config(); // to access .env file.
+require("dotenv").config();
 const mongoose = require("mongoose");
 const user_route = require("./routes/userRoute");
 const admin_route = require("./routes/adminRoute");
-mongoose.connect(process.env.MONGO_URL); // connecting to DB.
+mongoose.connect(process.env.MONGO_URL);
 
-const port = process.env.PORT || 3000; // setting the port number.
+const port = process.env.PORT || 3000;
 const app = express();
 
 app.use(express.json());
@@ -18,9 +18,6 @@ app.use(
     secret: "secret-key",
     resave: false,
     saveUninitialized: true,
-    cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds to store cookies.
-    },
   })
 );
 

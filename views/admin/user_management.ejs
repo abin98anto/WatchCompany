@@ -63,42 +63,6 @@
   </nav>
 </aside>
 
-<!-- block modal -->
-<div
-  class="modal fade"
-  id="confirmationModal"
-  tabindex="-1"
-  aria-labelledby="confirmationModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body">
-        <p id="confirmationMessage"></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          No
-        </button>
-        <button type="button" class="btn btn-primary" id="confirmAction">
-          Yes
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- unblock modal -->
-
 <!-- main content -->
 <main class="main-wrap">
   <section class="content-main">
@@ -145,9 +109,13 @@
                 <td><%= user.email %></td>
                 <td>
                   <% if (user.isBlocked) { %>
-                  <span class="rounded-pill alert-danger">Blocked</span>
+                  <span class="rounded-pill alert-danger" style="padding: 8px"
+                    >Blocked</span
+                  >
                   <% } else { %>
-                  <span class="rounded-pill alert-success">Active</span>
+                  <span class="rounded-pill alert-success" style="padding: 8px"
+                    >Active</span
+                  >
                   <% } %>
                 </td>
                 <td class="text-end">
@@ -184,48 +152,5 @@
     </div>
   </section>
 </main>
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const blockButtons = document.querySelectorAll(".block-button");
-
-    blockButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const userId = button.getAttribute("data-user-id");
-        const isBlocked = button.getAttribute("data-is-blocked");
-
-        let confirmationMessage =
-          isBlocked === "true"
-            ? "Are you sure you want to unblock this user?"
-            : "Are you sure you want to block this user?";
-
-        document.getElementById("confirmationMessage").innerText =
-          confirmationMessage;
-
-        const confirmAction = document.getElementById("confirmAction");
-        confirmAction.addEventListener("click", async () => {
-          try {
-            const response = await fetch("/admin/user_management/block", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ userId, isBlocked: isBlocked === "true" }),
-            });
-
-            if (response.ok) {
-              // Reload the page to reflect the changes
-              window.location.reload();
-            } else {
-              throw new Error("Failed to perform the action");
-            }
-          } catch (error) {
-            console.error("Error:", error);
-          }
-        });
-      });
-    });
-  });
-</script>
 
 <%- include('../partials/admin/admin_footer.ejs') %>

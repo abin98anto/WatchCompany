@@ -1,21 +1,27 @@
 const express = require("express");
 const user_route = express.Router();
+
+// Loading Controllers.
 const userController = require("../controllers/userController");
 
-user_route.get("/", userController.loadLandingPage); // loads the landing page when we access "/".
+// Loads Landing Page.
+user_route.get("/", userController.loadLandingPage);
 
-user_route.get("/signup", userController.loadSignUp); // loads the signup page.
-user_route.post("/signup", userController.sendOTP); // to do when we click "Sign up" button and load otp page.
-user_route.post("/otp", userController.verifyOTP); // when we click enter the OTP, checks validity and move to login.
+// Signup Process.
+user_route.get("/signup", userController.loadSignUp);
+user_route.post("/signup", userController.sendOTP);
+user_route.post("/otp", userController.verifyOTP);
+user_route.post("/check-email", userController.checkEmail);
+user_route.post("/resend-otp", userController.resendOTP);
 
-user_route.post("/check-email", userController.checkEmail); // to check email exists in the DB.
-user_route.post("/resend-otp", userController.resendOTP); // to resend OTP.
+// Login Process.
+user_route.get("/login", userController.loadLogin);
+user_route.post("/login", userController.verifyLogin);
 
-user_route.get("/login", userController.loadLogin); // loads the login page.
-user_route.post("/login", userController.verifyLogin); // checks the credentials and pass to home page.
+// Render Home page.
+user_route.get("/home", userController.loadHome);
 
-user_route.get("/home", userController.loadHome); // loads home page after login.
-
-user_route.get("/logout", userController.logoutUser); // logout functionallity.
+// User Logout Function.
+user_route.get("/logout", userController.logoutUser);
 
 module.exports = user_route;

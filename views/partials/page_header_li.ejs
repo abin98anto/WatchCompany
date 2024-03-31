@@ -4,7 +4,7 @@
       <div class="header-wrap header-space-between position-relative">
         <!-- logo -->
         <div class="logo">
-          <a href="index.html">
+          <a href="/home">
             <img
               src="/user_assets/imgs/theme/watchcompany_logo.svg"
               alt="logo"
@@ -22,104 +22,29 @@
             <ul>
               <!-- home page -->
               <li>
-                <a class="active" href="index.html">Home</a>
+                <a class="active" href="/home">Home</a>
               </li>
 
               <!-- Categories page -->
-              <li class="position-static">
-                <a href="#">Categories <i class="fi-rs-angle-down"></i></a>
-                <ul class="mega-menu">
-                  <li class="sub-mega-menu sub-mega-menu-width-22">
-                    <a class="menu-title" href="#">Women's Fashion</a>
-                    <ul>
-                      <li><a href="shop-product-right.html">Dresses</a></li>
-                      <li>
-                        <a href="shop-product-right.html">Blouses & Shirts</a>
-                      </li>
-                      <li>
-                        <a href="shop-product-right.html"
-                          >Hoodies & Sweatshirts</a
-                        >
-                      </li>
-                      <li>
-                        <a href="shop-product-right.html">Wedding Dresses</a>
-                      </li>
-                      <li>
-                        <a href="shop-product-right.html">Prom Dresses</a>
-                      </li>
-                      <li>
-                        <a href="shop-product-right.html">Cosplay Costumes</a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="sub-mega-menu sub-mega-menu-width-22">
-                    <a class="menu-title" href="#">Men's Fashion</a>
-                    <ul>
-                      <li><a href="shop-product-right.html">Jackets</a></li>
-                      <li>
-                        <a href="shop-product-right.html"
-                          >Casual Faux Leather</a
-                        >
-                      </li>
-                      <li>
-                        <a href="shop-product-right.html">Genuine Leather</a>
-                      </li>
-                      <li>
-                        <a href="shop-product-right.html">Casual Pants</a>
-                      </li>
-                      <li><a href="shop-product-right.html">Sweatpants</a></li>
-                      <li><a href="shop-product-right.html">Harem Pants</a></li>
-                    </ul>
-                  </li>
-                  <li class="sub-mega-menu sub-mega-menu-width-22">
-                    <a class="menu-title" href="#">Technology</a>
-                    <ul>
-                      <li>
-                        <a href="shop-product-right.html">Gaming Laptops</a>
-                      </li>
-                      <li>
-                        <a href="shop-product-right.html">Ultraslim Laptops</a>
-                      </li>
-                      <li><a href="shop-product-right.html">Tablets</a></li>
-                      <li>
-                        <a href="shop-product-right.html">Laptop Accessories</a>
-                      </li>
-                      <li>
-                        <a href="shop-product-right.html">Tablet Accessories</a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="sub-mega-menu sub-mega-menu-width-34">
-                    <div class="menu-banner-wrap">
-                      <a href="shop-product-right.html"
-                        ><img
-                          src="/user_assets/imgs/banner/menu-banner.jpg"
-                          alt="Evara"
-                      /></a>
-                      <div class="menu-banner-content">
-                        <h4>Hot deals</h4>
-                        <h3>
-                          Don't miss<br />
-                          Trending
-                        </h3>
-                        <div class="menu-banner-price">
-                          <span class="new-price text-success"
-                            >Save to 50%</span
-                          >
-                        </div>
-                        <div class="menu-banner-btn">
-                          <a href="shop-product-right.html">Shop now</a>
-                        </div>
-                      </div>
-                      <div class="menu-banner-discount">
-                        <h3>
-                          <span>35%</span>
-                          off
-                        </h3>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
+              <li class="position">
+                <div class="dropdown">
+                  <button
+                    class="btn dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    style="background-color: white; border: none; color: black"
+                  >
+                    Categories
+                  </button>
+                  <ul class="dropdown-menu">
+                    <% categories.forEach((category) => { %>
+                    <li>
+                      <a class="dropdown-item" href="#"><%= category.name %></a>
+                    </li>
+                    <% }); %>
+                  </ul>
+                </div>
               </li>
 
               <!-- Contact page -->
@@ -134,19 +59,6 @@
         <div class="header-action-right">
           <div class="search-style-2">
             <form action="#">
-              <select class="select-active">
-                <option>Search in</option>
-                <option>Women's Clothing</option>
-                <option>Men's Clothing</option>
-                <option>Cellphones</option>
-                <option>Computer & Office</option>
-                <option>Consumer Electronics</option>
-                <option>Jewelry & Accessories</option>
-                <option>Home & Garden</option>
-                <option>Luggage & Bags</option>
-                <option>Shoes</option>
-                <option>Mother & Kids</option>
-              </select>
               <input type="text" placeholder="Search for items…" />
             </form>
           </div>

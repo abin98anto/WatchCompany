@@ -1,66 +1,68 @@
-const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 
+// Load Controllers.
+const User = require("../models/userModel");
+
+// Render Admin Login.
 const loadAdminLogin = async (req, res) => {
   try {
+    console.log(`Load Admin Login Page.`);
     res.render("admin_login", { message: "" });
   } catch (error) {
-    res.send(`error loading the admin login page.`);
+    res.send(`Error Loading Admin Login Page.`);
   }
 };
 
+// Verifying Admin Credentials.
 const verifyAdmin = async (req, res) => {
   try {
-    // console.log(req.body);
+    console.log(`Verifying Admin Login Credentials.`);
     const { email, password } = req.body;
     const message = "Username or password is incorrect.";
-
-    // Secure password comparison using bcrypt
     const adminFound = await User.findOne({ email, isAdmin: 1 });
-    // console.log(adminFound);
     if (!adminFound) {
-      // console.log(`no user found.`);
+      console.log(`Wrong Admin Credentials.`);
       res.render("admin_login", { message: message });
     } else {
-      // console.log(`found admin.`);
+      console.log(`Correct Admin Credentials. Checking Passwords.`);
       const passwordMatch = await bcrypt.compare(password, adminFound.password);
-      // console.log("password match:", passwordMatch);
       if (passwordMatch) {
-        // console.log(`password matched`);
-        req.session.userData = adminFound;
+        console.log(`Password Matched. Rendering Dashboard.`);
+        req.session.adminData = adminFound;
         res.redirect("/admin/dashboard");
       } else {
-        // console.log(`wrong password.`);
+        console.log(`Wrong Password.`);
         res.render("admin_login", { message: message });
       }
     }
   } catch (error) {
-    res.send(`error loggin in admin`);
+    res.send(`Error Verifying Admin Login`);
   }
 };
 
+// Rendering Admin Dashboard.
 const loadDashboard = async (req, res) => {
   try {
-    if (req.session.userData) {
+    if (req.session.adminData) {
+      console.log(`Loading Admin Dashboard.`);
       res.render("dashboard");
     } else {
+      console.log(`Couldn't Load Admin Dashboard.`);
       res.redirect("/admin/");
     }
   } catch (error) {
-    console.log(`error loading the admin dashboard.`);
+    console.log(`Error Loading Admin Dashboard.`);
   }
 };
 
+// Logging Out Admin.
 const logout = async (req, res) => {
   try {
-    if (req.session.userData) {
-      res.session.userData == null;
-      res.redirect("/admin/");
-    } else {
-      res.redirect("/admin/");
-    }
+    console.log(`Logging Out ${req.session.adminData.name}`);
+    req.session.adminData == null;
+    res.redirect("/admin/");
   } catch (error) {
-    res.send("error loading logout.");
+    res.send("Error Logging Out Admin.");
   }
 };
 

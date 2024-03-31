@@ -72,13 +72,11 @@ include('../partials/page_header.ejs') %>
                     </button>
                   </div>
                 </form>
-                <% if (message) { %>
-                <p><%= message %></p>
-                <% } %>
-                <div
-                  id="errorMessage"
-                  style="color: red; display: none"
-                ></div>
+                <div id="errorMessage" style="color: red">
+                  <% if (message) { %>
+                  <p><%= message %></p>
+                  <% } %>
+                </div>
               </div>
             </div>
           </div>
@@ -87,15 +85,6 @@ include('../partials/page_header.ejs') %>
     </div>
   </section>
 </main>
-
-<script>
-  const errorMessage = document.getElementById("error-message");
-  if (errorMessage && errorMessage.value) {
-    // Display the message (e.g., using innerText)
-    document.getElementById("errorMessage").style.display = "block";
-    document.getElementById("errorMessage").innerText = errorMessage.value;
-  }
-</script>
 
 <%- include('../partials/page_footer.ejs') %> <%-
 include('../partials/footer.ejs')%>

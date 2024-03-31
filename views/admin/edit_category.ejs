@@ -81,22 +81,32 @@
       <div class="card-body">
         <div class="row">
           <div class="col-md-3">
-            <form method="post" action="/admin/addCategory">
+            <form
+              method="post"
+              action="/admin/edit_category?id=<%= toEdit._id %>"
+            >
               <div class="mb-4">
-                <label for="product_name" class="form-label">Name</label>
+                <h5 class="content-title card-title">Edit Category</h5>
                 <input
                   type="text"
                   placeholder="Enter category name"
                   class="form-control"
-                  name="category_name"
+                  name="new_name"
+                  value="<%= toEdit.name %>"
                 />
               </div>
               <div class="d-grid">
                 <button class="btn btn-primary" type="submit">
-                  Create category
+                  Save Changes
                 </button>
               </div>
             </form>
+            <br />
+            <div class="d-grid col-md-3">
+              <form method="get" action="/admin/category_management">
+                <button class="btn btn-secondary" type="submit">Cancel</button>
+              </form>
+            </div>
           </div>
           <div class="col-md-9">
             <div class="table-responsive">
@@ -163,9 +173,8 @@
                         <button
                           type="submit"
                           class="btn btn-danger"
-                          style="width: 80px; font-size: smaller"
+                          style="width: 80px; font-size: small"
                         >
-                          <i class="material-icons md-playlist_add_check"></i>
                           Unlist
                         </button>
                       </form>
@@ -184,7 +193,6 @@
                           class="btn btn-success"
                           style="width: 80px; font-size: small"
                         >
-                          <i class="material-icons md-playlist_add"></i>
                           List
                         </button>
                       </form>
@@ -196,9 +204,13 @@
               </table>
             </div>
           </div>
+          <!-- .col// -->
         </div>
+        <!-- .row // -->
       </div>
+      <!-- card body .// -->
     </div>
+    <!-- card .// -->
   </section>
 </main>
 
