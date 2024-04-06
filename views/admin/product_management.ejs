@@ -1,5 +1,6 @@
 <%- include('../partials/admin/admin_header.ejs') %>
 
+<!-- Sidebar -->
 <aside class="navbar-aside" id="offcanvas_aside">
   <div class="aside-top">
     <a href="index.html" class="brand-wrap">
@@ -62,12 +63,13 @@
   </nav>
 </aside>
 
+<!-- Main content -->
 <main class="main-wrap hide" id="product_management">
   <section class="content-main">
     <div class="content-header">
       <div>
         <h2 class="content-title card-title">Products List</h2>
-        <p>Lorem ipsum dolor sit amet.</p>
+        <p>Add products, Edit products and Unlist them.</p>
       </div>
       <div>
         <a href="/admin/add_new_product" class="btn btn-primary btn-sm rounded"
@@ -80,8 +82,10 @@
         <div class="row align-items-center">
           <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
             <select class="form-select">
-              <option selected>All category</option>
-              <option>Electronics</option>
+              <option selected>All</option>
+              <% categories.forEach((category)=>{ %>
+              <option><%= category.name %></option>
+              <% }); %>
             </select>
           </div>
           <div class="col-md-2 col-6">
@@ -89,54 +93,105 @@
           </div>
           <div class="col-md-2 col-6">
             <select class="form-select">
-              <option selected>Status</option>
-              <option>Active</option>
-              <option>Disabled</option>
-              <option>Show all</option>
+              <option selected>Show all</option>
+              <option>Unlisted</option>
+              <option>Listed</option>
             </select>
           </div>
         </div>
       </header>
-      <!-- card-header end// -->
       <div class="card-body">
+        <% products.forEach((product)=>{ %>
         <article class="itemlist">
           <div class="row align-items-center">
             <div class="col-lg-4 col-sm-4 col-8 flex-grow-1 col-name">
               <a class="itemside" href="#">
                 <div class="left">
                   <img
-                    src="/admin_assets/imgs/items/1.jpg"
+                    src="/uploads/<%= product.media[0] %>"
                     class="img-sm img-thumbnail"
-                    alt="Item"
+                    alt="<%= product.name%>"
                   />
                 </div>
                 <div class="info">
-                  <h6 class="mb-0">T-shirt for men medium size</h6>
+                  <h6 class="mb-0"><%= product.name%></h6>
                 </div>
               </a>
             </div>
             <div class="col-lg-2 col-sm-2 col-4 col-price">
-              <span>$34.50</span>
+              <span><%= product.price %></span>
             </div>
             <div class="col-lg-2 col-sm-2 col-4 col-status">
-              <span class="badge rounded-pill alert-success">Active</span>
+              <span class="badge"
+                ><% if (product.isUnlisted) { %>
+                <span class="rounded-pill alert-danger" style="padding: 8px"
+                  >Unlisted</span
+                >
+                <% } else { %>
+                <span class="rounded-pill alert-success" style="padding: 8px"
+                  >Active</span
+                >
+                <% } %></span
+              >
             </div>
-            <div class="col-lg-1 col-sm-2 col-4 col-date">
-              <span>02.11.2022</span>
-            </div>
-            <div class="col-lg-2 col-sm-2 col-4 col-action text-end">
-              <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                <i class="material-icons md-edit"></i> Edit
-              </a>
-              <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                <i class="material-icons md-delete_forever"></i> Delete
-              </a>
+            <div
+              class="col-lg-2 col-sm-2 col-4 col-action text-end"
+              style="display: flex; justify-content: space-between"
+            >
+              <div id="edit-product">
+                <form
+                  action="/admin/edit_product?id=<%= product._id %>"
+                  method="get"
+                >
+                  <input type="hidden" name="id" value="<%= product._id %>" />
+                  <button
+                    type="submit"
+                    class="btn border border-secondary"
+                    style="width: 80px; font-size: small"
+                  >
+                    <i class="material-icons md-edit"></i>
+                    Edit
+                  </button>
+                </form>
+              </div>
+              <div id="toggleStatus">
+                <% if (product.isUnlisted === false) { %>
+                <form
+                  action="/admin/unlist_product?id=<%= product._id %>"
+                  method="get"
+                >
+                  <input type="hidden" name="id" value="<%= product._id %>" />
+                  <button
+                    type="submit"
+                    class="btn btn-danger"
+                    style="font-size: smaller"
+                  >
+                    <i class="material-icons md-playlist_add_check"></i>
+                    Unlist
+                  </button>
+                </form>
+                <% } else { %>
+                <form
+                  action="/admin/list_product?id=<%= product._id %>"
+                  method="get"
+                >
+                  <input type="hidden" name="id" value="<%= product._id %>" />
+                  <button
+                    type="submit"
+                    class="btn btn-success"
+                    style="font-size: small"
+                  >
+                    <i class="material-icons md-playlist_add"></i>
+                    List
+                  </button>
+                </form>
+                <% } %>
+              </div>
             </div>
           </div>
-          <!-- row .// -->
         </article>
+        <% }); %>
       </div>
-      <!-- card-body end// -->
     </div>
   </section>
 </main>

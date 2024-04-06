@@ -5,7 +5,7 @@ const loadCategoryManagement = async (req, res) => {
   try {
     if (req.session.adminData) {
       console.log(`Loading Category Management.`);
-      const categories = await Category.find({});
+      const categories = await Category.find({}).sort({ createdOn: -1 });
       res.render("category_management", { categories: categories });
     } else {
       console.log(`Couldn't Load Category Mangement.`);
@@ -17,17 +17,27 @@ const loadCategoryManagement = async (req, res) => {
 };
 
 // Add Category to Database.
-const addCatergory = async (req, res) => {
+const addCategory = async (req, res) => {
   try {
     console.log(`Adding A New Category to DB.`);
     const { category_name } = req.body;
-    const newCategory = new Category({
-      name: category_name,
+    const cat_name =
+      category_name.charAt(0).toUpperCase() +
+      category_name.slice(1).toLowerCase();
+    const catFound = await Category.findOne({
+      name: cat_name,
     });
-    await newCategory.save();
+    if (!catFound) {
+      const newCategory = new Category({
+        name: cat_name,
+        createdOn: Date.now(),
+      });
+      await newCategory.save();
+    }
     res.redirect("/admin/category_management");
   } catch (error) {
-    res.send("Error Adding Catergory.");
+    console.error("Error Adding Category:", error);
+    res.status(500).send("Error Adding Category.");
   }
 };
 
@@ -75,10 +85,23 @@ const editCategory = async (req, res) => {
   }
 };
 
+const deleteCategory = async (req, res) => {
+  console.log(`Deleting a Category.`);
+  try {
+    const { id } = req.body;
+    console.log(id);
+    
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error deleting category" });
+  }
+};
+
 module.exports = {
   loadCategoryManagement,
-  addCatergory,
+  addCategory,
   toggleCategoryStatus,
   loadEditCategories,
   editCategory,
+  deleteCategory,
 };

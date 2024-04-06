@@ -4,6 +4,7 @@ require("dotenv").config();
 
 // load controllers.
 const Category = require("../models/categoryModel");
+const Product = require("../models/productModel");
 const User = require("../models/userModel");
 
 // hash password function.
@@ -43,8 +44,8 @@ const generateOTP = (length) => {
 // to load sign up page.
 const loadSignUp = async (req, res) => {
   try {
+    console.log(`Loading Signup Page.`);
     if (!req.session.adminData) {
-      console.log(`Loading Signup Page.`);
       const categories = await Category.find({ isUnlisted: false });
       console.log(`rendering signup page`);
       res.render("signup", { categories: categories });
@@ -222,17 +223,13 @@ const loadLogin = async (req, res) => {
 const loadLandingPage = async (req, res) => {
   try {
     console.log(`Rendering Landing Page.`);
+    const products = await Product.find({ isUnlisted: false });
     const categories = await Category.find({ isUnlisted: false });
-    res.render("landing_page", { categories: categories });
+    res.render("landing_page", { categories: categories, products: products });
   } catch (error) {
     res.send(`Error Rendering Landing Page.`);
   }
 };
-        // req.sessin.message = "You are Blocked.";
-        // res.render("login", {
-        //   message: "You are Blocked by Admin.",
-        //   categories: categories,
-        // });
 
 // to check login credentials.
 const verifyLogin = async (req, res) => {
@@ -269,6 +266,7 @@ const verifyLogin = async (req, res) => {
 // to load home page.
 const loadHome = async (req, res) => {
   const categories = await Category.find({ isUnlisted: false });
+  const products = await Product.find({ isUnlisted: false });
   try {
     if (req.session.userData) {
       const userID = req.session.userData._id;
@@ -283,6 +281,7 @@ const loadHome = async (req, res) => {
         res.render("home", {
           user: req.session.userData,
           categories: categories,
+          products: products,
         });
       }
     } else {
@@ -305,6 +304,22 @@ const logoutUser = async (req, res) => {
   }
 };
 
+// load single product.
+const loadProduct = async (req, res) => {
+  try {
+    console.log(`loading single product page.`);
+    const id = req.query.id;
+    console.log(`id: ${id}`);
+    const product = await Product.findOne({ isUnlisted: false, _id: id });
+    console.log(`product ${product.name}`);
+    const categories = await Category.find({ isUnlisted: false });
+    res.render("product_page", { product: product, categories: categories });
+  } catch (error) {
+    console.log(`errr loading single product page.`);
+    res.send(`error loading single product page.`);
+  }
+};
+
 module.exports = {
   loadSignUp,
   loadLogin,
@@ -316,4 +331,5 @@ module.exports = {
   resendOTP,
   loadHome,
   logoutUser,
+  loadProduct,
 };

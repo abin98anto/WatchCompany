@@ -25,10 +25,12 @@
     "express-session": "^1.18.0",
     "expresss": "^0.0.0",
     "mongoose": "^8.2.1",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.12",
     "nodemon": "^3.1.0",
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "sharp": "^0.33.3"
   }
 }

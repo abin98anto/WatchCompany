@@ -5,21 +5,28 @@
     display: flex;
     flex-wrap: wrap;
   }
+
   .previewImage {
     max-width: 100px;
     max-height: 100px;
     margin: 5px;
+  }
+
+  .image-container {
+    width: 100%; /* Adjust this as needed */
+    height: auto; /* Adjust this as needed */
+  }
+
+  .product-image {
+    width: 100%; /* Adjust this as needed */
+    height: auto; /* Adjust this as needed */
   }
 </style>
 
 <aside class="navbar-aside" id="offcanvas_aside">
   <div class="aside-top">
     <a href="index.html" class="brand-wrap">
-      <img
-        src="/admin_assets/imgs/theme/watchcompany_logo.webp"
-        class="logo"
-        alt="Watch Company Dashboard"
-      />
+      <img src="/admin_assets/imgs/theme/watchcompany_logo.webp" class="logo" alt="Watch Company Dashboard" />
     </a>
     <div>
       <button class="btn btn-icon btn-aside-minimize">
@@ -76,12 +83,11 @@
 
 <main class="main-wrap">
   <section class="content-main">
-    <!-- <form method="post"> -->
     <form method="post" enctype="multipart/form-data">
       <div class="row">
         <div class="col-9">
           <div class="content-header">
-            <h2 class="content-title">Add New Product</h2>
+            <h2 class="content-title">Edit Product</h2>
           </div>
         </div>
         <div class="col-lg-6">
@@ -90,54 +96,27 @@
               <h4>Basic Informations</h4>
             </div>
             <div class="card-body">
-              <!-- <form> -->
               <div class="mb-4">
-                <label for="product_name" class="form-label"
-                  >Product title</label
-                >
-                <input
-                  type="text"
-                  placeholder="Type Product Name here"
-                  class="form-control"
-                  id="product_name"
-                  name="name"
-                  required
-                />
+                <label for="product_name" class="form-label">Product title</label>
+                <input type="text" class="form-control" id="product_name" name="name" value="<%= product.name %>" required />
               </div>
               <div class="mb-4">
                 <label class="form-label">Full description</label>
-                <textarea
-                  placeholder="Type Description here"
-                  id="descriptionid"
-                  name="description"
-                  class="form-control border"
-                  rows="4"
-                  required
-                ></textarea>
+                <textarea id="descriptionid" name="description" class="form-control border" rows="4" required><%= product.description %></textarea>
               </div>
               <div class="row">
                 <div class="col-lg-4">
                   <div class="mb-4">
                     <label class="form-label"> Price</label>
                     <div class="row gx-2">
-                      <input
-                        placeholder="$"
-                        type="text"
-                        class="form-control"
-                        name="price"
-                        required
-                      />
+                      <input type="text" class="form-control" name="price" value="<%= product.price %>" required />
                     </div>
                   </div>
                 </div>
                 <div class="col-sm-6 mb-3">
                   <label class="form-label">Category</label>
-                  <select
-                    class="form-select"
-                    name="category"
-                    style="width: 150px"
-                    required
-                  >
+                  <select class="form-select" name="category" style="width: 150px" required>
+                    <option><%= product.category %></option>
                     <% categories.forEach((category) => { %>
                     <option><%= category.name %></option>
                     <% }); %>
@@ -146,37 +125,42 @@
                 <div class="mb-4">
                   <label class="form-label"> Stock</label>
                   <div class="row gx-2">
-                    <input
-                      type="text"
-                      class="form-control"
-                      style="width: 100px"
-                      name="stock"
-                      required
-                    />
+                    <input type="text" class="form-control" style="width: 100px" name="stock" value="<%= product.stock %>" required />
                   </div>
                 </div>
                 <div>
-                  <button
-                    type="submit"
-                    class="btn btn-md rounded font-sm hover-up"
-                  >
-                    Add Product
-                  </button>
+                  <button type="submit" class="btn btn-md rounded font-sm hover-up">Add Product</button>
                 </div>
               </div>
-              <!-- </form> -->
             </div>
           </div>
         </div>
         <div class="col-lg-3">
           <div class="card mb-4">
             <div class="card-header">
-              <h4>Media</h4>
+              <h4>Add New Media</h4>
             </div>
             <div class="card-body">
               <div class="input-upload">
                 <input type="file" id="uploads" name="media" multiple />
                 <div id="imagePreview"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <div class="card">
+            <div class="card-header">
+              <h4>Media</h4>
+            </div>
+            <div class="card-body">
+              <div id="imageContainer">
+                <% for(let i=0; i<product.media.length; i++) { %>
+                <div class="image-container" style="display: flex; flex-direction: column;">
+                  <img style="margin-bottom: 10px; margin-right: 10px;" class="product-image" src="/uploads/<%= product.media[i] %>" alt="<%= product.media[i] %>" />
+                  <button style="margin-bottom: 10px; margin-right: 10px;" type="submit" class="delete-btn">Delete</button>
+                </div>
+                <% } %>
               </div>
             </div>
           </div>
@@ -187,11 +171,11 @@
 </main>
 
 <script>
-  const fileInput = document.getElementById("uploads");
+  const fileInput = document.getElementById("fileInput");
   const imagePreview = document.getElementById("imagePreview");
 
   fileInput.addEventListener("change", function () {
-    imagePreview.innerHTML = ""; // Clear previous previews
+    imagePreview.innerHTML = "";
 
     const files = this.files;
     const numFiles = files.length;

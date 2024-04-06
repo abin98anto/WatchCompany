@@ -1,5 +1,6 @@
 const express = require("express");
 const user_route = express.Router();
+const userAuth = require("../middleware/userAuth");
 
 // Loading Controllers.
 const userController = require("../controllers/userController");
@@ -8,7 +9,7 @@ const userController = require("../controllers/userController");
 user_route.get("/", userController.loadLandingPage);
 
 // Signup Process.
-user_route.get("/signup", userController.loadSignUp);
+user_route.get("/signup", userAuth.userDataPresent, userController.loadSignUp);
 user_route.post("/signup", userController.sendOTP);
 user_route.post("/otp", userController.verifyOTP);
 user_route.post("/check-email", userController.checkEmail);
@@ -23,5 +24,8 @@ user_route.get("/home", userController.loadHome);
 
 // User Logout Function.
 user_route.get("/logout", userController.logoutUser);
+
+// Single Product Page.
+user_route.get("/load_product", userController.loadProduct);
 
 module.exports = user_route;

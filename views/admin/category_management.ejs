@@ -80,6 +80,7 @@
     <div class="card">
       <div class="card-body">
         <div class="row">
+          <!-- Create Category Section. -->
           <div class="col-md-3">
             <form method="post" action="/admin/addCategory">
               <div class="mb-4">
@@ -98,21 +99,23 @@
               </div>
             </form>
           </div>
+          <!-- End of the Create Category Section -->
+          <!-- Existing Category Table. -->
           <div class="col-md-9">
             <div class="table-responsive">
               <table class="table table-hover">
                 <thead>
-                  <tr>
-                    <th>ID</th>
+                  <tr class="text-center">
+                    <th>No.</th>
                     <th>Name</th>
                     <th>Status</th>
-                    <th class="text-end">Action</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <% categories.forEach((category) => { %>
-                  <tr>
-                    <td><%= category._id %></td>
+                  <% let i = 1 %> <% categories.forEach((category) => { %>
+                  <tr class="text-center">
+                    <td><%= i %></td>
                     <td><b><%= category.name %> </b></td>
                     <td>
                       <% if (category.isUnlisted) { %>
@@ -130,68 +133,90 @@
                       <% } %>
                     </td>
                     <td class="text-end">
-                      <form
-                        action="/admin/load_edit_category?id=<%= category._id %>"
-                        method="get"
-                      >
-                        <input
-                          type="hidden"
-                          name="id"
-                          value="<%= category._id %>"
-                        />
-                        <button
-                          type="submit"
-                          class="btn border border-secondary"
-                          style="width: 80px; font-size: small"
-                        >
-                          <i class="material-icons md-edit"></i>
-                          Edit
-                        </button>
-                      </form>
-                    </td>
-                    <td class="text-end">
-                      <% if (category.isUnlisted === false) { %>
-                      <form
-                        action="/admin/unlist?id=<%= category._id %>"
-                        method="get"
-                      >
-                        <input
-                          type="hidden"
-                          name="id"
-                          value="<%= category._id %>"
-                        />
-                        <button
-                          type="submit"
-                          class="btn btn-danger"
-                          style="width: 80px; font-size: smaller"
-                        >
-                          <i class="material-icons md-playlist_add_check"></i>
-                          Unlist
-                        </button>
-                      </form>
-                      <% } else { %>
-                      <form
-                        action="/admin/list?id=<%= category._id %>"
-                        method="get"
-                      >
-                        <input
-                          type="hidden"
-                          name="id"
-                          value="<%= category._id %>"
-                        />
-                        <button
-                          type="submit"
-                          class="btn btn-success"
-                          style="width: 80px; font-size: small"
-                        >
-                          <i class="material-icons md-playlist_add"></i>
-                          List
-                        </button>
-                      </form>
-                      <% } %>
+                      <ul style="display: flex; justify-content: space-evenly">
+                        <li>
+                          <form
+                            action="/admin/load_edit_category?id=<%= category._id %>"
+                            method="get"
+                          >
+                            <input
+                              type="hidden"
+                              name="id"
+                              value="<%=  category._id  %>"
+                            />
+                            <button
+                              type="submit"
+                              class="btn border border-secondary"
+                              style="width: 80px; font-size: small"
+                            >
+                              <i class="material-icons md-edit"></i>
+                              Edit
+                            </button>
+                          </form>
+                        </li>
+                        <li>
+                          <% if (category.isUnlisted === false) { %>
+                          <form
+                            action="/admin/unlist?id=<%= category._id %>"
+                            method="get"
+                          >
+                            <input
+                              type="hidden"
+                              name="id"
+                              value="<%= category._id %>"
+                            />
+                            <button
+                              type="submit"
+                              class="btn btn-danger"
+                              style="width: 80px; font-size: smaller"
+                            >
+                              <i
+                                class="material-icons md-playlist_add_check"
+                              ></i>
+                              Unlist
+                            </button>
+                          </form>
+                          <% } else { %>
+                          <form>
+                            <input
+                              type="hidden"
+                              name="id"
+                              value="<%= category._id %>"
+                            />
+                            <button
+                              id="delete-button"
+                              type="submit"
+                              class="btn btn-success"
+                              style="width: 80px; font-size: small"
+                            >
+                              <i class="material-icons md-playlist_add"></i>
+                              List
+                            </button>
+                          </form>
+                          <% } %>
+                        </li>
+                        <li>
+                          <form>
+                            <input
+                              type="hidden"
+                              name="id"
+                              value="<%= category._id %>"
+                            />
+                            <button
+                              id="delete-button"
+                              type="submit"
+                              class="btn"
+                              style="color: white; background-color: black"
+                            >
+                              <i class="material-icons md-delete-forever"></i>
+                              Delete
+                            </button>
+                          </form>
+                        </li>
+                      </ul>
                     </td>
                   </tr>
-                  <% }) %>
+                  <% i++ %> <% }) %>
                 </tbody>
               </table>
             </div>
@@ -201,5 +226,30 @@
     </div>
   </section>
 </main>
+
+<script>
+  document.getElementById("delete").addEventListener("click", async () => {
+    try {
+      const id = category._id;
+      const response = await fetch("/admin/delete_category", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(id),
+      });
+      const data = await response.json();
+      if (data.message === "Category deleted successfully") {
+        console.log("Category deleted successfully!");
+        res.redirect("/admin/category_management");
+      } else {
+        console.error("Error deleting category:", data.message);
+        // Handle deletion error (e.g., display error message to user)
+      }
+    } catch (error) {
+      console.log(`error occured while deleting the category.`);
+    }
+  });
+</script>
 
 <%- include('../partials/admin/admin_footer.ejs') %>
