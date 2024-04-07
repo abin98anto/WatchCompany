@@ -1,5 +1,44 @@
 <%- include('../partials/admin/admin_header.ejs') %>
 
+<!-- Edit Category Modal -->
+<div
+  class="modal"
+  id="editCategoryModal"
+  tabindex="-1"
+  aria-labelledby="editCategoryModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <input
+          type="text"
+          id="categoryNameInput"
+          class="form-control"
+          placeholder="Enter category name"
+        />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" id="confirmEditCategory">
+          Save changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <aside class="navbar-aside" id="offcanvas_aside">
   <div class="aside-top">
     <a href="index.html" class="brand-wrap">
@@ -74,6 +113,7 @@
           type="text"
           placeholder="Search Categories"
           class="form-control bg-white"
+          id="searchInput"
         />
       </div>
     </div>
@@ -103,7 +143,7 @@
           <!-- Existing Category Table. -->
           <div class="col-md-9">
             <div class="table-responsive">
-              <table class="table table-hover">
+              <table class="table table-hover" id="categoryTable">
                 <thead>
                   <tr class="text-center">
                     <th>No.</th>
@@ -112,7 +152,7 @@
                     <th>Action</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="categoryTableBody">
                   <% let i = 1 %> <% categories.forEach((category) => { %>
                   <tr class="text-center">
                     <td><%= i %></td>
@@ -135,10 +175,7 @@
                     <td class="text-end">
                       <ul style="display: flex; justify-content: space-evenly">
                         <li>
-                          <form
-                            action="/admin/load_edit_category?id=<%= category._id %>"
-                            method="get"
-                          >
+                          <form>
                             <input
                               type="hidden"
                               name="id"
@@ -146,7 +183,7 @@
                             />
                             <button
                               type="submit"
-                              class="btn border border-secondary"
+                              class="btn border border-secondary edit-button"
                               style="width: 80px; font-size: small"
                             >
                               <i class="material-icons md-edit"></i>
@@ -154,7 +191,7 @@
                             </button>
                           </form>
                         </li>
-                        <li>
+                        <!-- <li>
                           <% if (category.isUnlisted === false) { %>
                           <form
                             action="/admin/unlist?id=<%= category._id %>"
@@ -194,6 +231,43 @@
                             </button>
                           </form>
                           <% } %>
+                        </li> -->
+                        <li>
+                          <% if (category.isUnlisted === false) { %>
+                          <form>
+                            <input
+                              type="hidden"
+                              name="id"
+                              value="<%= category._id %>"
+                            />
+                            <button
+                              type="submit"
+                              class="btn btn-danger unlist-button"
+                              style="width: 80px; font-size: smaller"
+                            >
+                              <i
+                                class="material-icons md-playlist_add_check"
+                              ></i>
+                              Unlist
+                            </button>
+                          </form>
+                          <% } else { %>
+                          <form>
+                            <input
+                              type="hidden"
+                              name="id"
+                              value="<%= category._id %>"
+                            />
+                            <button
+                              type="submit"
+                              class="btn btn-success list-button"
+                              style="width: 80px; font-size: small"
+                            >
+                              <i class="material-icons md-playlist_add"></i>
+                              List
+                            </button>
+                          </form>
+                          <% } %>
                         </li>
                         <li>
                           <form>
@@ -203,9 +277,8 @@
                               value="<%= category._id %>"
                             />
                             <button
-                              id="delete-button"
                               type="submit"
-                              class="btn"
+                              class="btn delete-button"
                               style="color: white; background-color: black"
                             >
                               <i class="material-icons md-delete-forever"></i>
@@ -227,28 +300,279 @@
   </section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Delete button functionality. -->
 <script>
-  document.getElementById("delete").addEventListener("click", async () => {
-    try {
-      const id = category._id;
-      const response = await fetch("/admin/delete_category", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(id),
+  document.addEventListener("DOMContentLoaded", () => {
+    const deleteButtons = document.querySelectorAll(".delete-button");
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        event.preventDefault();
+        const categoryId =
+          event.target.parentNode.querySelector('input[name="id"]').value;
+
+        const categoryName = event.target
+          .closest("tr")
+          .querySelector("td:nth-child(2)").innerText;
+
+        Swal.fire({
+          title: `Are you sure you want to delete "${categoryName}"?`,
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete it!",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const response = await fetch(
+                `/admin/delete_category?id=${categoryId}`,
+                {
+                  method: "post",
+                }
+              );
+
+              if (!response.ok) {
+                throw new Error("Failed to delete category");
+              }
+
+              // Reload the page after deletion
+              window.location.reload();
+            } catch (error) {
+              console.error("Error:", error);
+              Swal.fire("Error!", "Failed to delete category.", "error");
+            }
+          }
+        });
       });
-      const data = await response.json();
-      if (data.message === "Category deleted successfully") {
-        console.log("Category deleted successfully!");
-        res.redirect("/admin/category_management");
-      } else {
-        console.error("Error deleting category:", data.message);
-        // Handle deletion error (e.g., display error message to user)
-      }
-    } catch (error) {
-      console.log(`error occured while deleting the category.`);
-    }
+    });
+  });
+</script>
+
+<!-- List/ Unlist Functionality -->
+<script>
+  // Unlist category.
+  document.addEventListener("DOMContentLoaded", () => {
+    const unlistButtons = document.querySelectorAll(".unlist-button");
+    unlistButtons.forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        event.preventDefault();
+        const categoryId =
+          event.target.parentNode.querySelector('input[name="id"]').value;
+        const categoryName = event.target
+          .closest("tr")
+          .querySelector("td:nth-child(2)").innerText;
+
+        Swal.fire({
+          title: `Are you sure you want to Unlist "${categoryName}"?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, unlist it!",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const response = await fetch(`/admin/unlist?id=${categoryId}`, {
+                method: "post",
+              });
+
+              if (!response.ok) {
+                throw new Error("Failed to unlist category");
+              }
+              window.location.reload();
+            } catch (error) {
+              console.error("Error:", error);
+              Swal.fire("Error!", "Failed to unlist category.", "error");
+            }
+          }
+        });
+      });
+    });
+  });
+
+  // list category
+  document.addEventListener("DOMContentLoaded", () => {
+    const listButtons = document.querySelectorAll(".list-button");
+    listButtons.forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        event.preventDefault();
+        const categoryId =
+          event.target.parentNode.querySelector('input[name="id"]').value;
+        const categoryName = event.target
+          .closest("tr")
+          .querySelector("td:nth-child(2)").innerText;
+
+        Swal.fire({
+          title: `Are you sure you want to list "${categoryName}"?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, list it!",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const response = await fetch(`/admin/list?id=${categoryId}`, {
+                method: "post",
+              });
+
+              if (!response.ok) {
+                throw new Error("Failed to list category");
+              }
+              window.location.reload();
+            } catch (error) {
+              console.error("Error:", error);
+              Swal.fire("Error!", "Failed to list category.", "error");
+            }
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<!-- Edit Category Functionality -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const editButtons = document.querySelectorAll(".edit-button");
+    const editCategoryModal = new bootstrap.Modal(
+      document.getElementById("editCategoryModal")
+    );
+
+    editButtons.forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        event.preventDefault();
+        const categoryName = event.target
+          .closest("tr")
+          .querySelector("td:nth-child(2)").innerText;
+        const categoryId = event.target
+          .closest("tr")
+          .querySelector('input[name="id"]').value;
+
+        document.getElementById("categoryNameInput").value = categoryName;
+
+        editCategoryModal.show();
+
+        document
+          .getElementById("confirmEditCategory")
+          .addEventListener("click", async () => {
+            const new_name = document.getElementById("categoryNameInput").value;
+            try {
+              const response = await fetch(
+                `/admin/edit_category?id=${categoryId}`,
+                {
+                  method: "post",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ new_name: new_name }),
+                }
+              );
+
+              if (!response.ok) {
+                throw new Error("Failed to edit category");
+              }
+
+              // Reload the page after deletion
+              window.location.reload();
+            } catch (error) {
+              console.error("Error:", error);
+              Swal.fire("Error!", "Failed to edit category.", "error");
+            }
+
+            editCategoryModal.hide();
+          });
+      });
+    });
+  });
+</script>
+
+<!-- Search Fucntionality -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("/admin/get_categories")
+      .then((response) => response.json())
+      .then((categories) => {
+        const searchInput = document.getElementById("searchInput");
+        const categoryTableBody = document.getElementById("categoryTableBody");
+
+        searchInput.addEventListener("input", () => {
+          const searchTerm = searchInput.value.toLowerCase().trim();
+          const filteredCategories = categories.filter((category) =>
+            category.name.toLowerCase().includes(searchTerm)
+          );
+
+          categoryTableBody.innerHTML = "";
+
+          filteredCategories.forEach((category, index) => {
+            const status = category.isUnlisted ? "Unlisted" : "Active";
+            const row = `
+              <tr class="text-center">
+                <td>${index + 1}</td>
+                <td><b>${category.name}</b></td>
+                <td>
+                  <span class="rounded-pill alert-${
+                    category.isUnlisted ? "danger" : "success"
+                  }" style="padding: 8px">${status}</span>
+                </td>
+                <td class="text-end">
+                  <!-- Action buttons -->
+                  <ul style="display: flex; justify-content: space-evenly">
+                    <li>
+                      <form>
+                        <input type="hidden" name="id" value="${
+                          category._id
+                        }" />
+                        <button type="submit" class="btn border border-secondary edit-button" style="width: 80px; font-size: small">
+                          <i class="material-icons md-edit"></i>
+                          Edit
+                        </button>
+                      </form>
+                    </li>
+                    <li>
+                      ${
+                        category.isUnlisted
+                          ? `<form>
+                              <input type="hidden" name="id" value="${category._id}" />
+                              <button type="submit" class="btn btn-success list-button" style="width: 80px; font-size: small">
+                                <i class="material-icons md-playlist_add"></i>
+                                List
+                              </button>
+                            </form>`
+                          : `<form>
+                              <input type="hidden" name="id" value="${category._id}" />
+                              <button type="submit" class="btn btn-danger unlist-button" style="width: 80px; font-size: smaller">
+                                <i class="material-icons md-playlist_add_check"></i>
+                                Unlist
+                              </button>
+                            </form>`
+                      }
+                    </li>
+                    <li>
+                      <form>
+                        <input type="hidden" name="id" value="${
+                          category._id
+                        }" />
+                        <button type="submit" class="btn delete-button" style="color: white; background-color: black">
+                          <i class="material-icons md-delete-forever"></i>
+                          Delete
+                        </button>
+                      </form>
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+            `;
+            categoryTableBody.insertAdjacentHTML("beforeend", row);
+          });
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+      });
   });
 </script>
 

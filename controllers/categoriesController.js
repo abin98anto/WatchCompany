@@ -5,7 +5,9 @@ const loadCategoryManagement = async (req, res) => {
   try {
     if (req.session.adminData) {
       console.log(`Loading Category Management.`);
-      const categories = await Category.find({}).sort({ createdOn: -1 });
+      const categories = await Category.find({ isDeleted: false }).sort({
+        createdOn: -1,
+      });
       res.render("category_management", { categories: categories });
     } else {
       console.log(`Couldn't Load Category Mangement.`);
@@ -13,6 +15,19 @@ const loadCategoryManagement = async (req, res) => {
     }
   } catch (error) {
     res.send(`Error Loading Category Mangement.`);
+  }
+};
+
+// Get Categories
+const getCategories = async (req, res) => {
+  try {
+    console.log(`getting categories.`);
+    const categories = await Category.find({ isDeleted: false }).sort({
+      createdOn: -1,
+    });
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ error: "Error searching categories" });
   }
 };
 
@@ -53,22 +68,10 @@ const toggleCategoryStatus = async (req, res) => {
     }
     category.isUnlisted = !category.isUnlisted;
     await category.save();
-    res.redirect("/admin/category_management");
+    res.status(200).send("Category Status Togglling successfully");
   } catch (error) {
     console.log(`Error Toggling Category Status.`);
-  }
-};
-
-// Render Edit Category page.
-const loadEditCategories = async (req, res) => {
-  try {
-    console.log(`Rendering Edit Category.`);
-    const id = req.query.id;
-    const toEdit = await Category.findOne({ _id: id });
-    const categories = await Category.find({});
-    res.render("edit_category", { toEdit: toEdit, categories: categories });
-  } catch (error) {
-    console.log(`Error Rendering Edit Category.`);
+    res.status(500).send("Internal server error");
   }
 };
 
@@ -79,21 +82,23 @@ const editCategory = async (req, res) => {
     let id = req.query.id;
     let { new_name } = req.body;
     await Category.updateOne({ _id: id }, { $set: { name: new_name } });
-    res.redirect("/admin/category_management");
+    res.status(200).send("Category deleted successfully");
   } catch (error) {
     console.log(`Error Making Changes To A Category.`);
+    res.status(500).send("Internal server error");
   }
 };
 
+// Delete Categories.
 const deleteCategory = async (req, res) => {
-  console.log(`Deleting a Category.`);
+  const categoryId = req.query.id;
+  console.log(`deleting a category`);
   try {
-    const { id } = req.body;
-    console.log(id);
-    
+    await Category.findByIdAndUpdate(categoryId, { isDeleted: true });
+    res.status(200).send("Category deleted successfully");
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Error deleting category" });
+    console.error("Error:", error);
+    res.status(500).send("Internal server error");
   }
 };
 
@@ -101,7 +106,7 @@ module.exports = {
   loadCategoryManagement,
   addCategory,
   toggleCategoryStatus,
-  loadEditCategories,
   editCategory,
   deleteCategory,
+  getCategories,
 };

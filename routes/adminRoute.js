@@ -26,11 +26,11 @@ admin_route.get(
   categoriesController.loadCategoryManagement
 );
 admin_route.post("/addCategory", categoriesController.addCategory);
-admin_route.get("/unlist", categoriesController.toggleCategoryStatus);
-admin_route.get("/list", categoriesController.toggleCategoryStatus);
-admin_route.get("/load_edit_category", categoriesController.loadEditCategories);
+admin_route.post("/unlist", categoriesController.toggleCategoryStatus);
+admin_route.post("/list", categoriesController.toggleCategoryStatus);
 admin_route.post("/edit_category", categoriesController.editCategory);
 admin_route.post("/delete_category", categoriesController.deleteCategory);
+admin_route.get("/get_categories", categoriesController.getCategories);
 
 // Product Management.
 admin_route.get("/product_management", productController.loadProductManagement);
@@ -40,7 +40,6 @@ admin_route.get("/unlist_product", productController.toggleProductStatus);
 admin_route.get("/list_product", productController.toggleProductStatus);
 admin_route.get("/edit_product", productController.editProduct);
 admin_route.post("/edit_product", productController.deleteImage);
-// admin_route.get("/delete_product_image", productController.deleteImage);
 admin_route.post("/delete_product_image", productController.deleteImage);
 
 // Admin logout.
