@@ -191,6 +191,17 @@ const deleteImage = async (req, res) => {
   }
 };
 
+//  get products
+const getProducts = async (req, res) => {
+  try {
+    console.log(`getting products.`);
+    const products = await Product.find({ isUnlisted: false });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: "Error searching users" });
+  }
+};
+
 module.exports = {
   loadProductManagement,
   loadAddProduct,
@@ -198,4 +209,5 @@ module.exports = {
   toggleProductStatus,
   editProduct,
   deleteImage,
+  getProducts,
 };

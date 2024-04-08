@@ -41,6 +41,7 @@ admin_route.get("/list_product", productController.toggleProductStatus);
 admin_route.get("/edit_product", productController.editProduct);
 admin_route.post("/edit_product", productController.deleteImage);
 admin_route.post("/delete_product_image", productController.deleteImage);
+admin_route.get("/load_products", productController.getProducts);
 
 // Admin logout.
 admin_route.get("/logout", adminController.logout);

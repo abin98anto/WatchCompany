@@ -88,15 +88,61 @@
             <!-- Account Icon -->
             <div class="header-action-icon-2">
               <% if (user) { %>
-              <ul>
-                <li><a href="/profile">hello <%= user.name %></a></li>
-                <li><a href="/logout">Logout</a></li>
-              </ul>
+              <div class="dropdown text-center">
+                <a
+                  class="btn dropdown-toggle"
+                  style="
+                    background-color: white;
+                    color: black;
+                    border-style: none;
+                  "
+                  href="#"
+                  role="button"
+                  id="userDropdown"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i class="material-icons align-middle">account_circle</i> <%=
+                  user.name %>
+                </a>
+                <ul
+                  class="dropdown-menu text-center"
+                  aria-labelledby="userDropdown"
+                >
+                  <li>
+                    <a class="dropdown-item" href="/settings">Settings</a>
+                  </li>
+                  <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                </ul>
+              </div>
               <% } else { %>
-              <ul>
-                <li><a href="/signup">SignUp</a>/</li>
-                <li><a href="/login">Login</a></li>
-              </ul>
+              <div class="dropdown text-center">
+                <a
+                  class="btn dropdown-toggle"
+                  style="
+                    background-color: white;
+                    color: black;
+                    border-style: none;
+                  "
+                  href="#"
+                  role="button"
+                  id="userDropdown"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i class="material-icons align-middle">account_circle</i>
+                  Guest
+                </a>
+                <ul
+                  class="dropdown-menu text-center"
+                  aria-labelledby="userDropdown"
+                >
+                  <li>
+                    <a class="dropdown-item" href="/signup">Signup</a>
+                  </li>
+                  <li><a class="dropdown-item" href="/login">Login</a></li>
+                </ul>
+              </div>
               <% } %>
             </div>
 
