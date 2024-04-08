@@ -17,8 +17,8 @@ admin_route.get("/dashboard", adminController.loadDashboard);
 
 // User Management.
 admin_route.get("/user_management", usersController.loadUserManagement);
-admin_route.get("/block", usersController.toggleUserStatus);
-admin_route.get("/unblock", usersController.toggleUserStatus);
+admin_route.post("/toggle_user_status", usersController.toggleUserStatus);
+admin_route.get("/get_users", usersController.getUsers);
 
 // Catergory Management.
 admin_route.get(

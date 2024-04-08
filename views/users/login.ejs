@@ -2,18 +2,20 @@
 include('../partials/page_header.ejs') %>
 
 <main class="main">
-  <div class="page-header breadcrumb-wrap pb-10 pt-10" style="padding: 0px">
+  <!-- Breadcrumbs -->
+  <div class="page-header breadcrumb-wrap pb-5 pt-5" style="padding: 0px">
     <div class="container">
       <div class="breadcrumb">
-        <a href="index.html" rel="nofollow">Home</a>
-        <span></span> Pages <span></span> Login / Register
+        <span><a href="/" rel="nofollow">Home</a></span> Pages
+        <span></span> Login / Register
       </div>
     </div>
   </div>
+
   <section style="background-color: black">
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-6">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <!-- <div class="col-sm-6">
           <div class="has-bg-img">
             <img
               src="/user_assets/imgs/sigup_login/login.png"
@@ -21,14 +23,14 @@ include('../partials/page_header.ejs') %>
               style="width: 100%; height: 100%; object-fit: cover"
             />
           </div>
-        </div>
+        </div> -->
         <div class="col-sm-6 pt-10 pb-10" style="color: white">
           <div
-            class="login_wrap widget-taber-content p-30 background-white border-radius-10 mb-md-5 mb-lg-0 mb-sm-5 mt-200"
+            class="p-30 background-white border-radius-10"
             style="background-color: white; height: 400px"
           >
             <div
-              class="bg-white mr-50 ml-50"
+              class="bg-white"
               style="
                 height: 100%;
                 display: flex;
@@ -40,11 +42,10 @@ include('../partials/page_header.ejs') %>
                 <div class="heading_s1">
                   <h3 class="mb-20 text-center">Login</h3>
                 </div>
-                <form id="loginForm" method="post">
+                <form id="loginForm" method="post" class="text-center">
                   <div class="form-group">
                     <input
                       type="text"
-                      required=""
                       name="email"
                       id="email"
                       placeholder="Email"
@@ -53,7 +54,6 @@ include('../partials/page_header.ejs') %>
                   </div>
                   <div class="form-group">
                     <input
-                      required=""
                       type="password"
                       name="password"
                       id="password"
@@ -65,7 +65,7 @@ include('../partials/page_header.ejs') %>
                     <button
                       type="submit"
                       id="loginButton"
-                      class="btn btn-fill-out btn-block hover-up ml-130"
+                      class="btn btn-fill-out btn-block hover-up"
                       style="background-color: black"
                     >
                       Login
@@ -76,6 +76,28 @@ include('../partials/page_header.ejs') %>
                   <% if (message) { %>
                   <p><%= message %></p>
                   <% } %>
+                </div>
+                <div class="divider-text-center mt-15 mb-15">
+                  <span style="color: black"> or</span>
+                </div>
+                <ul class="btn-login list_none text-center mb-15">
+                  <li>
+                    <a
+                      href="/auth/facebook"
+                      class="btn btn-facebook hover-up mb-lg-0 mb-sm-4"
+                      >Login With Facebook</a
+                    >
+                  </li>
+                  <li>
+                    <a href="/auth/google" class="btn btn-google hover-up"
+                      >Login With Google</a
+                    >
+                  </li>
+                </ul>
+                <div id="exiting-user" class="text-center">
+                  <span>
+                    <p>Don't have an account? <a href="/signup">Sign up</a></p>
+                  </span>
                 </div>
               </div>
             </div>

@@ -87,10 +87,17 @@
 
             <!-- Account Icon -->
             <div class="header-action-icon-2">
+              <% if (user) { %>
+              <ul>
+                <li><a href="/profile">hello <%= user.name %></a></li>
+                <li><a href="/logout">Logout</a></li>
+              </ul>
+              <% } else { %>
               <ul>
                 <li><a href="/signup">SignUp</a>/</li>
                 <li><a href="/login">Login</a></li>
               </ul>
+              <% } %>
             </div>
 
             <!-- Dropdown list for account -->

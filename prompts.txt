@@ -1,0 +1,4 @@
+user_management (unblock, block) - In this code, when the user clicks the block button it should show a sweet alert asking "Are you sure you want to block this user?". If the user confirms it then use fetch to go to database and change the isBlocked to true and then refresh the page. After the refresh the block button will be replaced with unblock button. so when the user clicks the unblock button a sweet alert should ask "Are you sure you want to unblock this user?". If the user confirms it, then use fetch to go to database and change the value of isBlocked to false and then refresh the page.
+
+user_management (search & sort) - In this code, implement the search functionality along with filtering it with the form-select that displays the appropriate result according to the status (isBlocked field in the database).
+

@@ -45,14 +45,17 @@ const generateOTP = (length) => {
 const loadSignUp = async (req, res) => {
   try {
     console.log(`Loading Signup Page.`);
-    if (!req.session.adminData) {
-      const categories = await Category.find({ isUnlisted: false });
-      console.log(`rendering signup page`);
-      res.render("signup", { categories: categories });
-    } else {
-      console.log(`User Already Logged in. Redirecting To Home.`);
-      res.redirect("/home");
-    }
+    // if (!req.session.adminData) {
+    const categories = await Category.find({ isUnlisted: false });
+    console.log(`rendering signup page`);
+    res.render("signup", {
+      categories: categories,
+      user: req.session.userData,
+    });
+    // } else {
+    // console.log(`User Already Logged in. Redirecting To Home.`);
+    // res.redirect("/home");
+    // }
   } catch (error) {
     res.sending(`Error Loading Signup Page.`);
   }
@@ -132,6 +135,7 @@ const verifyOTP = async (req, res) => {
         name: username,
         email: email,
         password: sPassword,
+        createdOn: Date.now(),
       });
       await newUser.save();
       res.json({ success: true });
@@ -204,16 +208,17 @@ const resendOTP = async (req, res) => {
 const loadLogin = async (req, res) => {
   try {
     const categories = await Category.find({ isUnlisted: false });
-    if (!req.session.userData) {
-      console.log(`Rendering Login Page.`);
-      res.render("login", {
-        message: "",
-        categories: categories,
-      });
-    } else {
-      console.log(`Couldn't Render Login Page.`);
-      res.redirect("/home");
-    }
+    // if (!req.session.userData) {
+    console.log(`Rendering Login Page.`);
+    res.render("login", {
+      message: "",
+      categories: categories,
+      user: req.session.userData,
+    });
+    // } else {
+    // console.log(`Couldn't Render Login Page.`);
+    // res.redirect("/home");
+    // }
   } catch (error) {
     res.send(`Error Rendering Login Page.`);
   }
@@ -223,9 +228,14 @@ const loadLogin = async (req, res) => {
 const loadLandingPage = async (req, res) => {
   try {
     console.log(`Rendering Landing Page.`);
+
     const products = await Product.find({ isUnlisted: false });
     const categories = await Category.find({ isUnlisted: false });
-    res.render("landing_page", { categories: categories, products: products });
+    res.render("landing_page", {
+      categories: categories,
+      products: products,
+      user: req.session.userData,
+    });
   } catch (error) {
     res.send(`Error Rendering Landing Page.`);
   }
@@ -249,7 +259,7 @@ const verifyLogin = async (req, res) => {
       if (passwordMatch && user.isAdmin == 0) {
         console.log(`User Password Matched.`);
         req.session.userData = user;
-        res.redirect("/home");
+        res.redirect("/");
       } else {
         console.log(`Wrong Password.`);
         req.session.message = message;
@@ -264,33 +274,33 @@ const verifyLogin = async (req, res) => {
 };
 
 // to load home page.
-const loadHome = async (req, res) => {
-  const categories = await Category.find({ isUnlisted: false });
-  const products = await Product.find({ isUnlisted: false });
-  try {
-    if (req.session.userData) {
-      const userID = req.session.userData._id;
-      const status = await User.findById({ _id: userID });
-      console.log(`status: ${status.isBlocked}`);
-      if (status.isBlocked) {
-        console.log(`User is Blocked.`);
-        req.session.userData = null;
-        res.redirect("/");
-      } else {
-        console.log(`Rendering Home Page for ${req.session.userData.name}`);
-        res.render("home", {
-          user: req.session.userData,
-          categories: categories,
-          products: products,
-        });
-      }
-    } else {
-      res.redirect("/");
-    }
-  } catch (error) {
-    console.log(`Error Rendering Home Page.`);
-  }
-};
+// const loadHome = async (req, res) => {
+//   const categories = await Category.find({ isUnlisted: false });
+//   const products = await Product.find({ isUnlisted: false });
+//   try {
+//     if (req.session.userData) {
+//       const userID = req.session.userData._id;
+//       const status = await User.findById({ _id: userID });
+//       console.log(`status: ${status.isBlocked}`);
+//       if (status.isBlocked) {
+//         console.log(`User is Blocked.`);
+//         req.session.userData = null;
+//         res.redirect("/");
+//       } else {
+//         console.log(`Rendering Home Page for ${req.session.userData.name}`);
+//         res.render("home", {
+//           user: req.session.userData,
+//           categories: categories,
+//           products: products,
+//         });
+//       }
+//     } else {
+//       res.redirect("/");
+//     }
+//   } catch (error) {
+//     console.log(`Error Rendering Home Page.`);
+//   }
+// };
 
 // to logout user.
 const logoutUser = async (req, res) => {
@@ -313,7 +323,11 @@ const loadProduct = async (req, res) => {
     const product = await Product.findOne({ isUnlisted: false, _id: id });
     console.log(`product ${product.name}`);
     const categories = await Category.find({ isUnlisted: false });
-    res.render("product_page", { product: product, categories: categories });
+    res.render("product_page", {
+      product: product,
+      categories: categories,
+      user: req.session.userData,
+    });
   } catch (error) {
     console.log(`errr loading single product page.`);
     res.send(`error loading single product page.`);
@@ -329,7 +343,7 @@ module.exports = {
   verifyOTP,
   checkEmail,
   resendOTP,
-  loadHome,
+  // loadHome,
   logoutUser,
   loadProduct,
 };

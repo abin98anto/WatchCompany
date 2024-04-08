@@ -20,7 +20,7 @@ user_route.get("/login", userController.loadLogin);
 user_route.post("/login", userController.verifyLogin);
 
 // Render Home page.
-user_route.get("/home", userController.loadHome);
+// user_route.get("/home", userController.loadLandingPage);
 
 // User Logout Function.
 user_route.get("/logout", userController.logoutUser);

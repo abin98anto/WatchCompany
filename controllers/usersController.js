@@ -5,7 +5,9 @@ const loadUserManagement = async (req, res) => {
   try {
     if (req.session.adminData) {
       console.log(`Rendering User Management.`);
-      const users = await User.find({ isAdmin: 0 });
+      const users = await User.find({ isAdmin: 0 }).sort({
+        createdOn: -1,
+      });
       res.render("user_management", { users: users });
     } else {
       console.log(`Couldn't Render User Management.`);
@@ -29,12 +31,59 @@ const toggleUserStatus = async (req, res) => {
     user.isBlocked = !user.isBlocked;
     await user.save();
     res.redirect("/admin/user_management");
+    // return res.status(200).send("User status toggled successfully");
   } catch (error) {
     console.log(`Error Toggling User Status.`);
+    res.status(500).send("Internal server error");
+  }
+};
+
+// const blockUser = async (req, res) => {
+//   try {
+//     const userId = req.query.id;
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).send("User not found");
+//     }
+//     user.isBlocked = true;
+//     await user.save();
+//     res.status(200).send("User blocked successfully");
+//   } catch (error) {
+//     console.error("Error blocking user:", error);
+//     res.status(500).send("Internal server error");
+//   }
+// };
+// const unblockUser = async (req, res) => {
+//   try {
+//     const userId = req.query.id;
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).send("User not found");
+//     }
+//     user.isBlocked = false;
+//     await user.save();
+//     res.status(200).send("User unblocked successfully");
+//   } catch (error) {
+//     console.error("Error unblocking user:", error);
+//     res.status(500).send("Internal server error");
+//   }
+// };
+
+// Get users
+const getUsers = async (req, res) => {
+  try {
+    console.log(`getting users.`);
+    const users = await User.find({ isAdmin: 0 }).sort({
+      createdOn: -1,
+    });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Error searching users" });
   }
 };
 
 module.exports = {
   loadUserManagement,
   toggleUserStatus,
+  getUsers,
 };
