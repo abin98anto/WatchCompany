@@ -1,4 +1,5 @@
 const Category = require("../models/categoryModel");
+const Product = require("../models/productModel");
 
 // Render Category Management Page.
 const loadCategoryManagement = async (req, res) => {
@@ -62,12 +63,26 @@ const toggleCategoryStatus = async (req, res) => {
     console.log(`Toggling Category Status.`);
     let id = req.query.id;
     const category = await Category.findById(id);
+    // const products = await Product.find({});
     if (!category) {
       res.status(404).send("Category not found");
       return;
     }
+    const products = await Product.find({});
+    console.log(products);
+    products.forEach((product) => {
+      if (product.category == category.name.toLowerCase()) {
+        console.log(product.name);
+        product.isUnlisted = !product.isUnlisted;
+        product.save();
+      }
+    });
     category.isUnlisted = !category.isUnlisted;
     await category.save();
+    await Product.updateMany(
+      { category: category._id }, // Filter products by category
+      { $set: { isUnlisted: category.isUnlisted } } // Set isUnlisted to the new value
+    );
     res.status(200).send("Category Status Togglling successfully");
   } catch (error) {
     console.log(`Error Toggling Category Status.`);

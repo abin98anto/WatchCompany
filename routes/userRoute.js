@@ -19,11 +19,11 @@ user_route.post("/resend-otp", userController.resendOTP);
 user_route.get("/login", userController.loadLogin);
 user_route.post("/login", userController.verifyLogin);
 
-// Render Home page.
-// user_route.get("/home", userController.loadLandingPage);
-
 // User Logout Function.
 user_route.get("/logout", userController.logoutUser);
+
+// Shop Page.
+user_route.get("/shop", userController.loadShop);
 
 // Single Product Page.
 user_route.get("/load_product", userController.loadProduct);

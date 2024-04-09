@@ -138,18 +138,12 @@ include('../partials/page_header.ejs') %>
                     />
                   </a>
                 </div>
-                <div class="product-action-1">
-                  <a
-                    aria-label="Add To Wishlist"
-                    class="action-btn hover-up"
-                    href="#"
-                    ><i class="fi-rs-heart"></i
-                  ></a>
-                </div>
               </div>
               <div class="product-content-wrap">
                 <div class="product-category">
-                  <a href="#"><%= products[i].category %></a>
+                  <a href="/load_product?id=<%= products[i]._id %>"
+                    ><%= products[i].category %></a
+                  >
                 </div>
                 <h2>
                   <a href="/load_product?id=<%= products[i].id %>"
@@ -171,6 +165,12 @@ include('../partials/page_header.ejs') %>
                     class="action-btn hover-up"
                     href="#"
                     ><i class="fi-rs-shopping-bag-add"></i
+                  ></a>
+                  <a
+                    aria-label="Add To Wishlist"
+                    class="action-btn hover-up"
+                    href="#"
+                    ><i class="fi-rs-heart"></i
                   ></a>
                 </div>
               </div>
@@ -332,19 +332,6 @@ include('../partials/page_header.ejs') %>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <!-- Slider logic -->
-<!-- <script>
-  // Preload images to ensure smooth transition
-  $(document).ready(function () {
-    $("#carouselExampleIndicators .carousel-item img").each(function () {
-      var src = $(this).attr("src");
-      $("<img/>")
-        .attr("src", src)
-        .on("load", function () {
-          $(this).remove();
-        });
-    });
-  });
-</script> -->
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -383,76 +370,6 @@ include('../partials/page_header.ejs') %>
 </script>
 
 <!-- Bestseller logic -->
-<!-- <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // By default, load products for Men
-    loadProducts("Men");
-
-    // Function to load products based on category
-    function loadProducts(category) {
-      fetch("/load_products?category=" + category)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json(); // Assuming response is JSON
-        })
-        .then((data) => {
-          // Assuming data is an array of products
-          const productsHTML = data
-            .slice(0, 4)
-            .map(
-              (product) => `
-        <div class="col-lg-4 col-md-4 col-12 col-sm-6">
-          <div class="product-cart-wrap mb-30">
-            <div class="product-img-action-wrap">
-              <div class="product-img product-img-zoom">
-                <a href="/load_product?id=${product.id}">
-                  <img class="default-img" style="height: 100%;" src="/uploads/${product.media[0]}" alt="${product.media[0]}"/>
-                  <img class="hover-img" style="height: 100%;" src="/uploads/${product.media[0]}" alt="${product.media[0]}"/>
-                </a>
-              </div>
-              <div class="product-action-1">
-                <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#"><i class="fi-rs-heart"></i></a>
-              </div>
-            </div>
-            <div class="product-content-wrap">
-              <div class="product-category">
-                <a href="#">${product.category}</a>
-              </div>
-              <h2><a href="/load_product?id=${product.id}">${product.name}</a></h2>
-              <div class="rating-result" title="90%"><span><span>90%</span></span></div>
-              <div class="product-price"><span>$ ${product.price}</span></div>
-              <div class="product-action-1 show">
-                <a aria-label="Add To Cart" class="action-btn hover-up" href="#"><i class="fi-rs-shopping-bag-add"></i></a>
-              </div>
-            </div>
-          </div>
-        </div>
-      `
-            )
-            .join("");
-
-          // Replace existing products with the newly generated HTML
-          document.querySelector(".product-grid-4").innerHTML = productsHTML;
-        })
-        .catch((error) => {
-          console.error("Error loading products:", error);
-        });
-    }
-
-    // Event listener for Men button
-    document.getElementById("menBtn").addEventListener("click", function () {
-      loadProducts("Men");
-    });
-
-    // Event listener for Women button
-    document.getElementById("womenBtn").addEventListener("click", function () {
-      loadProducts("Women");
-    });
-  });
-</script> -->
-
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     // Function to load products based on category

@@ -2,3 +2,4 @@ user_management (unblock, block) - In this code, when the user clicks the block 
 
 user_management (search & sort) - In this code, implement the search functionality along with filtering it with the form-select that displays the appropriate result according to the status (isBlocked field in the database).
 
+category_management (to now show items whose category is unlisted) - in this code i want to search the products for the ones that mathches the category and negate the value of it's isUnlisted key value pair.

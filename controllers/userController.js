@@ -230,7 +230,10 @@ const loadLandingPage = async (req, res) => {
     console.log(`Rendering Landing Page.`);
 
     const products = await Product.find({ isUnlisted: false });
-    const categories = await Category.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
     res.render("landing_page", {
       categories: categories,
       products: products,
@@ -273,35 +276,6 @@ const verifyLogin = async (req, res) => {
   }
 };
 
-// to load home page.
-// const loadHome = async (req, res) => {
-//   const categories = await Category.find({ isUnlisted: false });
-//   const products = await Product.find({ isUnlisted: false });
-//   try {
-//     if (req.session.userData) {
-//       const userID = req.session.userData._id;
-//       const status = await User.findById({ _id: userID });
-//       console.log(`status: ${status.isBlocked}`);
-//       if (status.isBlocked) {
-//         console.log(`User is Blocked.`);
-//         req.session.userData = null;
-//         res.redirect("/");
-//       } else {
-//         console.log(`Rendering Home Page for ${req.session.userData.name}`);
-//         res.render("home", {
-//           user: req.session.userData,
-//           categories: categories,
-//           products: products,
-//         });
-//       }
-//     } else {
-//       res.redirect("/");
-//     }
-//   } catch (error) {
-//     console.log(`Error Rendering Home Page.`);
-//   }
-// };
-
 // to logout user.
 const logoutUser = async (req, res) => {
   try {
@@ -319,9 +293,9 @@ const loadProduct = async (req, res) => {
   try {
     console.log(`loading single product page.`);
     const id = req.query.id;
-    console.log(`id: ${id}`);
+    // console.log(`id: ${id}`);
     const product = await Product.findOne({ isUnlisted: false, _id: id });
-    console.log(`product ${product.name}`);
+    // console.log(`product ${product.name}`);
     const categories = await Category.find({ isUnlisted: false });
     res.render("product_page", {
       product: product,
@@ -334,6 +308,24 @@ const loadProduct = async (req, res) => {
   }
 };
 
+// load shop.
+const loadShop = async (req, res) => {
+  try {
+    const product = await Product.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
+    res.render("shopping_page", {
+      product: product,
+      categories: categories,
+      user: req.session.userData,
+    });
+  } catch (error) {
+    console.log(`error rendering shop page.`);
+  }
+};
+
 module.exports = {
   loadSignUp,
   loadLogin,
@@ -343,7 +335,7 @@ module.exports = {
   verifyOTP,
   checkEmail,
   resendOTP,
-  // loadHome,
   logoutUser,
   loadProduct,
+  loadShop,
 };
