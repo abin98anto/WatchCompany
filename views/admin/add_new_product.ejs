@@ -175,7 +175,13 @@
             </div>
             <div class="card-body">
               <div class="input-upload">
-                <input type="file" id="uploads" name="media" multiple />
+                <input
+                  type="file"
+                  id="uploads"
+                  name="media"
+                  accept="image/*"
+                  multiple
+                />
                 <div id="imagePreview"></div>
               </div>
             </div>
@@ -196,10 +202,10 @@
     const files = this.files;
     const numFiles = files.length;
 
-    if (numFiles > 3) {
-      alert("Please select up to three images.");
-      return;
-    }
+    // if (numFiles > 3) {
+    //   alert("Please select up to three images.");
+    //   return;
+    // }
 
     for (let i = 0; i < numFiles; i++) {
       const file = files[i];

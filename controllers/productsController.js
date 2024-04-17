@@ -4,6 +4,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs");
+const { stopCoverage } = require("v8");
 
 // Multer Configuring.
 const storage = multer.diskStorage({
@@ -11,39 +12,43 @@ const storage = multer.diskStorage({
     cb(null, "public/uploads");
   },
   filename: function (req, file, cb) {
-    cb(
-      null,
-      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-    );
+    cb(null, Date.now() + "-" + file.originalname);
   },
 });
-const upload = multer({ storage: storage }).array("media", 3);
+const upload = multer({ storage: storage }).array("media", 10);
 
 // Render product management page.
 const loadProductManagement = async (req, res) => {
   try {
-    if (req.session.adminData) {
-      const Products = await Product.find({});
-      const Categories = await Category.find({ isUnlisted: false });
-      console.log(`Rendering Product Management.`);
-      // console.log(Categories[0]._id);
-      res.render("product_management", {
-        products: Products,
-        categories: Categories,
-      });
-    } else {
-      console.log(`Couldn't Render Product Management.`);
-      res.redirect("/admin/");
-    }
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 5;
+
+    const Products = await Product.find()
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / pageSize);
+
+    const Categories = await Category.find({ isUnlisted: false });
+
+    res.render("product_management", {
+      products: Products,
+      categories: Categories,
+      currentPage: page,
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: page < totalPages,
+    });
   } catch (error) {
-    res.send(`Error Rendering Product Management.`);
+    console.error(`Error rendering product management page: ${error}`);
+    res.status(500).send(`Error rendering product management page`);
   }
 };
 
 // Render add new product page.
 const loadAddProduct = async (req, res) => {
   try {
-    console.log(`Rendering Add New Product Page.`);
+    // console.log(`Rendering Add New Product Page.`);
     const categories = await Category.find({ isUnlisted: false });
     res.render("add_new_product", { categories: categories });
   } catch (error) {
@@ -54,7 +59,7 @@ const loadAddProduct = async (req, res) => {
 // Adding the product to database.
 const addProduct = async (req, res) => {
   try {
-    console.log(`Adding New Product to DB.`);
+    // console.log(`Adding New Product to DB.`);
     console.log(req.body);
 
     upload(req, res, async function (err) {
@@ -75,7 +80,6 @@ const addProduct = async (req, res) => {
       try {
         const processedImages = [];
         for (const file of req.files) {
-          // Initialize imagePath before using it
           const filename = `${file.originalname} - cropped`;
           const imagePath = path.join(
             __dirname,
@@ -86,12 +90,11 @@ const addProduct = async (req, res) => {
           );
 
           // Check if the file exists before processing
-          if (!fs.existsSync(file.path)) {
-            console.log(`Input file is missing: ${file.path}`);
-            // Handle the error appropriately, e.g., return an error response
-            res.status(400).send("Input file is missing");
-            return; // Stop further execution
-          }
+          // if (!fs.existsSync(file.path)) {
+          //   console.log(`Input file is missing: ${file.path}`);
+          //   res.status(400).send("Input file is missing");
+          //   return;
+          // }
 
           try {
             // Process the image using Sharp
@@ -160,41 +163,147 @@ const toggleProductStatus = async (req, res) => {
 };
 
 // load edit product.
-const editProduct = async (req, res) => {
+const loadEditProduct = async (req, res) => {
   try {
     const id = req.query.id;
-    // console.log(`id: ${id}`);
+    console.log(`id: ${id}`);
     const Categories = await Category.find({ isUnlisted: false });
     const product = await Product.findById(id);
     console.log(`Editing the product : ${product.name}`);
     res.render("edit_product", { product: product, categories: Categories });
   } catch (error) {
-    console.log(`Error editing the product.`);
+    console.log(`Error loading Edit Products`);
   }
 };
 
-// delete images in edit product
+// Edit product.
+const editProduct = async (req, res) => {
+  try {
+    // console.log(`Adding New Product to DB.`);
+    console.log(req.body);
+    const { id } = req.query;
+    console.log(id);
+
+    upload(req, res, async function (err) {
+      if (err instanceof multer.MulterError) {
+        console.log(`Multer error: ${err}`);
+        res.status(500).send("Error Uploading the images");
+        return;
+      } else if (err) {
+        console.log(`Unknown Error: ${err}`);
+        res.status(500).send("Unknown Error Occurred. The Error: ", err);
+        return;
+      }
+      // if (!req.files || req.files.length === 0) {
+        // res.status(400).send(`No images uploaded.`);
+        // return;
+        // req.files =
+      // }
+
+      try {
+        const processedImages = [];
+        for (const file of req.files) {
+          const filename = `${file.originalname} - cropped`;
+          const imagePath = path.join(
+            __dirname,
+            "..",
+            "public",
+            "uploads",
+            filename
+          );
+
+          // Check if the file exists before processing
+          // if (!fs.existsSync(file.path)) {
+          //   console.log(`Input file is missing: ${file.path}`);
+          //   res.status(400).send("Input file is missing");
+          //   return;
+          // }
+
+          try {
+            // Process the image using Sharp
+            const imageBuffer = await sharp(file.path)
+              .resize(440, 440)
+              .toBuffer();
+
+            // Write the processed image to the specified path
+            fs.writeFileSync(imagePath, imageBuffer);
+
+            // Remove the original file after processing
+            fs.unlinkSync(file.path);
+
+            processedImages.push(filename);
+          } catch (error) {
+            console.log(`Error occurred while processing the image: ${error}`);
+            // Handle the error appropriately
+            res.status(500).send("Error processing the image");
+            return; // Stop further execution
+          }
+        }
+
+        const { name, description, price, category, stock, media } = req.body;
+        const updateProduct = await Product.findByIdAndUpdate(id, {
+          $push: { media: { $each: processedImages } },
+          name: name,
+          description: description,
+          price: price,
+          category: category,
+          stock: stock,
+        });
+
+        await updateProduct.save();
+        res.redirect("/admin/product_management");
+      } catch (err) {
+        console.log(
+          `Error occurred while processing the image using Sharp: ${err}`
+        );
+        res
+          .status(500)
+          .send(`Error processing images using Sharp ${err.message}`);
+      }
+    });
+  } catch (err) {
+    console.log(`error editing product : ${err}`);
+    res.status(500).send(`Error editing Product.`);
+  }
+};
+
+// delete single images in edit product
 const deleteImage = async (req, res) => {
   try {
-    console.log(req.body);
-    const { id, index } = req.body;
-    const Categories = await Category.find({ isUnlisted: false });
-    const product = await Product.findById(id);
-    console.log(`index: ${index}`);
-    console.log(`id: ${id}`);
-    await product.updateOne({ _id: id }, { $unset: { [`media.${index}`]: 1 } });
-    res.render("edit_product", { categories: Categories, product: product });
+    // console.log(req.body);
+    // console.log(req.query);
+    const { productId, index } = req.body;
+    // console.log(productId);
+    // Find the product by ID
+    const product = await Product.findById(productId);
+
+    console.log(`deleting the image ${index} of ${product.name}`);
+
+    // Check if product exists
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Remove the image from the product's media array
+    product.media.splice(index, 1);
+
+    // Save the updated product
+    await product.save();
+
+    // Respond with success message
+    // res.status(200).json({ message: "Image deleted successfully" });
+    res.redirect(`/admin/edit_product?id=${productId}`);
   } catch (error) {
-    console.log(`Error deleting image in edit product: ${error}`);
-    // Handle the error appropriately
-    res.status(500).send("Error deleting image");
+    // Handle errors
+    console.error("Error deleting image:", error);
+    res.status(500).json({ error: "Failed to delete image" });
   }
 };
 
 //  get products
 const getProducts = async (req, res) => {
   try {
-    console.log(`getting products.`);
+    // console.log(`getting products.`);
     const products = await Product.find({ isUnlisted: false });
     res.json(products);
   } catch (error) {
@@ -207,6 +316,7 @@ module.exports = {
   loadAddProduct,
   addProduct,
   toggleProductStatus,
+  loadEditProduct,
   editProduct,
   deleteImage,
   getProducts,

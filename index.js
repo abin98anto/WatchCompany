@@ -7,10 +7,12 @@ const user_route = require("./routes/userRoute");
 const admin_route = require("./routes/adminRoute");
 mongoose.connect(process.env.MONGO_URL);
 const secretKey = process.env.SECRET_KEY;
+const nocache = require("nocache");
 
 const port = process.env.PORT || 3000;
 const app = express();
 
+app.use(nocache());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

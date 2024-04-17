@@ -92,6 +92,7 @@
           </div>
         </div>
       </header>
+
       <div class="card-body">
         <div class="table-responsive">
           <table class="table table-hover">
@@ -105,13 +106,15 @@
               </tr>
             </thead>
             <tbody id="userTableBody">
-              <% let i = 1 %> <% users.forEach((user) => { %>
+              <% let i = (currentPage - 1) * usersPerPage + 1; %> <% for (let j
+              = 0; j < users.length; j++) { %> <% if (j >= (currentPage - 1) *
+              usersPerPage && j < currentPage * usersPerPage) { %>
               <tr class="text-center">
                 <td class="text-center"><%= i %></td>
-                <td class="text-center"><%= user.name %></td>
-                <td class="text-center"><%= user.email %></td>
+                <td class="text-center"><%= users[j].name %></td>
+                <td class="text-center"><%= users[j].email %></td>
                 <td class="text-center">
-                  <% if (user.isBlocked) { %>
+                  <% if (users[j].isBlocked) { %>
                   <span class="rounded-pill alert-danger" style="padding: 8px"
                     >Blocked</span
                   >
@@ -122,10 +125,9 @@
                   <% } %>
                 </td>
                 <td>
-                  <% if (!user.isBlocked) { %>
+                  <% if (!users[j].isBlocked) { %>
                   <button
                     class="btn btn-danger block-button"
-                    onclick="confirmBlock('<%= user._id %>')"
                     style="width: 80px; font-size: small"
                   >
                     Block
@@ -133,7 +135,6 @@
                   <% } else { %>
                   <button
                     class="btn btn-success unblock-button"
-                    onclick="confirmUnblock('<%= user._id %>')"
                     style="width: 80px; font-size: small"
                   >
                     Unblock
@@ -141,17 +142,47 @@
                   <% } %>
                 </td>
               </tr>
-              <% i++ %> <% }); %>
+              <% i++ %> <% } %> <% } %>
             </tbody>
           </table>
         </div>
       </div>
+
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item <%= !hasPreviousPage ? 'disabled' : '' %>">
+            <a
+              class="page-link"
+              href="/admin/user_management?page=<%= currentPage - 1 %>"
+              tabindex="-1"
+              aria-disabled="<%= !hasPreviousPage %>"
+              >Previous</a
+            >
+          </li>
+          <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+            <a class="page-link" href="/admin/user_management?page=<%= i %>"
+              ><%= i %></a
+            >
+          </li>
+          <% } %>
+          <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
+            <a
+              class="page-link"
+              href="/admin/user_management?page=<%= currentPage + 1 %>"
+              tabindex="-1"
+              aria-disabled="<%= !hasNextPage %>"
+              >Next</a
+            >
+          </li>
+        </ul>
+      </nav>
     </div>
   </section>
 </main>
 
-<!-- Block/Unblock, Search with filter Functionalities. -->
 <script>
+  // Block/Unblock, Search with filter Functionalities.
   document.addEventListener("DOMContentLoaded", () => {
     console.log(`going to fetch.`);
     fetch("/admin/get_users")
@@ -190,24 +221,24 @@
             const statusText = user.isBlocked ? "Blocked" : "Active";
 
             const row = `
-              <tr>
-                <td>${index + 1}</td>
-                <td>${user.name}</td>
-                <td>${user.email}</td>
-                <td>
-                  <span class="rounded-pill alert-${statusBadgeClass}" style="padding: 8px">${statusText}</span>
-                </td>
-                <td class="text-end">
-                  <button class="btn btn-${
-                    user.isBlocked ? "success" : "danger"
-                  } toggle-button" data-id="${
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${user.name}</td>
+                  <td>${user.email}</td>
+                  <td>
+                    <span class="rounded-pill alert-${statusBadgeClass}" style="padding: 8px">${statusText}</span>
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-${
+                      user.isBlocked ? "success" : "danger"
+                    } toggle-button" data-id="${
               user._id
             }" style="width: 80px; font-size: small">
-                    ${user.isBlocked ? "Unblock" : "Block"}
-                  </button>
-                </td>
-              </tr>
-            `;
+                      ${user.isBlocked ? "Unblock" : "Block"}
+                    </button>
+                  </td>
+                </tr>
+              `;
 
             userTableBody.insertAdjacentHTML("beforeend", row);
           });

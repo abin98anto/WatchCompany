@@ -77,7 +77,8 @@
         >
       </div>
     </div>
-    <div class="card mb-4">
+    <div class="card mb-4 d-flex">
+      <!-- Table header -->
       <header class="card-header">
         <div class="row align-items-center">
           <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
@@ -89,9 +90,6 @@
             </select>
           </div>
           <div class="col-md-2 col-6">
-            <input type="date" value="02.05.2022" class="form-control" />
-          </div>
-          <div class="col-md-2 col-6">
             <select class="form-select">
               <option selected>Show all</option>
               <option>Unlisted</option>
@@ -100,7 +98,9 @@
           </div>
         </div>
       </header>
-      <div class="card-body">
+
+      <!-- Populating products -->
+      <div class="card-body" style="height: 500px">
         <% products.forEach((product)=>{ %>
         <article class="itemlist">
           <div class="row align-items-center">
@@ -191,6 +191,41 @@
           </div>
         </article>
         <% }); %>
+      </div>
+
+      <!-- Pagination -->
+      <div style="flex-direction: column; align-items: center" class="d-flex">
+        <nav aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item <%= !hasPreviousPage ? 'disabled' : '' %>">
+              <a
+                class="page-link"
+                href="/admin/product_management?page=<%= currentPage - 1 %>"
+                tabindex="-1"
+                aria-disabled="<%= !hasPreviousPage %>"
+                >Previous</a
+              >
+            </li>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+              <a
+                class="page-link"
+                href="/admin/product_management?page=<%= i %>"
+                ><%= i %></a
+              >
+            </li>
+            <% } %>
+            <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
+              <a
+                class="page-link"
+                href="/admin/product_management?page=<%= currentPage + 1 %>"
+                tabindex="-1"
+                aria-disabled="<%= !hasNextPage %>"
+                >Next</a
+              >
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   </section>

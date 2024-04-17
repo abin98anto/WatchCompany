@@ -25,6 +25,34 @@ const userSchema = mongoose.Schema({
   createdOn: {
     type: Date,
   },
+  address: [
+    {
+      houseName: {
+        type: String,
+      },
+      street: {
+        type: String,
+      },
+      city: {
+        type: String,
+      },
+      state: {
+        type: String,
+      },
+      country: {
+        type: String,
+      },
+      pincode: {
+        type: Number,
+      },
+      phoneNumber: {
+        type: Number,
+      },
+      addressType: {
+        type: String,
+      },
+    },
+  ],
 });
 
 const User = mongoose.model("User", userSchema);

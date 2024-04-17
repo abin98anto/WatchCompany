@@ -3,3 +3,9 @@ user_management (unblock, block) - In this code, when the user clicks the block 
 user_management (search & sort) - In this code, implement the search functionality along with filtering it with the form-select that displays the appropriate result according to the status (isBlocked field in the database).
 
 category_management (to now show items whose category is unlisted) - in this code i want to search the products for the ones that mathches the category and negate the value of it's isUnlisted key value pair.
+
+shopping_page (search & filter) - in this code there is an option to filter the products according to their category. I need it to show only products that are matching the category. I also need it to work with the sorting in this page. Implement every sort in the drop down menu. Use fetch and give the complete codes that are needed to be changed.
+
+otp (hide resend button) - This is a ejs file and it loads after the program the has send a otp to the user's email. so when this page loads I want block the resend button until the countdown has reached zero, the user should not be able to click it. after the countdown has reached zero I want to block submit button so the user can't click it. Then implement the logic to send the otp using fetch. Provide me the complete codes of ejs file. I will attach the routes and controller down below. give me the routes that i must add if there are any changes to be made to the controllers.
+
+addtocart from landing page - In this page when the user clicks the add-to-cart a tag, if there is user it should go to the add the product id to the products in the cart model. After that it should reload the page.

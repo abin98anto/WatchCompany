@@ -1,0 +1,102 @@
+<%- include('../partials/header.ejs') %> <%-
+include('../partials/page_header.ejs') %>
+
+<main class="main d-flex" style="flex-direction: column">
+  <!-- breadcrumbs -->
+  <div class="page-header breadcrumb-wrap pb-5 pt-5">
+    <div class="container">
+      <div class="breadcrumb" style="height: 10px">
+        <a href="/" rel="nofollow">Home</a>
+        <span>Account</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- side menu -->
+  <div>
+    <div class="row">
+      <div>
+        <div class="dashboard-menu">
+          <ul
+            class="nav text-center"
+            style="justify-content: center"
+            role="tablist"
+          >
+            <li class="nav-item text-center">
+              <a
+                class="nav-link"
+                id="account-detail-tab"
+                href="/my_profile"
+                ><i class="fi-rs-user mr-10 text-center"></i>Account details</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="account-detail-tab" href="/my_address"
+                ><i class="fi-rs-marker mr-10"></i>My Address</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="account-detail-tab" href="/my_orders"
+                ><i class="fi-rs-shopping-bag mr-10"></i>Orders</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="account-detail-tab" href="/my_wallet"
+                style="background-color: black; color: white"
+                ><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" fillRule="evenodd" d="M20 9c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zm-2 0V6H4v12h14v-3h-2c-1.1 0-2-1.1-2-2v-1.968C14 9.9 14.9 9 16 9zm-2 4h2v-2h-2z"></path></svg></i>Wallet</a
+              >
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" class="nav-link" href="/logout"
+                ><i class="fi-rs-sign-out mr-10"></i>Logout</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="pt-20 pb-10" style="height: 800px">
+    <!-- main menu -->
+    <h3 class="text-center pt-20 pb-20">Current Balance: <span style="color: greenyellow;">$3000</span></h3>
+    <div class="container">
+      <div class="col-lg-7 m-auto">
+        <div class="card">
+            <div class="card-header text-center">
+                <h5 class="mb-0 ">Your Wallet History</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table text-center">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                <tr>
+                                  <td>#1357</td>
+                                  <td>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Praesentium autem fugit omnis ea deserunt, iusto cumque consectetur, nam esse error sapiente cum numquam. Eaque.</td>
+                                  <td>March 45, 2020</td>
+                                  <td>Processing</td>
+                                  <td>$125.00</td>
+                                  
+                                </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/page_footer.ejs') %> <%-
+include('../partials/footer.ejs')%>

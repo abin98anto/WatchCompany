@@ -44,8 +44,6 @@
           style="background-color: black"
           onmouseover="this.style.opacity='0.8'"
           onmouseout="this.style.opacity='1'"
-          id="submitBtn"
-          disabled
         >
           Submit
         </button>
@@ -56,7 +54,6 @@
           style="background-color: black"
           onmouseover="this.style.opacity='0.8'"
           onmouseout="this.style.opacity='1'"
-          disabled
         >
           Resend
         </button>
@@ -64,12 +61,14 @@
     </div>
   </div>
 
-  <script>
-    let countdown = 20;
+  <!-- <script>
+    // Set timer for 2 minutes
+    let countdown = 120;
     const timerDisplay = document.getElementById("timer");
     const submitButton = document.getElementById("submitBtn");
     const resendButton = document.getElementById("resendBtn");
 
+    // Function to start the timer
     function startTimer() {
       let minutes, seconds;
 
@@ -85,8 +84,8 @@
         if (--countdown < 0) {
           clearInterval(timer);
           timerDisplay.textContent = "Time's up!";
-          submitButton.disabled = true;
-          resendButton.disabled = false;
+          submitButton.style.display = "none";
+          resendButton.style.display = "block";
         }
       }, 1000);
     }
@@ -109,9 +108,6 @@
           if (data.success) {
             displayMessage("New OTP sent successfully!", "text-success");
             countdown = 120;
-            startTimer();
-            submitButton.disabled = false;
-            resendButton.disabled = true;
           } else {
             displayMessage(
               "Failed to resend OTP. Please try again later.",
@@ -128,24 +124,39 @@
         });
     });
 
-    document.getElementById("otpInput").addEventListener("input", function () {
-      submitButton.disabled = this.value.trim() === "";
-    });
-
+    // Form submission handling
     document
       .getElementById("otpForm")
       .addEventListener("submit", function (event) {
         event.preventDefault();
+
+        // Check if countdown has reached zero
+        if (countdown <= 0) {
+          displayMessage(
+            "The timer has expired. Please try resending the OTP.",
+            "text-danger"
+          );
+          return;
+        }
+
         const enteredOTP = document.getElementById("otpInput").value;
-        fetch("/otp", {
+        if (enteredOTP.trim() === "") {
+          displayMessage("Please enter the OTP.", "text-danger");
+          return;
+        }
+        fetch("http://localhost:4000/otp", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ otp: enteredOTP }),
+          body: JSON.stringify({ otp: enteredOTP }), // Use 'otp' as the key
         })
-          .then((response) => response.json())
+          .then((response) => {
+            console.log(`the first then`);
+            return response.json(); // Add 'return' here
+          })
           .then((data) => {
+            console.log("fetch data", data);
             if (data.success) {
               displayMessage("OTP verification successful!", "text-success");
               setTimeout(() => {
@@ -158,6 +169,7 @@
               );
             }
           })
+
           .catch((error) => {
             console.error("Error:", error);
             displayMessage(
@@ -167,11 +179,12 @@
           });
       });
 
+    // Function to display OTP verification status message
     function displayMessage(message, className) {
       const otpStatusElement = document.getElementById("otpStatus");
       otpStatusElement.textContent = message;
       otpStatusElement.className = className;
     }
-  </script>
+  </script> -->
 </div>
 <%- include('../partials/footer.ejs') %>

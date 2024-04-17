@@ -48,9 +48,14 @@
                 </div>
               </li>
 
+              <!-- Shop page -->
+              <li>
+                <a href="/shop">Shop</a>
+              </li>
+
               <!-- Contact page -->
               <li>
-                <a href="page-contact.html">Contact</a>
+                <a href="#">Contact</a>
               </li>
             </ul>
           </nav>
@@ -79,7 +84,7 @@
 
             <!-- Cart -->
             <div class="header-action-icon-2">
-              <a class="mini-cart-icon" href="shop-cart.html">
+              <a class="mini-cart-icon" href="/cart">
                 <img
                   alt="Watch Company"
                   src="/user_assets/imgs/theme/icons/icon-cart.svg"
@@ -105,15 +110,15 @@
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  <i class="material-icons align-middle">account_circle</i> <%=
-                  user.name %>
+                  <i class="material-icons align-middle">account_circle</i>
+                  <span id="headerUserName"><%= user.name %></span>
                 </a>
                 <ul
                   class="dropdown-menu text-center"
                   aria-labelledby="userDropdown"
                 >
                   <li>
-                    <a class="dropdown-item" href="/settings">Settings</a>
+                    <a class="dropdown-item" href="/my_profile">Settings</a>
                   </li>
                   <li><a class="dropdown-item" href="/logout">Logout</a></li>
                 </ul>

@@ -137,10 +137,13 @@
                   Create category
                 </button>
               </div>
+              <div>
+                <% if (message) { %>
+                <p style="color: red"><%= message %></p>
+                <% } %>
+              </div>
             </form>
           </div>
-          <!-- End of the Create Category Section -->
-          <!-- Existing Category Table. -->
           <div class="col-md-9">
             <div class="table-responsive">
               <table class="table table-hover" id="categoryTable">
@@ -191,47 +194,6 @@
                             </button>
                           </form>
                         </li>
-                        <!-- <li>
-                          <% if (category.isUnlisted === false) { %>
-                          <form
-                            action="/admin/unlist?id=<%= category._id %>"
-                            method="get"
-                          >
-                            <input
-                              type="hidden"
-                              name="id"
-                              value="<%= category._id %>"
-                            />
-                            <button
-                              type="submit"
-                              class="btn btn-danger"
-                              style="width: 80px; font-size: smaller"
-                            >
-                              <i
-                                class="material-icons md-playlist_add_check"
-                              ></i>
-                              Unlist
-                            </button>
-                          </form>
-                          <% } else { %>
-                          <form>
-                            <input
-                              type="hidden"
-                              name="id"
-                              value="<%= category._id %>"
-                            />
-                            <button
-                              id="delete-button"
-                              type="submit"
-                              class="btn btn-success"
-                              style="width: 80px; font-size: small"
-                            >
-                              <i class="material-icons md-playlist_add"></i>
-                              List
-                            </button>
-                          </form>
-                          <% } %>
-                        </li> -->
                         <li>
                           <% if (category.isUnlisted === false) { %>
                           <form>

@@ -1,22 +1,81 @@
 const User = require("../models/userModel");
 
 // Render User Management page.
+// const loadUserManagement = async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const pageSize = 5;
+//     // if (req.session.adminData) {
+//     console.log(`Rendering User Management.`);
+//     const users = await User.find({ isAdmin: 0 })
+//       .sort({
+//         createdOn: -1,
+//       })
+//       .skip((page - 1) * pageSize)
+//       .limit(pageSize);
+//     const totalUsers = await User.countDocuments({ isAdmin: 0 });
+//     const totalPages = Math.ceil(totalUsers / pageSize);
+//     const hasPreviousPage = page > 1;
+//     const hasNextPage = page < totalPages;
+//     res.render("user_management", {
+//       users: users,
+//       currentPage: page,
+//       totalPages,
+//       hasPreviousPage,
+//       hasNextPage,
+//     });
+//     // } else {
+//     // console.log(`Couldn't Render User Management.`);
+//     // res.redirect("/admin/");
+//     // }
+//   } catch (error) {
+//     res.send(`Error Rendering User Management.`);
+//   }
+// };
+// const loadUserManagement = async (req, res) => {
+//   try {
+//     // if (req.session.adminData) {
+//     console.log(`Rendering User Management.`);
+//     const users = await User.find({ isAdmin: 0 }).sort({
+//       createdOn: -1,
+//     });
+//     res.render("user_management", {
+//       users: users,
+//     });
+//     // } else {
+//     // console.log(`Couldn't Render User Management.`);
+//     // res.redirect("/admin/");
+//     // }
+//   } catch (error) {
+//     res.send(`Error Rendering User Management.`);
+//   }
+// };
 const loadUserManagement = async (req, res) => {
   try {
-    if (req.session.adminData) {
-      console.log(`Rendering User Management.`);
-      const users = await User.find({ isAdmin: 0 }).sort({
-        createdOn: -1,
-      });
-      res.render("user_management", { users: users });
-    } else {
-      console.log(`Couldn't Render User Management.`);
-      res.redirect("/admin/");
-    }
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 7;
+
+    const users = await User.find({ isAdmin: 0 })
+      .sort({ createdOn: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    const totalUsers = await User.countDocuments({ isAdmin: 0 });
+    const totalPages = Math.ceil(totalUsers / pageSize);
+
+    res.render("user_management", {
+      users: users,
+      currentPage: page,
+      totalPages,
+      hasPreviousPage: page>1, 
+      hasNextPage: page< totalPages,
+      usersPerPage: pageSize,
+    });
   } catch (error) {
     res.send(`Error Rendering User Management.`);
   }
 };
+
 
 // Block/ Unblock users.
 const toggleUserStatus = async (req, res) => {
@@ -38,41 +97,10 @@ const toggleUserStatus = async (req, res) => {
   }
 };
 
-// const blockUser = async (req, res) => {
-//   try {
-//     const userId = req.query.id;
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(404).send("User not found");
-//     }
-//     user.isBlocked = true;
-//     await user.save();
-//     res.status(200).send("User blocked successfully");
-//   } catch (error) {
-//     console.error("Error blocking user:", error);
-//     res.status(500).send("Internal server error");
-//   }
-// };
-// const unblockUser = async (req, res) => {
-//   try {
-//     const userId = req.query.id;
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(404).send("User not found");
-//     }
-//     user.isBlocked = false;
-//     await user.save();
-//     res.status(200).send("User unblocked successfully");
-//   } catch (error) {
-//     console.error("Error unblocking user:", error);
-//     res.status(500).send("Internal server error");
-//   }
-// };
-
 // Get users
 const getUsers = async (req, res) => {
   try {
-    console.log(`getting users.`);
+    // console.log(`getting users.`);
     const users = await User.find({ isAdmin: 0 }).sort({
       createdOn: -1,
     });

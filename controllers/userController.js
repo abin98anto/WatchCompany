@@ -6,11 +6,12 @@ require("dotenv").config();
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 const User = require("../models/userModel");
+const Cart = require("../models/cartModel");
 
 // hash password function.
 const hashPassword = async (password) => {
   try {
-    console.log(`Hashing Password.`);
+    // console.log(`Hashing Password.`);
     const salt = await bcrypt.genSalt(10);
     const sPassword = await bcrypt.hash(password, salt);
     return sPassword;
@@ -21,7 +22,7 @@ const hashPassword = async (password) => {
 // check if user exists function.
 const checkEmail = async (req, res) => {
   try {
-    console.log(`Checking If Email Exists in DB.`);
+    // console.log(`Checking If Email Exists in DB.`);
     const { email } = req.body;
     const userFound = await User.findOne({ email });
     res.json({ exists: !!userFound });
@@ -32,7 +33,7 @@ const checkEmail = async (req, res) => {
 };
 // generate OTP function.
 const generateOTP = (length) => {
-  console.log(`Generating OTP.`);
+  // console.log(`Generating OTP.`);
   const digits = "0123456789";
   let OTP = "";
   for (let i = 0; i < length; i++) {
@@ -44,18 +45,16 @@ const generateOTP = (length) => {
 // to load sign up page.
 const loadSignUp = async (req, res) => {
   try {
-    console.log(`Loading Signup Page.`);
-    // if (!req.session.adminData) {
-    const categories = await Category.find({ isUnlisted: false });
+    const user = await User.findById(req.session.userData);
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
     console.log(`rendering signup page`);
     res.render("signup", {
       categories: categories,
-      user: req.session.userData,
+      user: user,
     });
-    // } else {
-    // console.log(`User Already Logged in. Redirecting To Home.`);
-    // res.redirect("/home");
-    // }
   } catch (error) {
     res.sending(`Error Loading Signup Page.`);
   }
@@ -64,9 +63,9 @@ const loadSignUp = async (req, res) => {
 // to send OTP.
 const sendOTP = async (req, res) => {
   try {
-    console.log(`Sending OTP To User Email.`);
+    // console.log(`Sending OTP To User Email.`);
     let { username, email, password, confirm_password } = req.body;
-    console.log(`sending the otp to ${email}`);
+    // console.log(`sending the otp to ${email}`);
     req.session.formData = { username, email, password, confirm_password };
 
     let newOTP = generateOTP(6);
@@ -111,8 +110,9 @@ const sendOTP = async (req, res) => {
         res.status(500).send("Error sending email.The errror is");
       } else {
         console.log("Email sent successfully!");
-        console.log("Message ID:", info.messageId);
+        // console.log("Message ID:", info.messageId);
         req.session.newOTP = newOTP;
+        req.session.email = email;
         res.render("otp");
       }
     });
@@ -123,7 +123,7 @@ const sendOTP = async (req, res) => {
 
 // to verify OTP.
 const verifyOTP = async (req, res) => {
-  console.log(`Verifying OTP.`);
+  // console.log(`Verifying OTP.`);
   try {
     const enteredOTP = req.body.otp;
     const generatedOTP = req.session.newOTP;
@@ -150,9 +150,10 @@ const verifyOTP = async (req, res) => {
 // to resend OTP.
 const resendOTP = async (req, res) => {
   try {
-    const { email } = req.session.formData;
+    const { email } = req.session.email;
     console.log(`Resending OTP To ${email}`);
     const newOTP = generateOTP(6);
+    console.log(`resended otp : ${newOTP}`);
     req.session.newOTP = newOTP;
 
     const transporter = nodemailer.createTransport({
@@ -168,7 +169,7 @@ const resendOTP = async (req, res) => {
 
     const mailOptions = {
       from: process.env.AUTH_EMAIL,
-      to: req.body.email,
+      to: req.session.email,
       subject: "Welcome to Watch Company! Verify your Account",
       preheader: "Complete your registration and unlock exclusive benefits.",
       text: `This is a verification email sent from Watch Company.`,
@@ -207,13 +208,14 @@ const resendOTP = async (req, res) => {
 // to load login page.
 const loadLogin = async (req, res) => {
   try {
+    const user = await User.findById(req.session.userData);
     const categories = await Category.find({ isUnlisted: false });
     // if (!req.session.userData) {
-    console.log(`Rendering Login Page.`);
+    // console.log(`Rendering Login Page.`);
     res.render("login", {
       message: "",
       categories: categories,
-      user: req.session.userData,
+      user: user,
     });
     // } else {
     // console.log(`Couldn't Render Login Page.`);
@@ -228,16 +230,20 @@ const loadLogin = async (req, res) => {
 const loadLandingPage = async (req, res) => {
   try {
     console.log(`Rendering Landing Page.`);
-
+    const user = await User.findById(req.session.userData);
+    const cart = await Cart.findById(req.session.userData);
+    // console.log('landing',users);
     const products = await Product.find({ isUnlisted: false });
     const categories = await Category.find({
       isUnlisted: false,
       isDeleted: false,
     });
+    // console.log(categories);
     res.render("landing_page", {
       categories: categories,
       products: products,
-      user: req.session.userData,
+      user: user,
+      cart: cart,
     });
   } catch (error) {
     res.send(`Error Rendering Landing Page.`);
@@ -247,26 +253,37 @@ const loadLandingPage = async (req, res) => {
 // to check login credentials.
 const verifyLogin = async (req, res) => {
   try {
-    console.log(`Verifying User Login Credentials.`);
+    // console.log(`Verifying User Login Credentials.`);
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
-    const categories = await Category.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
     const message = "Username or password is incorrect.";
 
     if (!user) {
-      console.log(`No User Found!`);
-      res.render("login", { message: message });
+      // console.log(`No User Found!`);
+      res.render("login", {
+        message: message,
+        categories: categories,
+        user: req.user.userData,
+      });
     } else {
-      console.log(`User Found.`);
+      // console.log(`User Found.`);
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (passwordMatch && user.isAdmin == 0) {
-        console.log(`User Password Matched.`);
-        req.session.userData = user;
+        // console.log(`User Password Matched.`);
+        req.session.userData = user._id;
         res.redirect("/");
       } else {
-        console.log(`Wrong Password.`);
+        // console.log(`Wrong Password.`);
         req.session.message = message;
-        res.render("login", { message: message, categories: categories });
+        res.render("login", {
+          message: message,
+          categories: categories,
+          user: req.user.userData,
+        });
       }
     }
   } catch (error) {
@@ -279,7 +296,7 @@ const verifyLogin = async (req, res) => {
 // to logout user.
 const logoutUser = async (req, res) => {
   try {
-    console.log(`Logging Out ${req.session.userData.name}`);
+    console.log(`Logging Out ${req.session.userData}`);
     req.session.userData = null;
     res.redirect("/");
   } catch (error) {
@@ -294,13 +311,18 @@ const loadProduct = async (req, res) => {
     console.log(`loading single product page.`);
     const id = req.query.id;
     // console.log(`id: ${id}`);
+    const user = await User.findById(req.session.userData);
+
     const product = await Product.findOne({ isUnlisted: false, _id: id });
     // console.log(`product ${product.name}`);
-    const categories = await Category.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
     res.render("product_page", {
       product: product,
       categories: categories,
-      user: req.session.userData,
+      user: user,
     });
   } catch (error) {
     console.log(`errr loading single product page.`);
@@ -311,18 +333,359 @@ const loadProduct = async (req, res) => {
 // load shop.
 const loadShop = async (req, res) => {
   try {
-    const product = await Product.find({ isUnlisted: false });
+    const user = await User.findById(req.session.userData);
+    let products;
     const categories = await Category.find({
       isUnlisted: false,
       isDeleted: false,
     });
+
+    if (req.query.category) {
+      products = await Product.find({
+        category: req.query.category,
+        isUnlisted: false,
+      });
+    } else {
+      products = await Product.find({ isUnlisted: false });
+    }
     res.render("shopping_page", {
-      product: product,
+      products: products,
       categories: categories,
-      user: req.session.userData,
+      user: user,
     });
   } catch (error) {
     console.log(`error rendering shop page.`);
+  }
+};
+
+// filter category.
+const filterCategory = async (req, res) => {
+  console.log(`filtering category.`);
+  const category = req.params.category;
+  try {
+    const user = await User.findById(req.session.userData);
+    const products = await Product.find({ category: category }).lean();
+    const categories = await Category.find().lean();
+    console.log(products);
+    console.log(categories);
+    res.render("shopping_page", {
+      products: products,
+      categories: categories,
+      user: user,
+    });
+  } catch (err) {
+    console.error(`Error filtering category: ${err}`);
+    res.status(500).send("Error filtering category");
+  }
+};
+
+// cart page.
+const loadCart = async (req, res) => {
+  console.log(`loading cart.`);
+  try {
+    const user = await User.findById(req.session.userData);
+    const products = await Product.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
+    res.render("cart", {
+      categories: categories,
+      products: products,
+      user: user,
+    });
+  } catch (error) {
+    console.log(`error loading cart page.`);
+  }
+};
+
+// Render profile Page.
+const loadMyProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.userData);
+    console.log(user.name);
+    console.log(`loading my_profile.`);
+    const products = await Product.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
+    res.render("my_profile", {
+      categories: categories,
+      products: products,
+      user: user,
+    });
+  } catch (error) {
+    console.log(`Error loading setting.`);
+  }
+};
+
+// change the Profile details.
+const updateProfile = async (req, res) => {
+  try {
+    const { name, email, id } = req.body;
+    // console.log(`name : ${name} and email: ${email} and id: `);
+    // console.log(req.body);
+    const user = await User.findByIdAndUpdate(id, { name: name, email: email });
+    // console.log(`user of hoi : ${user}`);
+    if (user) {
+      req.session.userData = user._id;
+      res.redirect("/my_profile");
+    } else {
+      res.status(404).json({ success: false, error: "User not found" });
+    }
+  } catch (error) {
+    console.error(`Error updating Profile: ${error.message}`);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+// Render my_address.
+const loadMyAddress = async (req, res) => {
+  try {
+    console.log(`loading setting.`);
+    const user = await User.findById(req.session.userData);
+    const products = await Product.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
+    res.render("my_address", {
+      categories: categories,
+      products: products,
+      user: user,
+    });
+  } catch (error) {
+    console.log(`Error Loading my_orders`);
+  }
+};
+
+// Add address
+const addAddress = async (req, res) => {
+  try {
+    console.log(`adding new address.`);
+
+    const {
+      houseName,
+      street,
+      city,
+      state,
+      country,
+      pincode,
+      phoneNumber,
+      addressType,
+    } = req.body;
+    try {
+      const user = await User.findById(req.session.userData);
+      user.address.push({
+        houseName,
+        street,
+        city,
+        state,
+        country,
+        pincode,
+        phoneNumber,
+        addressType,
+      });
+      await user.save();
+
+      res.status(200).json({ message: "Address added successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Server Error");
+    }
+  } catch (error) {
+    console.log(`error adding new address.`);
+  }
+};
+
+// Update address.
+// const updateAddress = async (req, res) => {
+//   try {
+//     console.log(`updating address`);
+//     const addressId = req.params.addressId;
+//     // Extract updated address details from request body
+//     const {
+//       houseName,
+//       street,
+//       city,
+//       state,
+//       country,
+//       pincode,
+//       phoneNumber,
+//       addressType,
+//     } = req.body;
+
+//     // Find the address by ID and update its details
+//     await User.address.findByIdAndUpdate(addressId, {
+//       houseName,
+//       street,
+//       city,
+//       state,
+//       country,
+//       pincode,
+//       phoneNumber,
+//       addressType,
+//     });
+
+//     // Respond with success message
+//     res.status(200).json({ message: "Address updated successfully" });
+//   } catch (error) {
+//     // Handle errors
+//     console.error("Error updating address:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+// Update address.
+// const updateAddress = async (req, res) => {
+//   try {
+//     console.log(`updating address`);
+//     console.log(`userid: ${req.session.userData}`);
+//     const i = document.getElementById("i");
+//     const user = await User.findById(req.session.userData);
+//     const addressId = user.address[i]._id;
+//     console.log(`address id: ${addressId}`);
+//     // Extract updated address details from request body
+//     const {
+//       houseName,
+//       street,
+//       city,
+//       state,
+//       country,
+//       pincode,
+//       phoneNumber,
+//       addressType,
+//     } = req.body;
+
+//     // Find the user and update the address by ID
+//     await user.address.findByIdAndUpdate(
+//       { id },
+//       {
+//         $set: {
+//           houseName: houseName,
+//           street: street,
+//           city: city,
+//           state: state,
+//           country: country,
+//           pincode: pincode,
+//           phoneNumber: phoneNumber,
+//           addressType: addressType,
+//         },
+//       }
+//     );
+//     // await User.findOneAndUpdate(
+//     //   { "address._id": addressId },
+//     //   {
+//     //     $set: {
+//     //       "address.$.houseName": houseName,
+//     //       "address.$.street": street,
+//     //       "address.$.city": city,
+//     //       "address.$.state": state,
+//     //       "address.$.country": country,
+//     //       "address.$.pincode": pincode,
+//     //       "address.$.phoneNumber": phoneNumber,
+//     //       "address.$.addressType": addressType,
+//     //     },
+//     //   }
+//     // );
+
+//     // Respond with success message
+//     res.status(200).json({ message: "Address updated successfully" });
+//   } catch (error) {
+//     // Handle errors
+//     console.error("Error updating address:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+const updateAddress = async (req, res) => {
+  try {
+    console.log(`updating address`);
+    console.log(`userid: ${req.session.userData}`);
+
+    const {
+      addressId,
+      houseName,
+      street,
+      city,
+      state,
+      country,
+      pincode,
+      phoneNumber,
+      addressType,
+    } = req.body;
+
+    // Find the user and update the address by ID
+    const user = await User.findById(req.session.userData);
+    const addressIndex = user.address.findIndex(
+      (address) => address._id === addressId
+    );
+    console.log("address index:", addressIndex);
+    console.log(`old address: ${user.address[addressIndex]}`);
+    if (addressIndex !== -1) {
+      // Update the address details
+      user.address[addressIndex] = {
+        _id: addressId,
+        houseName,
+        street,
+        city,
+        state,
+        country,
+        pincode,
+        phoneNumber,
+        addressType,
+      };
+
+      await user.save();
+      console.log(`new address: ${user.address[addressIndex]}`);
+      // Respond with success message
+      return res.status(200).json({ message: "Address updated successfully" });
+    } else {
+      return res.status(404).json({ error: "Address not found" });
+    }
+  } catch (error) {
+    // Handle errors
+    console.error("Error updating address:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Render my_orders
+const loadMyOrders = async (req, res) => {
+  try {
+    console.log(`loading my_orders.`);
+    const user = await User.findById(req.session.userData);
+    const products = await Product.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
+    res.render("my_orders", {
+      categories: categories,
+      products: products,
+      user: user,
+    });
+  } catch (error) {
+    console.log(`Error loading my_orders`);
+  }
+};
+
+// Render my_wallet
+const loadMyWallet = async (req, res) => {
+  try {
+    console.log(`loading my_wallet.`);
+    const user = await User.findById(req.session.userData);
+    const products = await Product.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
+    res.render("my_wallet", {
+      categories: categories,
+      products: products,
+      user: user,
+    });
+  } catch (error) {
+    console.log(`Error loading my_wallet.`);
   }
 };
 
@@ -338,4 +701,13 @@ module.exports = {
   logoutUser,
   loadProduct,
   loadShop,
+  filterCategory,
+  loadCart,
+  loadMyProfile,
+  loadMyAddress,
+  loadMyWallet,
+  loadMyOrders,
+  updateProfile,
+  addAddress,
+  updateAddress,
 };

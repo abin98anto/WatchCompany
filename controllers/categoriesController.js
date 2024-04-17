@@ -4,16 +4,19 @@ const Product = require("../models/productModel");
 // Render Category Management Page.
 const loadCategoryManagement = async (req, res) => {
   try {
-    if (req.session.adminData) {
-      console.log(`Loading Category Management.`);
-      const categories = await Category.find({ isDeleted: false }).sort({
-        createdOn: -1,
-      });
-      res.render("category_management", { categories: categories });
-    } else {
-      console.log(`Couldn't Load Category Mangement.`);
-      res.redirect("/admin/");
-    }
+    // if (req.session.adminData) {
+    // console.log(`Loading Category Management.`);
+    const categories = await Category.find({ isDeleted: false }).sort({
+      createdOn: -1,
+    });
+    res.render("category_management", {
+      categories: categories,
+      message: "",
+    });
+    // } else {
+    // console.log(`Couldn't Load Category Mangement.`);
+    // res.redirect("/admin/");
+    // }
   } catch (error) {
     res.send(`Error Loading Category Mangement.`);
   }
@@ -22,7 +25,7 @@ const loadCategoryManagement = async (req, res) => {
 // Get Categories
 const getCategories = async (req, res) => {
   try {
-    console.log(`getting categories.`);
+    // console.log(`getting categories.`);
     const categories = await Category.find({ isDeleted: false }).sort({
       createdOn: -1,
     });
@@ -35,13 +38,14 @@ const getCategories = async (req, res) => {
 // Add Category to Database.
 const addCategory = async (req, res) => {
   try {
-    console.log(`Adding A New Category to DB.`);
+    // console.log(`Adding A New Category to DB.`);
     const { category_name } = req.body;
     const cat_name =
       category_name.charAt(0).toUpperCase() +
       category_name.slice(1).toLowerCase();
     const catFound = await Category.findOne({
       name: cat_name,
+      isDeleted: false,
     });
     if (!catFound) {
       const newCategory = new Category({
@@ -49,8 +53,16 @@ const addCategory = async (req, res) => {
         createdOn: Date.now(),
       });
       await newCategory.save();
+      res.redirect("/admin/category_management");
+    } else {
+      const categories = await Category.find({ isDeleted: false }).sort({
+        createdOn: -1,
+      });
+      res.render("category_management", {
+        categories: categories,
+        message: "Category already exists.",
+      });
     }
-    res.redirect("/admin/category_management");
   } catch (error) {
     console.error("Error Adding Category:", error);
     res.status(500).send("Error Adding Category.");
@@ -60,7 +72,7 @@ const addCategory = async (req, res) => {
 // Unlist/List Category.
 const toggleCategoryStatus = async (req, res) => {
   try {
-    console.log(`Toggling Category Status.`);
+    // console.log(`Toggling Category Status.`);
     let id = req.query.id;
     const category = await Category.findById(id);
     // const products = await Product.find({});
@@ -69,10 +81,10 @@ const toggleCategoryStatus = async (req, res) => {
       return;
     }
     const products = await Product.find({});
-    console.log(products);
+    // console.log(products);
     products.forEach((product) => {
       if (product.category == category.name.toLowerCase()) {
-        console.log(product.name);
+        // console.log(product.name);
         product.isUnlisted = !product.isUnlisted;
         product.save();
       }
@@ -80,8 +92,8 @@ const toggleCategoryStatus = async (req, res) => {
     category.isUnlisted = !category.isUnlisted;
     await category.save();
     await Product.updateMany(
-      { category: category._id }, // Filter products by category
-      { $set: { isUnlisted: category.isUnlisted } } // Set isUnlisted to the new value
+      { category: category._id },
+      { $set: { isUnlisted: category.isUnlisted } }
     );
     res.status(200).send("Category Status Togglling successfully");
   } catch (error) {
@@ -93,7 +105,7 @@ const toggleCategoryStatus = async (req, res) => {
 // Edit Categories.
 const editCategory = async (req, res) => {
   try {
-    console.log(`Making Changes To A Category.`);
+    // console.log(`Making Changes To A Category.`);
     let id = req.query.id;
     let { new_name } = req.body;
     await Category.updateOne({ _id: id }, { $set: { name: new_name } });
@@ -107,9 +119,10 @@ const editCategory = async (req, res) => {
 // Delete Categories.
 const deleteCategory = async (req, res) => {
   const categoryId = req.query.id;
-  console.log(`deleting a category`);
+  // console.log(`deleting a category`);
   try {
     await Category.findByIdAndUpdate(categoryId, { isDeleted: true });
+    await Category.findByIdAndUpdate(categoryId, { isUnlisted: true });
     res.status(200).send("Category deleted successfully");
   } catch (error) {
     console.error("Error:", error);

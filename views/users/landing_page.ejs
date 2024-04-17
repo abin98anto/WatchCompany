@@ -1,6 +1,14 @@
 <%- include('../partials/header.ejs') %> <%-
 include('../partials/page_header.ejs') %>
 
+<style>
+  .product-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+
 <main class="main">
   <!-- slider section-->
   <div
@@ -145,7 +153,7 @@ include('../partials/page_header.ejs') %>
                     ><%= products[i].category %></a
                   >
                 </div>
-                <h2>
+                <h2 class="product-name">
                   <a href="/load_product?id=<%= products[i].id %>"
                     ><%= products[i].name %></a
                   >
@@ -206,7 +214,7 @@ include('../partials/page_header.ejs') %>
       </div>
       <div class="row product-grid-4">
         <div class="row product-grid-4">
-          <% for (let i=products.length-1; i>=2; i--) { %>
+          <% for (let i=0; i<8; i++) { %>
           <div class="col-lg-3 col-md-4 col-12 col-sm-6">
             <div class="product-cart-wrap mb-30">
               <div class="product-img-action-wrap">
@@ -226,20 +234,14 @@ include('../partials/page_header.ejs') %>
                     />
                   </a>
                 </div>
-                <div class="product-action-1">
-                  <a
-                    aria-label="Add To Wishlist"
-                    class="action-btn hover-up"
-                    href="#"
-                    ><i class="fi-rs-heart"></i
-                  ></a>
-                </div>
               </div>
               <div class="product-content-wrap">
                 <div class="product-category">
-                  <a href="#"><%= products[i].category %></a>
+                  <a href="/load_product?id=<%= products[i]._id %>"
+                    ><%= products[i].category %></a
+                  >
                 </div>
-                <h2>
+                <h2 class="product-name">
                   <a href="/load_product?id=<%= products[i].id %>"
                     ><%= products[i].name %></a
                   >
@@ -252,14 +254,31 @@ include('../partials/page_header.ejs') %>
                 <div class="product-price">
                   <span>$ <%= products[i].price %> </span>
                   <!-- <span class="old-price">$245.8</span> -->
-                </div>
-                <div class="product-action-1 show">
-                  <a
-                    aria-label="Add To Cart"
-                    class="action-btn hover-up"
-                    href="#"
-                    ><i class="fi-rs-shopping-bag-add"></i
-                  ></a>
+                  <div class="product-action-1 show">
+                    <% if (user) { %>
+                    <!-- <button class="add-to-cart"> -->
+                    <a
+                      aria-label="Add To Cart"
+                      class="action-btn hover-up"
+                      href="#"
+                      ><i class="fi-rs-check"></i
+                    ></a>
+                    <!-- </button> -->
+                    <% } else { %>
+                    <a
+                      aria-label="Add To Cart"
+                      class="action-btn hover-up"
+                      href="/login"
+                      ><i class="fi-rs-shopping-bag-add"></i
+                    ></a>
+                    <% } %>
+                    <a
+                      aria-label="Add To Wishlist"
+                      class="action-btn hover-up"
+                      href="#"
+                      ><i class="fi-rs-heart"></i
+                    ></a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -269,7 +288,7 @@ include('../partials/page_header.ejs') %>
       </div>
       <div class="text-center">
         <button class="btn" style="background-color: black">
-          View All Products
+          <a href="/shop" style="color: white">View All Products</a>
         </button>
       </div>
     </div>
@@ -332,7 +351,6 @@ include('../partials/page_header.ejs') %>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <!-- Slider logic -->
-
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     let carouselItems = document.querySelectorAll(".carousel-item");
@@ -369,7 +387,7 @@ include('../partials/page_header.ejs') %>
   });
 </script>
 
-<!-- Bestseller logic -->
+<!-- Bestseller logic : "not working" -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     // Function to load products based on category
@@ -427,6 +445,44 @@ include('../partials/page_header.ejs') %>
 
     // By default, load products for Men
     loadProducts("Men");
+  });
+</script>
+
+<!-- Add to cart logic -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Add event listener to all "Add to Cart" buttons
+    const addToCartButtons = document.querySelectorAll(".action-btn");
+    addToCartButtons.forEach((button) => {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        const productId = button.dataset.productId;
+        addToCart(productId);
+      });
+    });
+
+    // Function to add product to cart
+    function addToCart(productId) {
+      // Send a POST request to your server to add the product ID to the cart
+      fetch("/add_to_cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId: productId }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          // Reload the page upon successful addition to the cart
+          // location.reload();
+          response.redirect("/my_address");
+        })
+        .catch((error) => {
+          console.error("Error adding product to cart:", error);
+        });
+    }
   });
 </script>
 

@@ -1,16 +1,30 @@
-// If user userData exists in the session.
+// If user userData exists in the session go to the requested route or else take the user to user login. wishlist,cart,userprofile,
+const isLogin = async (req, res, next) => {
+  try {
+    if (req.session.userData) {
+      next();
+    } else {
+      res.redirect("/login");
+    }
+  } catch (error) {
+    console.log(`error checking isLogin.`);
+  }
+};
 
-const userDataPresent = async (req, res, next) => {
-  console.log(`reached userDataPresent middleware.`);
-  if (!req.session.userData) {
-    console.log(`no userData`);
-    next();
-  } else {
-    console.log(`userData present.`);
-    res.redirect("/home");
+// If there is userData the don't take the user to the requested route or else take the user to the requested route. signin, login.
+const isLogout = async (req, res, next) => {
+  try {
+    if (req.session.userData) {
+      res.redirect("/");
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.log(`error checking isLogout.`);
   }
 };
 
 module.exports = {
-  userDataPresent,
+  isLogin,
+  isLogout,
 };
