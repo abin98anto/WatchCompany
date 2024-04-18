@@ -226,6 +226,26 @@ const loadLogin = async (req, res) => {
   }
 };
 
+// load Forgot Password.
+const loadForgotPassword = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.userData);
+    const products = await Product.find({ isUnlisted: false });
+    const categories = await Category.find({
+      isUnlisted: false,
+      isDeleted: false,
+    });
+    res.render("forgot_password", {
+      categories: categories,
+      products: products,
+      message: "",
+      user: user,
+    });
+  } catch (error) {
+    console.log(`error rendering forgot password`);
+  }
+};
+
 // to load landing page.
 const loadLandingPage = async (req, res) => {
   try {
@@ -689,6 +709,101 @@ const loadMyWallet = async (req, res) => {
   }
 };
 
+// send otp to change password
+const passwordOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Generate OTP
+    const newOTP = generateOTP(6);
+    console.log(`The OTP is ${newOTP} to change the password.`);
+
+    // Store OTP and email in session
+    req.session.newOTP = newOTP;
+    req.session.email = email;
+
+    // Send OTP to the user's email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.AUTH_EMAIL,
+        pass: process.env.AUTH_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.AUTH_EMAIL,
+      to: email,
+      subject: "Reset Password OTP",
+      text: `Your OTP for resetting the password is: ${newOTP}`,
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+        return res.status(500).send("Error sending OTP email.");
+      } else {
+        console.log("OTP Email sent successfully!");
+        // Render OTP input form
+        // res.render("otp", { email });
+        res.status(200).send("OTP Email sent successfully!");
+      }
+    });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    res.status(500).send("Error sending OTP.");
+  }
+};
+
+// verify otp to change password
+const passwordVerifyOTP = async (req, res) => {
+  // console.log(`Verifying OTP.`);
+  try {
+    const enteredOTP = req.body.otp;
+    const generatedOTP = req.session.newOTP;
+
+    if (enteredOTP === generatedOTP) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false });
+    }
+  } catch (error) {
+    res.send(`Error Verifying OTP.`);
+  }
+};
+
+// change password.
+const changePassword = async (req, res) => {
+  try {
+    const { email } = req.session;
+    const { newPassword } = req.body;
+
+    // Hash the new password
+    const hashedPassword = await hashPassword(newPassword);
+
+    // Find the user by email and update the password
+    const updatedUser = await User.findOneAndUpdate(
+      { email: email },
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Password updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   loadSignUp,
   loadLogin,
@@ -710,4 +825,8 @@ module.exports = {
   updateProfile,
   addAddress,
   updateAddress,
+  loadForgotPassword,
+  passwordOTP,
+  passwordVerifyOTP,
+  changePassword,
 };

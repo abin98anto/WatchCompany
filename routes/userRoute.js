@@ -8,7 +8,7 @@ const cartController = require("../controllers/cartController");
 
 // Loads Landing Page.
 user_route.get("/", userController.loadLandingPage);
-user_route.post('/add_to_cart', cartController.addToCart);
+user_route.post("/add_to_cart", cartController.addToCart);
 
 // Signup Process.
 user_route.get("/signup", userAuth.isLogout, userController.loadSignUp);
@@ -20,6 +20,14 @@ user_route.post("/resend-otp", userController.resendOTP);
 // Login Process.
 user_route.get("/login", userAuth.isLogout, userController.loadLogin);
 user_route.post("/login", userController.verifyLogin);
+user_route.get(
+  "/forgot_password",
+  userAuth.isLogout,
+  userController.loadForgotPassword
+);
+user_route.post("/forgotPassword_otp", userController.passwordOTP);
+user_route.post("/forgotPassword_verifyotp", userController.passwordVerifyOTP);
+user_route.post("/updatePassword", userController.changePassword);
 
 // User Logout Function.
 user_route.get("/logout", userController.logoutUser);
