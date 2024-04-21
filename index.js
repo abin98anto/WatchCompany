@@ -9,6 +9,13 @@ mongoose.connect(process.env.MONGO_URL);
 const secretKey = process.env.SECRET_KEY;
 const nocache = require("nocache");
 
+// OAuth
+const authRoutes = require("./routes/auth-routes");
+const passportSetup = require("./config/passport-setup");
+const passport = require("passport");
+const cookieSession = require("cookie-session");
+const keys = require("./config/keys");
+
 const port = process.env.PORT || 3000;
 const app = express();
 
@@ -24,6 +31,17 @@ app.use(
   })
 );
 
+// app.use(
+//   cookieSession({
+//     maxAge: 24 * 60 * 60 * 1000,
+//     keys: keys.session.cookieKey,
+//   })
+// );
+
+// initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.set("view engine", "ejs");
 app.set("views", [
   path.join(__dirname, "views/users"),
@@ -34,26 +52,29 @@ app.set("views", [
 
 app.use(express.static(path.join(__dirname, "public")));
 
+// OAuth set up routes
+app.use("/auth", authRoutes);
+
 app.use("/", user_route);
 
 app.use("/admin", admin_route);
 
 // Middleware to handle undefined routes
-app.use((req, res, next) => {
-  const error = new Error("Not Found");
-  error.status = 404;
-  next(error);
-});
+// app.use((req, res, next) => {
+//   const error = new Error("Not Found");
+//   error.status = 404;
+//   next(error);
+// });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.log(req.url.split("/")[1]);
-  let url = "";
-  let folder = "";
-  req.url.split("/")[1] == "admin" ? (folder = "admin") : (folder = "user");
-  req.url.split("/")[1] == "admin" ? (url = "/admin") : (url = "/");
-  res.status(err.status || 500);
-  res.render("404", { error: err, url: url, folder: folder });
-});
+// // Error handling middleware
+// app.use((err, req, res, next) => {
+//   console.log(req.url.split("/")[1]);
+//   let url = "";
+//   let folder = "";
+//   req.url.split("/")[1] == "admin" ? (folder = "admin") : (folder = "user");
+//   req.url.split("/")[1] == "admin" ? (url = "/admin") : (url = "/");
+//   res.status(err.status || 500);
+//   res.render("404", { error: err, url: url, folder: folder });
+// });
 
 app.listen(port, () => console.log(`http://localhost:${port}`));

@@ -1,6 +1,7 @@
 <%- include('../partials/header.ejs') %> 
 <%-include('../partials/page_header.ejs') %>
 
+
 <main class="main d-flex" style="flex-direction: column">
   <!-- breadcrumbs -->
   <div class="page-header breadcrumb-wrap pb-5 pt-5">
@@ -48,7 +49,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link" class="nav-link" href="/logout"
+              <a class="nav-link" class="nav-link" href=<%= logout %>
                 ><i class="fi-rs-sign-out mr-10"></i>Logout</a
               >
             </li>
@@ -61,8 +62,9 @@
   <section class="pt-80 pb-30" style="height: 800px">
     <!-- main menu -->
     <div class="container">
-      <div class="col-lg-4 m-auto">
-        <div class="card">
+      <div class="col-lg-10 d-flex m-auto">
+        <!-- Edit name and email details -->
+        <div class="card mr-30">
           <div class="card-header text-center">
             <h5>Edit Account Details</h5>
           </div>
@@ -73,6 +75,7 @@
                   <label>Name</label>
                   <input
                     class="form-control square"
+                    id="nameInput"
                     name="name"
                     type="text"
                     value="<%= user.name %>"
@@ -83,14 +86,16 @@
                   <label>Email</label>
                   <input
                     class="form-control square"
+                    id="emailInput"
                     name="email"
-                    type="email"
+                    type="text"
                     value="<%= user.email %>"
                   />
                 </div>
                 <div class="col-md-12 text-center">
                   <button
                     type="submit"
+                    id="saveButton"
                     style="background-color: black"
                     class="btn btn-fill-out submit"
                   >
@@ -101,13 +106,175 @@
             </form>
           </div>
         </div>
+        <!-- Reset password -->
+        <div class="card">
+          <div class="card-header text-center">
+            <h5>Reset Password</h5>
+          </div>
+          <div class="card-body">
+            <form id="passwordForm">
+              <div class="row">
+                <div class="form-group col-md-12">
+                  <label>Old Password</label>
+                  <input
+                    class="form-control square"
+                    id="oldPassword"
+                    name="password"
+                    type="password"
+                  />
+                </div>
+                <input type="hidden" name="id" value="<%=  user._id  %>"/>
+                <div class="form-group col-md-12">
+                  <label>New Password</label>
+                  <input
+                    class="form-control square"
+                    id="newPassword"
+                    name="password"
+                    type="password"
+                  />
+                </div>
+                <div class="form-group col-md-12">
+                  <label>Confirm Password</label>
+                  <input
+                    class="form-control square"
+                    id="confirmPassword"
+                    name="password"
+                    type="password"
+                  />
+                </div>
+                <div class="col-md-12 text-center">
+                  <button
+                    type="submit"
+                    style="background-color: black"
+                    class="btn btn-fill-out submit"
+                  >
+                    Reset Password
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
-      <div id="profileToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-  <div class="toast-body"></div>
-</div>
     </div>
   </section>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// the edit profile section
+document.getElementById('profileForm').addEventListener('submit', async function(event) {
+  event.preventDefault();
+  
+  var nameInput = document.getElementById('nameInput').value.trim();
+  var emailInput = document.getElementById('emailInput').value.trim();
+
+  if (nameInput === '<%= user.name %>' && emailInput === '<%= user.email %>') {
+    Swal.fire("No Changes", "No changes were made.", "info");
+    return;
+  }
+  if (!nameInput || !emailInput) {
+    Swal.fire("Empty Fields", "Name and email cannot be empty.", "error");
+    return;
+  }
+  if (!/^[a-zA-Z\s]*$/.test(nameInput)) {
+    Swal.fire("Invalid Name", "Only alphabets are allowed in the name.", "error");
+    return;
+  }
+  if (!/^\S+@\S+\.\S+$/.test(emailInput)) {
+    Swal.fire("Invalid Email", "Please enter a valid email address.", "error");
+    return;
+  }
+
+  try {
+    const response = await fetch('/update_profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: nameInput,
+        email: emailInput,
+        id: '<%= user._id %>'
+      })
+    });
+
+    if (response.ok) {
+      window.location.href = '/my_profile';
+    } else {
+      throw new Error('Failed to update profile');
+    }
+  } catch (error) {
+    console.error(error);
+    Swal.fire("Error", "Failed to update profile", "error");
+  }
+});
+
+// Reset Password
+document.getElementById('passwordForm').addEventListener('submit', async function(event) {
+  event.preventDefault();
+  
+  var oldPassword = document.getElementById('oldPassword').value.trim();
+  var newPassword = document.getElementById('newPassword').value.trim();
+  var confirmPassword = document.getElementById('confirmPassword').value.trim();
+  console.log(`old: ${oldPassword}, new: ${newPassword}, confirm: ${confirmPassword}`);
+
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    Swal.fire("Empty Fields", "Input fields should not be empty.", "error");
+    return;
+  }
+  if (newPassword.length < 8) {
+    Swal.fire("Password Length", "Password must be at least 8 characters long.", "error");
+    return;
+  }
+  if (!/[A-Z]/.test(newPassword)) {
+    Swal.fire("Password Complexity", "Password must contain at least one capital letter.", "error");
+    return;
+  }
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+    Swal.fire("Password Complexity", "Password must contain at least one symbol.", "error");
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    Swal.fire("Password Mismatch", "New password and confirm password do not match.", "error");
+    return;
+  }
+
+  try {
+    const response = await fetch('/reset_password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+        id: '<%= user._id %>'
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      Swal.fire("Password Reset", "Password reset successfully!", "success");
+      document.getElementById('oldPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+    } else if (data.message === "Incorrect old password") {
+      Swal.fire("Wrong Password", "The old password you entered is incorrect.", "error");
+    } else {
+      throw new Error('Failed to reset password');
+    }
+  } catch (error) {
+    console.error(error);
+    Swal.fire("Error", "Failed to reset password", "error");
+  }
+});
+
+
+</script>
+
 
 
 <%- include('../partials/page_footer.ejs') %> <%-

@@ -6,8 +6,8 @@ include('../partials/page_header.ejs') %>
   <div class="page-header breadcrumb-wrap pb-5 pt-5" style="padding: 0px">
     <div class="container">
       <div class="breadcrumb">
-        <span><a href="/" rel="nofollow">Home</a></span> Pages
-        <span></span> Login / Register
+        <span><a href="/" rel="nofollow">Home</a></span>
+        <span>Login </span>
       </div>
     </div>
   </div>
@@ -15,19 +15,10 @@ include('../partials/page_header.ejs') %>
   <section style="background-color: black">
     <div class="container-fluid">
       <div class="row justify-content-center">
-        <!-- <div class="col-sm-6">
-          <div class="has-bg-img">
-            <img
-              src="/user_assets/imgs/sigup_login/login.png"
-              alt=""
-              style="width: 100%; height: 100%; object-fit: cover"
-            />
-          </div>
-        </div> -->
-        <div class="col-sm-6 pt-10 pb-10" style="color: white">
+        <div class="col-sm-6 pt-10 pb-10 mt-30" style="color: white">
           <div
             class="p-30 background-white border-radius-10"
-            style="background-color: white; height: 400px"
+            style="background-color: white; height: 600px"
           >
             <div
               class="bg-white"
@@ -62,7 +53,7 @@ include('../partials/page_header.ejs') %>
                     />
                   </div>
                   <div class="login_footer form-group">
-                    <a class="text-muted" href="/forgot_password"
+                    <a class="text-end" href="/forgot_password"
                       >Forgot password?</a
                     >
                   </div>
@@ -77,22 +68,22 @@ include('../partials/page_header.ejs') %>
                     </button>
                   </div>
                 </form>
-                <div id="errorMessage" style="color: red">
+                <div id="errorMessage" style="height: 30px">
                   <% if (message) { %>
-                  <p><%= message %></p>
+                  <p style="color: red"><%= message %></p>
                   <% } %>
                 </div>
                 <div class="divider-text-center mt-15 mb-15">
                   <span style="color: black"> or</span>
                 </div>
                 <ul class="btn-login list_none text-center mb-15">
-                  <li>
+                  <!-- <li>
                     <a
                       href="/auth/facebook"
                       class="btn btn-facebook hover-up mb-lg-0 mb-sm-4"
                       >Login With Facebook</a
                     >
-                  </li>
+                  </li> -->
                   <li>
                     <a href="/auth/google" class="btn btn-google hover-up"
                       >Login With Google</a

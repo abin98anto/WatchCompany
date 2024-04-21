@@ -1,52 +1,50 @@
 <%- include('../partials/header.ejs') %> <%- include('../partials/page_header.ejs') %>
 
-    <main class="main d-flex" style="flex-direction: column">
-      <!-- breadcrumbs -->
-      <div class="page-header breadcrumb-wrap pb-5 pt-5">
-        <div class="container">
-          <div class="breadcrumb" style="height: 10px">
-            <a href="/" rel="nofollow">Home</a>
-            <span>Account</span>
-          </div>
+  <main class="main d-flex" style="flex-direction: column">
+    <!-- breadcrumbs -->
+    <div class="page-header breadcrumb-wrap pb-5 pt-5">
+      <div class="container">
+        <div class="breadcrumb" style="height: 10px">
+          <a href="/" rel="nofollow">Home</a>
+          <span>Account</span>
         </div>
       </div>
+    </div>
 
-      <!-- side menu -->
-      <div>
-        <div class="row">
-          <div>
-            <div class="dashboard-menu">
-              <ul class="nav text-center" style="justify-content: center" role="tablist">
-                <li class="nav-item text-center">
-                  <a class="nav-link" id="account-detail-tab" href="/my_profile"><i
-                      class="fi-rs-user mr-10 text-center"></i>Account details</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="account-detail-tab" href="/my_address"
-                    style="background-color: black; color: white"><i class="fi-rs-marker mr-10"></i>My Address</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="account-detail-tab" href="/my_orders"><i
-                      class="fi-rs-shopping-bag mr-10"></i>Orders</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="account-detail-tab" href="/my_wallet"><svg xmlns="http://www.w3.org/2000/svg"
-                      width="1em" height="1em" viewBox="0 0 24 24">
-                      <path fill="currentColor" fillRule="evenodd"
-                        d="M20 9c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zm-2 0V6H4v12h14v-3h-2c-1.1 0-2-1.1-2-2v-1.968C14 9.9 14.9 9 16 9zm-2 4h2v-2h-2z">
-                      </path>
-                    </svg></i>Wallet</a>
-                </li>
-                <li class="nav-item">
+    <!-- side menu -->
+    <div>
+      <div class="row">
+        <div>
+          <div class="dashboard-menu">
+            <ul class="nav text-center" style="justify-content: center" role="tablist">
+              <li class="nav-item text-center">
+                <a class="nav-link" id="account-detail-tab" href="/my_profile">
+                  <i class="fi-rs-user mr-10 text-center"></i>Account details
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="account-detail-tab" href="/my_address" style="background-color: black; color: white"><i class="fi-rs-marker mr-10"></i>My Address
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="account-detail-tab" href="/my_orders">
+                  <i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="account-detail-tab" href="/my_wallet"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"> <path fill="currentColor" fillRule="evenodd" d="M20 9c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zm-2 0V6H4v12h14v-3h-2c-1.1 0-2-1.1-2-2v-1.968C14 9.9 14.9 9 16 9zm-2 4h2v-2h-2z"></path>
+                </svg></i>Wallet</a>
+              </li>
+              <li class="nav-item">
                   <a class="nav-link" class="nav-link" href="/logout"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
-                </li>
-              </ul>
-            </div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="container text-center pt-25">
+    <!-- content -->
+    <div class="container text-center pt-25">
         <button class="btn" style="background-color: black" id="addNewAddressBtn">Add New Address</button>
     
         <div class="row pt-30" style="height: 800px">
@@ -56,7 +54,7 @@
             <div class="card mb-3 mb-lg-0">
               <div class="card-header d-flex text-center" style="justify-content: space-between; align-items: center;">
                 <h5><%= user.address[i].addressType %></h5>
-                <!-- Edit button -->
+                <!-- buttons -->
                 <div>
                 <button class="btn-warning btn-sm edit-address-btn" style="color: white;" data-address-id="<%= user.address[i]._id %>">Edit</button>
 
@@ -75,8 +73,9 @@
           </div>
           <% }; %>
         </div>
-      </div>
-    </main>
+    </div>
+      
+  </main>
 
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
@@ -143,70 +142,8 @@
   });
 </script>
 
-<!-- editing a address -->
 <!-- Update existing address -->
 <script>
-  // document.querySelectorAll('.edit-address-btn').addEventListener('click', function() {
-  //   Swal.fire({
-  //     title: 'Add New Address',
-  //     html:
-        
-  //       '<input id="houseName" class="swal2-input" ' +
-  //       '<input id="street" class="swal2-input" placeholder="Street Name">' +
-  //       '<input id="city" class="swal2-input" placeholder="City">' +
-  //       '<input id="state" class="swal2-input" placeholder="State">' +
-  //       '<input id="country" class="swal2-input" placeholder="Country">' +
-  //       '<input id="pincode" class="swal2-input" placeholder="Pincode">' +
-  //       '<input id="phoneNumber" class="swal2-input" placeholder="Phone Number">' +
-  //       '<select id="addressType" class="swal2-select" style="width: 100%"><option value="Home">Home</option><option value="Work">Work</option><option value="Other">Other</option></select>',
-  //     showCancelButton: true,
-  //     confirmButtonText: 'Submit',
-  //     cancelButtonText: 'Cancel',
-  //     focusConfirm: false,
-  //     preConfirm: () => {
-  //       const houseName = Swal.getPopup().querySelector('#houseName').value;
-  //       console.log(houseName);
-  //       const street = Swal.getPopup().querySelector('#street').value;
-  //       const city = Swal.getPopup().querySelector('#city').value;
-  //       const state = Swal.getPopup().querySelector('#state').value;
-  //       const country = Swal.getPopup().querySelector('#country').value;
-  //       const pincode = Swal.getPopup().querySelector('#pincode').value;
-  //       const phoneNumber = Swal.getPopup().querySelector('#phoneNumber').value;
-  //       const addressType = Swal.getPopup().querySelector('#addressType').value;
-        
-  //       fetch('/update_address', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({
-  //           houseName,
-  //           street,
-  //           city,
-  //           state,
-  //           country,
-  //           pincode,
-  //           phoneNumber,
-  //           addressType
-  //         }),
-  //       })
-  //       .then(response => {
-  //         if (!response.ok) {
-  //           throw new Error('Network response was not ok');
-  //         }
-  //         return response.json();
-  //       })
-  //       .then(data => {
-  //         console.log('Success:', data);
-  //         window.location.reload();
-  //       })
-  //       .catch(error => {
-  //         console.error('Error:', error);
-  //       });
-  //     }
-  //   });
-  // });
-// Update existing address
 document.querySelectorAll('.edit-address-btn').forEach(button => {
   button.addEventListener('click', function() {
     Swal.fire({
@@ -234,15 +171,13 @@ document.querySelectorAll('.edit-address-btn').forEach(button => {
         const phoneNumber = Swal.getPopup().querySelector('#phoneNumber').value;
         const addressType = Swal.getPopup().querySelector('#addressType').value;
         
-        // Here, you should send the address ID along with other data to identify which address to update
-        
         fetch('/update_address', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            addressId: button.getAttribute('data-address-id'), // Assuming you have a data attribute for address ID
+            addressId: button.getAttribute('data-address-id'),
             houseName,
             street,
             city,

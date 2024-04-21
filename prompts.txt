@@ -11,3 +11,40 @@ otp (hide resend button) - This is a ejs file and it loads after the program the
 addtocart from landing page - In this page when the user clicks the add-to-cart a tag, if there is user it should go to the add the product id to the products in the cart model. After that it should reload the page.
 
 forgot password - in this code when the user click the send OTP button, it should check if the email id in the user database. Use fetch to do this. if the email exists send a mail to the user's email and show a sweet alert to enter a the OTP and 2 buttons to confirm and to cancel. If the user clicks confirm it should check if the entered otp and otp send are the same. If they are the same it should go to another sweet alert with 2 fields to enter a new password and one to confirm  the entered password. The new password field should have form validation to check if the password contains atleast 8 charactors, 1 symbol and atleast 1 number. The confirm password field should check if the password are same as the previous field. If they match, and when user clicks the submit button, it should update the user's password in the user data base with the newly entered password. Then redirect to login page. In both sweet alert if the user clicks the cancel button it should take them to the login page:
+
+edit profile details - I want to modify the form with the id as profileForm such that when the user clicks the submit button, i want to check
+1. if there were any changes made to the fields with ids nameInput and emailInput. If there were no changes then show a sweet alert that there was no changes made. Then do nothing after that.
+2. if there were changes made then I want to check if the input fields are blank. If not blank then check if the nameInput contains only alphabets if not then show a sweetalert that says only alphabets are allowed in the name. Then I want to check if the emailInput has match a email format.
+if these conditions are met then I want to go to the database and change the user database and set name in the database with the value of nameInput and email in database with value of emailInput. Then redirect to the /my_profile page that shows the new name and email in the nameInput and emailInput.
+use fetch to show do check and remove the post and method from the profileForm form if you need to make these changes. Provide with the ejs, routes and the controller that is needed to be added.
+
+<div class="container text-center pt-25">
+        <button class="btn" style="background-color: black" id="addNewAddressBtn">Add New Address</button>
+    
+        <div class="row pt-30" style="height: 800px">
+            <% for (let i=0; i<user.address.length; i++) { %>
+          <div class="col-lg-3">
+            <input type="hidden" value="<%= i %>" id="i">
+            <div class="card mb-3 mb-lg-0">
+              <div class="card-header d-flex text-center" style="justify-content: space-between; align-items: center;">
+                <h5><%= user.address[i].addressType %></h5>
+                <!-- buttons -->
+                <div>
+                <button class="btn-warning btn-sm edit-address-btn" style="color: white;" data-address-id="<%= user.address[i]._id %>">Edit</button>
+
+                <button class="btn-danger btn-sm"><a data-address-id="<%= user.address[i]._id %>">Delete</a></button>
+                </div>
+              </div>
+              <div class="card-body text-start" style="font-size: large;">
+                <address>
+                  <%= user.address[i].houseName %>,<br>
+                  <%= user.address[i].street %>,<br>
+                  <%= user.address[i].city %>,<br><%= user.address[i].State %>, <%= user.address[i].country %> <br> <%= user.address[i].pincode %>
+                </address>
+                <p><%= user.address[i].phoneNumber %></p>
+              </div>
+            </div>
+          </div>
+          <% }; %>
+        </div>
+      </div>

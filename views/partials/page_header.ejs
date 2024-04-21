@@ -120,7 +120,13 @@
                   <li>
                     <a class="dropdown-item" href="/my_profile">Settings</a>
                   </li>
+                  <% if (google) { %>
+                  <li>
+                    <a class="dropdown-item" href="/auth/logout">Logout</a>
+                  </li>
+                  <% } else { %>
                   <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                  <% } %>
                 </ul>
               </div>
               <% } else { %>

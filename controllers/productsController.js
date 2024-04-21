@@ -195,9 +195,9 @@ const editProduct = async (req, res) => {
         return;
       }
       // if (!req.files || req.files.length === 0) {
-        // res.status(400).send(`No images uploaded.`);
-        // return;
-        // req.files =
+      // res.status(400).send(`No images uploaded.`);
+      // return;
+      // req.files =
       // }
 
       try {

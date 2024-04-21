@@ -41,7 +41,9 @@ user_route.get("/cart", userController.loadCart);
 
 //Settings Page.
 user_route.get("/my_profile", userAuth.isLogin, userController.loadMyProfile);
-user_route.post("/my_profile", userController.updateProfile);
+// user_route.post("/my_profile", userController.updateProfile);
+user_route.post("/update_profile", userController.updateProfile);
+user_route.post("/reset_password", userController.resetPassword);
 user_route.get("/my_address", userAuth.isLogin, userController.loadMyAddress);
 user_route.post("/add_address", userController.addAddress);
 user_route.post("/update_address", userController.updateAddress);

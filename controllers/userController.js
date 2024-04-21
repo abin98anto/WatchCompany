@@ -7,12 +7,12 @@ const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
+const { google } = require("../config/keys");
 
 // hash password function.
 const hashPassword = async (password) => {
   try {
-    // console.log(`Hashing Password.`);
-    const salt = await bcrypt.genSalt(10);
+    const salt = 10;
     const sPassword = await bcrypt.hash(password, salt);
     return sPassword;
   } catch (error) {
@@ -212,8 +212,9 @@ const loadLogin = async (req, res) => {
     const categories = await Category.find({ isUnlisted: false });
     // if (!req.session.userData) {
     // console.log(`Rendering Login Page.`);
+    const message = "";
     res.render("login", {
-      message: "",
+      message: message,
       categories: categories,
       user: user,
     });
@@ -250,23 +251,46 @@ const loadForgotPassword = async (req, res) => {
 const loadLandingPage = async (req, res) => {
   try {
     console.log(`Rendering Landing Page.`);
-    const user = await User.findById(req.session.userData);
-    const cart = await Cart.findById(req.session.userData);
-    // console.log('landing',users);
-    const products = await Product.find({ isUnlisted: false });
-    const categories = await Category.find({
-      isUnlisted: false,
-      isDeleted: false,
-    });
-    // console.log(categories);
-    res.render("landing_page", {
-      categories: categories,
-      products: products,
-      user: user,
-      cart: cart,
-    });
+    // const id = req.session.userData || req.user.id;
+    // console.log(id);
+    if (req.user) {
+      const user = await User.findById(req.user.id);
+      const cart = await Cart.findById(req.user.id);
+      // console.log("landing req.user", user);
+      const products = await Product.find({ isUnlisted: false });
+      const categories = await Category.find({
+        isUnlisted: false,
+        isDeleted: false,
+      });
+      req.session.userData = user.id;
+      // console.log(categories);
+      res.render("landing_page", {
+        categories: categories,
+        products: products,
+        user: user,
+        cart: cart,
+        google: true,
+      });
+    } else {
+      const user = await User.findById(req.session.userData);
+      const cart = await Cart.findById(req.session.userData);
+      // console.log('landing',users);
+      const products = await Product.find({ isUnlisted: false });
+      const categories = await Category.find({
+        isUnlisted: false,
+        isDeleted: false,
+      });
+      // console.log(categories);
+      res.render("landing_page", {
+        categories: categories,
+        products: products,
+        user: user,
+        cart: cart,
+        google: false,
+      });
+    }
   } catch (error) {
-    res.send(`Error Rendering Landing Page.`);
+    res.send(`Error Rendering Landing Page.: ${error}`);
   }
 };
 
@@ -283,21 +307,21 @@ const verifyLogin = async (req, res) => {
     const message = "Username or password is incorrect.";
 
     if (!user) {
-      // console.log(`No User Found!`);
+      console.log(`No User Found!`);
       res.render("login", {
         message: message,
         categories: categories,
         user: req.user.userData,
       });
     } else {
-      // console.log(`User Found.`);
+      console.log(`User Found.`);
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (passwordMatch && user.isAdmin == 0) {
-        // console.log(`User Password Matched.`);
+        console.log(`User Password Matched.`);
         req.session.userData = user._id;
         res.redirect("/");
       } else {
-        // console.log(`Wrong Password.`);
+        console.log(`Wrong Password.`);
         req.session.message = message;
         res.render("login", {
           message: message,
@@ -316,9 +340,17 @@ const verifyLogin = async (req, res) => {
 // to logout user.
 const logoutUser = async (req, res) => {
   try {
-    console.log(`Logging Out ${req.session.userData}`);
-    req.session.userData = null;
-    res.redirect("/");
+    if (req.user) {
+      console.log(`req.user : ${req.user}`);
+      req.session.userData = null;
+      // req.user = null;
+      req.logout();
+      res.redirect("/");
+    } else {
+      console.log(`Logging Out ${req.session.userData}`);
+      req.session.userData = null;
+      res.redirect("/");
+    }
   } catch (error) {
     console.error("Error Logging Out User.");
     res.status(500).send("Internal Server Error");
@@ -430,10 +462,16 @@ const loadMyProfile = async (req, res) => {
       isUnlisted: false,
       isDeleted: false,
     });
+    let google, logout;
+    req.user
+      ? ((google = true), (logout = "/auth/logout"))
+      : ((google = false), (logout = "/logout"));
     res.render("my_profile", {
       categories: categories,
       products: products,
       user: user,
+      google: google,
+      logout,
     });
   } catch (error) {
     console.log(`Error loading setting.`);
@@ -444,13 +482,10 @@ const loadMyProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { name, email, id } = req.body;
-    // console.log(`name : ${name} and email: ${email} and id: `);
-    // console.log(req.body);
     const user = await User.findByIdAndUpdate(id, { name: name, email: email });
-    // console.log(`user of hoi : ${user}`);
     if (user) {
       req.session.userData = user._id;
-      res.redirect("/my_profile");
+      res.sendStatus(200);
     } else {
       res.status(404).json({ success: false, error: "User not found" });
     }
@@ -470,10 +505,16 @@ const loadMyAddress = async (req, res) => {
       isUnlisted: false,
       isDeleted: false,
     });
+    let google;
+    req.user
+      ? ((google = true), (logout = "/auth/logout"))
+      : ((google = false), (logout = "/logout"));
     res.render("my_address", {
       categories: categories,
       products: products,
       user: user,
+      google: google,
+      logout,
     });
   } catch (error) {
     console.log(`Error Loading my_orders`);
@@ -542,8 +583,10 @@ const updateAddress = async (req, res) => {
     const addressIndex = user.address.findIndex(
       (address) => address._id === addressId
     );
-    console.log("address index:", addressIndex);
-    console.log(`old address: ${user.address[addressIndex]}`);
+    // console.log("address index:", addressIndex);
+    // console.log(`old address: ${user.address[addressIndex]}`);
+    let google;
+    req.user ? (google = true) : (google = false);
     if (addressIndex !== -1) {
       // Update the address details
       user.address[addressIndex] = {
@@ -556,6 +599,7 @@ const updateAddress = async (req, res) => {
         pincode,
         phoneNumber,
         addressType,
+        google: google,
       };
 
       await user.save();
@@ -572,7 +616,7 @@ const updateAddress = async (req, res) => {
   }
 };
 
-// Render my_orders
+// Render my_ordersawait bcrypt.genSalt(10)
 const loadMyOrders = async (req, res) => {
   try {
     console.log(`loading my_orders.`);
@@ -582,10 +626,16 @@ const loadMyOrders = async (req, res) => {
       isUnlisted: false,
       isDeleted: false,
     });
+    let google;
+    req.user
+      ? ((google = true), (logout = "/auth/logout"))
+      : ((google = false), (logout = "/logout"));
     res.render("my_orders", {
       categories: categories,
       products: products,
       user: user,
+      google: google,
+      logout,
     });
   } catch (error) {
     console.log(`Error loading my_orders`);
@@ -602,10 +652,16 @@ const loadMyWallet = async (req, res) => {
       isUnlisted: false,
       isDeleted: false,
     });
+    let google;
+    req.user
+      ? ((google = true), (logout = "/auth/logout"))
+      : ((google = false), (logout = "/logout"));
     res.render("my_wallet", {
       categories: categories,
       products: products,
       user: user,
+      google: google,
+      logout,
     });
   } catch (error) {
     console.log(`Error loading my_wallet.`);
@@ -684,10 +740,8 @@ const changePassword = async (req, res) => {
     const { email } = req.session;
     const { newPassword } = req.body;
 
-    // Hash the new password
     const hashedPassword = await hashPassword(newPassword);
 
-    // Find the user by email and update the password
     const updatedUser = await User.findOneAndUpdate(
       { email: email },
       { password: hashedPassword },
@@ -704,6 +758,30 @@ const changePassword = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { id, oldPassword, newPassword } = req.body;
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await user.save();
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -732,4 +810,5 @@ module.exports = {
   passwordOTP,
   passwordVerifyOTP,
   changePassword,
+  resetPassword,
 };
