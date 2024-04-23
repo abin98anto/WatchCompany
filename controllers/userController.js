@@ -375,6 +375,7 @@ const loadProduct = async (req, res) => {
       product: product,
       categories: categories,
       user: user,
+      google: "",
     });
   } catch (error) {
     console.log(`errr loading single product page.`);
@@ -404,6 +405,7 @@ const loadShop = async (req, res) => {
       products: products,
       categories: categories,
       user: user,
+      google: "",
     });
   } catch (error) {
     console.log(`error rendering shop page.`);
@@ -433,21 +435,73 @@ const filterCategory = async (req, res) => {
 
 // cart page.
 const loadCart = async (req, res) => {
-  console.log(`loading cart.`);
   try {
+    console.log(`req.body: ${req.body}`);
     const user = await User.findById(req.session.userData);
     const products = await Product.find({ isUnlisted: false });
     const categories = await Category.find({
       isUnlisted: false,
       isDeleted: false,
     });
+    const cart = await Cart.findOne({ userID: req.session.userData }).populate(
+      "products.productID"
+    );
+    // const populatedCart = cart.products.map((item) => ({
+    //   productID: item.productID,
+    //   quantity: item.quantity,
+    // }));
+
+    // console.log(populatedCart);
+    // console.log(cart);
     res.render("cart", {
       categories: categories,
       products: products,
       user: user,
+      cart: cart,
+      google: "",
     });
   } catch (error) {
-    console.log(`error loading cart page.`);
+    console.log(`error loading cart page. ${error}`);
+  }
+};
+
+// add to cart
+const addToCart = async (req, res) => {
+  console.log(`addd to cart in server side.`);
+  const { productId, quantity } = req.body;
+  console.log("reqest body : ", req.body);
+  try {
+    // Check if the user has an existing cart
+    let cart = await Cart.findOne({ userID: req.session.userData });
+    console.log(`cart found ? ${cart}`);
+    if (!cart) {
+      console.log(`no cart found so creating a new one for the user `);
+      cart = new Cart({
+        userID: req.session.userData,
+        products: [{ productID: productId, quantity: quantity }],
+      });
+    } else {
+      // If the user has a cart, check if the product already exists in the cart
+      const existingProduct = cart.products.find(
+        (product) => product.productID.toString() === productId
+      );
+
+      if (existingProduct) {
+        // If the product exists, update its quantity
+        existingProduct.quantity += quantity;
+      } else {
+        // If the product doesn't exist, add it to the cart
+        cart.products.push({ productID: productId, quantity: quantity });
+      }
+    }
+
+    // Save the updated cart
+    await cart.save();
+
+    res.status(200).json({ message: "Product added to cart successfully" });
+  } catch (error) {
+    console.error("Error adding product to cart:", error);
+    res.status(500).json({ error: "Failed to add product to cart" });
   }
 };
 
@@ -455,8 +509,8 @@ const loadCart = async (req, res) => {
 const loadMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.session.userData);
-    console.log(user.name);
-    console.log(`loading my_profile.`);
+    // console.log(user.name);
+    // console.log(`loading my_profile.`);
     const products = await Product.find({ isUnlisted: false });
     const categories = await Category.find({
       isUnlisted: false,
@@ -498,7 +552,7 @@ const updateProfile = async (req, res) => {
 // Render my_address.
 const loadMyAddress = async (req, res) => {
   try {
-    console.log(`loading setting.`);
+    // console.log(`loading setting.`);
     const user = await User.findById(req.session.userData);
     const products = await Product.find({ isUnlisted: false });
     const categories = await Category.find({
@@ -613,6 +667,38 @@ const updateAddress = async (req, res) => {
     // Handle errors
     console.error("Error updating address:", error);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Delete Address
+const deleteAddress = async (req, res) => {
+  try {
+    const i = req.query.i;
+    console.log("Value of i:", i);
+
+    // Delete the address from the user model (replace this with your actual logic)
+    User.findById(req.user.id, (err, user) => {
+      if (err) {
+        res.status(500).json({ error: "Internal server error" });
+      } else {
+        if (!user) {
+          res.status(404).json({ error: "User not found" });
+        } else {
+          // Remove the address at index i
+          user.address.splice(i, 1);
+          // Save the updated user object
+          user.save((err, savedUser) => {
+            if (err) {
+              res.status(500).json({ error: "Internal server error" });
+            } else {
+              res.json({ message: "Address deleted successfully" });
+            }
+          });
+        }
+      }
+    });
+  } catch (error) {
+    console.log(`error deleting address.`);
   }
 };
 
@@ -811,4 +897,6 @@ module.exports = {
   passwordVerifyOTP,
   changePassword,
   resetPassword,
+  deleteAddress,
+  addToCart,
 };

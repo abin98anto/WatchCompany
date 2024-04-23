@@ -18,33 +18,4 @@ edit profile details - I want to modify the form with the id as profileForm such
 if these conditions are met then I want to go to the database and change the user database and set name in the database with the value of nameInput and email in database with value of emailInput. Then redirect to the /my_profile page that shows the new name and email in the nameInput and emailInput.
 use fetch to show do check and remove the post and method from the profileForm form if you need to make these changes. Provide with the ejs, routes and the controller that is needed to be added.
 
-<div class="container text-center pt-25">
-        <button class="btn" style="background-color: black" id="addNewAddressBtn">Add New Address</button>
-    
-        <div class="row pt-30" style="height: 800px">
-            <% for (let i=0; i<user.address.length; i++) { %>
-          <div class="col-lg-3">
-            <input type="hidden" value="<%= i %>" id="i">
-            <div class="card mb-3 mb-lg-0">
-              <div class="card-header d-flex text-center" style="justify-content: space-between; align-items: center;">
-                <h5><%= user.address[i].addressType %></h5>
-                <!-- buttons -->
-                <div>
-                <button class="btn-warning btn-sm edit-address-btn" style="color: white;" data-address-id="<%= user.address[i]._id %>">Edit</button>
-
-                <button class="btn-danger btn-sm"><a data-address-id="<%= user.address[i]._id %>">Delete</a></button>
-                </div>
-              </div>
-              <div class="card-body text-start" style="font-size: large;">
-                <address>
-                  <%= user.address[i].houseName %>,<br>
-                  <%= user.address[i].street %>,<br>
-                  <%= user.address[i].city %>,<br><%= user.address[i].State %>, <%= user.address[i].country %> <br> <%= user.address[i].pincode %>
-                </address>
-                <p><%= user.address[i].phoneNumber %></p>
-              </div>
-            </div>
-          </div>
-          <% }; %>
-        </div>
-      </div>
+my_address (editing an address) - In this code, when the user clicks the edit button a sweet alert should appear with input fields for house name, street name, city, state, country, pincode, phone number and a drop down menu to select the type of address which has home, ofice and other as option. This should have 2 buttons to save and cancel.

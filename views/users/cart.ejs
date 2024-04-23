@@ -34,35 +34,37 @@ include('../partials/page_header.ejs') %>
                 </tr>
               </thead>
               <tbody>
+                <% cart.products.forEach((prod)=> { %>
                 <tr>
                   <td class="image product-thumbnail">
-                    <img src="assets/imgs/shop/product-1-2.jpg" alt="#" />
+                    <img
+                      src="/uploads/<%= prod.productID.media[0] %>"
+                      alt="#"
+                    />
                   </td>
                   <td class="product-des product-name">
                     <h5 class="product-name">
-                      <a href="shop-product-right.html"
-                        >J.Crew Mercantile Women's Short-Sleeve</a
-                      >
+                      <a href="shop-product-right.html">
+                        <%= prod.productID.name %>
+                      </a>
                     </h5>
-                    <p class="font-xs">
-                      Maboriosam in a tonto nesciung eget<br />
-                      distingy magndapibus.
-                    </p>
                   </td>
-                  <td class="price" data-title="Price"><span>$65.00 </span></td>
+                  <td data-title="Price">
+                    <span class="price"> $ <%= prod.productID.price %> </span>
+                  </td>
                   <td class="text-center" data-title="Stock">
                     <div class="detail-qty border radius m-auto">
                       <a href="#" class="qty-down"
                         ><i class="fi-rs-angle-small-down"></i
                       ></a>
-                      <span class="qty-val">1</span>
+                      <span class="qty-val"> 1</span>
                       <a href="#" class="qty-up"
                         ><i class="fi-rs-angle-small-up"></i
                       ></a>
                     </div>
                   </td>
-                  <td class="text-right" data-title="Cart">
-                    <span>$65.00 </span>
+                  <td class="text-right subtotal" data-title="Cart">
+                    <span class="subtotal-value"></span>
                   </td>
                   <td class="action" data-title="Remove">
                     <a href="#" class="text-muted"
@@ -70,6 +72,7 @@ include('../partials/page_header.ejs') %>
                     ></a>
                   </td>
                 </tr>
+                <% }); %>
               </tbody>
             </table>
           </div>
@@ -120,6 +123,117 @@ include('../partials/page_header.ejs') %>
     </div>
   </section>
 </main>
+
+<!-- <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Calculate subtotal for each product when the page loads
+    calculateSubtotals();
+
+    // Add event listeners to quantity buttons to recalculate subtotal when quantity changes
+    const qtyDownButtons = document.querySelectorAll(".qty-down");
+    const qtyUpButtons = document.querySelectorAll(".qty-up");
+
+    qtyDownButtons.forEach((button) => {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        updateQuantity(button, -1);
+      });
+    });
+
+    qtyUpButtons.forEach((button) => {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        updateQuantity(button, 1);
+      });
+    });
+  });
+
+  function calculateSubtotals() {
+    const priceElements = document.querySelectorAll(".price");
+    const qtyElements = document.querySelectorAll(".qty-val");
+    const subtotalElements = document.querySelectorAll(".subtotal-value");
+
+    priceElements.forEach((priceElement, index) => {
+      const price = parseFloat(
+        priceElement.textContent.replace("$", "").trim()
+      );
+      const qty = parseInt(qtyElements[index].textContent.trim());
+      const subtotal = price * qty;
+      subtotalElements[index].textContent = "$" + subtotal.toFixed(2);
+    });
+  }
+
+  function updateQuantity(button, increment) {
+    const qtyElement = button.parentElement.querySelector(".qty-val");
+    let qty = parseInt(qtyElement.textContent.trim());
+
+    // Update quantity and ensure it's within bounds (greater than 0)
+    qty += increment;
+    if (qty < 1) {
+      qty = 1;
+    }
+
+    qtyElement.textContent = qty;
+
+    // Recalculate subtotal after updating quantity
+    calculateSubtotals();
+  }
+</script> -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Calculate subtotal for each product when the page loads
+    calculateSubtotals();
+
+    // Add event listeners to quantity buttons to recalculate subtotal when quantity changes
+    const qtyDownButtons = document.querySelectorAll(".qty-down");
+    const qtyUpButtons = document.querySelectorAll(".qty-up");
+
+    qtyDownButtons.forEach((button) => {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        updateQuantity(button, -1);
+      });
+    });
+
+    qtyUpButtons.forEach((button) => {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        updateQuantity(button, 1);
+      });
+    });
+  });
+
+  function calculateSubtotals() {
+    const priceElements = document.querySelectorAll(".price");
+    const qtyElements = document.querySelectorAll(".qty-val");
+    const subtotalElements = document.querySelectorAll(".subtotal-value");
+
+    priceElements.forEach((priceElement, index) => {
+      const price = parseFloat(
+        priceElement.textContent.replace("$", "").trim()
+      );
+      const qty = parseInt(qtyElements[index].textContent.trim());
+      const subtotal = Math.round(price * qty); // Round to nearest integer
+      subtotalElements[index].textContent = "$" + subtotal;
+    });
+  }
+
+  function updateQuantity(button, increment) {
+    const qtyElement = button.parentElement.querySelector(".qty-val");
+    let qty = parseInt(qtyElement.textContent.trim());
+
+    // Update quantity and ensure it's within bounds (greater than 0)
+    qty += increment;
+    if (qty < 1) {
+      qty = 1;
+    }
+
+    qtyElement.textContent = qty;
+
+    // Recalculate subtotal after updating quantity
+    calculateSubtotals();
+  }
+</script>
 
 <%- include('../partials/page_footer.ejs') %> <%-
 include('../partials/footer.ejs')%>

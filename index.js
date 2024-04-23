@@ -13,7 +13,7 @@ const nocache = require("nocache");
 const authRoutes = require("./routes/auth-routes");
 const passportSetup = require("./config/passport-setup");
 const passport = require("passport");
-const cookieSession = require("cookie-session");
+// const cookieSession = require("cookie-session");
 const keys = require("./config/keys");
 
 const port = process.env.PORT || 3000;

@@ -8,7 +8,7 @@ const cartController = require("../controllers/cartController");
 
 // Loads Landing Page.
 user_route.get("/", userController.loadLandingPage);
-user_route.post("/add_to_cart", cartController.addToCart);
+// user_route.post("/add_to_cart", cartController.addToCart);
 
 // Signup Process.
 user_route.get("/signup", userAuth.isLogout, userController.loadSignUp);
@@ -38,6 +38,7 @@ user_route.get("/filterByCategory", userController.filterCategory);
 
 // Cart Page.
 user_route.get("/cart", userController.loadCart);
+user_route.post("/add_to_cart", userController.addToCart);
 
 //Settings Page.
 user_route.get("/my_profile", userAuth.isLogin, userController.loadMyProfile);
@@ -46,6 +47,7 @@ user_route.post("/update_profile", userController.updateProfile);
 user_route.post("/reset_password", userController.resetPassword);
 user_route.get("/my_address", userAuth.isLogin, userController.loadMyAddress);
 user_route.post("/add_address", userController.addAddress);
+user_route.delete("/delete_address", userController.deleteAddress);
 user_route.post("/update_address", userController.updateAddress);
 user_route.get("/my_orders", userAuth.isLogin, userController.loadMyOrders);
 user_route.get("/my_wallet", userAuth.isLogin, userController.loadMyWallet);

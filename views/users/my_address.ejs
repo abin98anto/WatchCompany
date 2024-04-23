@@ -1,4 +1,15 @@
 <%- include('../partials/header.ejs') %> <%- include('../partials/page_header.ejs') %>
+<!-- SweetAlert -->
+<style>
+  /* Adjusting SweetAlert input and select box size */
+  .swal2-input,
+  .swal2-select {
+    font-size: 14px; /* You can adjust the font size as needed */
+    padding: 10px; /* Adjust padding for inputs */
+    margin: 5px 0; /* Adjust margin for inputs */
+    width: 100%; /* Make inputs and select box full width */
+  }
+</style>
 
   <main class="main d-flex" style="flex-direction: column">
     <!-- breadcrumbs -->
@@ -49,16 +60,15 @@
     
         <div class="row pt-30" style="height: 800px">
             <% for (let i=0; i<user.address.length; i++) { %>
-          <div class="col-lg-3">
-            <input type="hidden" value="<%= i %>" id="i">
-            <div class="card mb-3 mb-lg-0">
-              <div class="card-header d-flex text-center" style="justify-content: space-between; align-items: center;">
-                <h5><%= user.address[i].addressType %></h5>
-                <!-- buttons -->
-                <div>
-                <button class="btn-warning btn-sm edit-address-btn" style="color: white;" data-address-id="<%= user.address[i]._id %>">Edit</button>
-
-                <button class="btn-danger btn-sm"><a data-address-id="<%= user.address[i]._id %>">Delete</a></button>
+              <div class="col-lg-3">
+                <input type="hidden" value="<%= i %>" id="i">
+                <div class="card mb-3 mb-lg-0">
+                  <div class="card-header d-flex text-center" style="justify-content: space-between; align-items: center;">
+                    <h5><%= user.address[i].addressType %></h5>
+                    <!-- buttons -->
+                    <div>
+                <button class="btn-warning btn-sm editButton" style="color: white;" data-address-id="<%= user.address[i]._id %>">Edit</button>
+                  <button class="btn-danger btn-sm deleteButton"> <input type="hidden" value="<%= i %>" id="i"> Delete</button>
                 </div>
               </div>
               <div class="card-body text-start" style="font-size: large;">
@@ -80,8 +90,10 @@
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-<!-- Adding new address -->
 <script>
+  console.log('Script loaded');
+
+  // Adding new address
   document.getElementById('addNewAddressBtn').addEventListener('click', function() {
     Swal.fire({
       title: 'Add New Address',
@@ -107,7 +119,28 @@
         const pincode = Swal.getPopup().querySelector('#pincode').value;
         const phoneNumber = Swal.getPopup().querySelector('#phoneNumber').value;
         const addressType = Swal.getPopup().querySelector('#addressType').value;
-        
+
+        // Form validation
+        if (!houseName || !street || !city || !state || !country || !pincode || !phoneNumber) {
+          Swal.showValidationMessage('All fields are required');
+          return false;
+        }
+
+        // Validate pincode and phone number
+        const pincodePattern = /^\d{6}$/;
+        const phoneNumberPattern = /^\d+$/;
+
+        if (!pincodePattern.test(pincode)) {
+          Swal.showValidationMessage('Invalid pincode. Please enter a 6-digit number');
+          return false;
+        }
+
+        if (!phoneNumberPattern.test(phoneNumber)) {
+          Swal.showValidationMessage('Invalid phone number. Only numbers are allowed');
+          return false;
+        }
+
+        // If all validations pass, submit the form
         fetch('/add_address', {
           method: 'POST',
           headers: {
@@ -140,73 +173,52 @@
       }
     });
   });
-</script>
 
-<!-- Update existing address -->
-<script>
-document.querySelectorAll('.edit-address-btn').forEach(button => {
-  button.addEventListener('click', function() {
-    Swal.fire({
-      title: 'Edit Address',
-      html:
-        '<input id="houseName" class="swal2-input" placeholder="House Name">' +
-        '<input id="street" class="swal2-input" placeholder="Street Name">' +
-        '<input id="city" class="swal2-input" placeholder="City">' +
-        '<input id="state" class="swal2-input" placeholder="State">' +
-        '<input id="country" class="swal2-input" placeholder="Country">' +
-        '<input id="pincode" class="swal2-input" placeholder="Pincode">' +
-        '<input id="phoneNumber" class="swal2-input" placeholder="Phone Number">' +
-        '<select id="addressType" class="swal2-select" style="width: 100%"><option value="Home">Home</option><option value="Work">Work</option><option value="Other">Other</option></select>',
-      showCancelButton: true,
-      confirmButtonText: 'Submit',
-      cancelButtonText: 'Cancel',
-      focusConfirm: false,
-      preConfirm: () => {
-        const houseName = Swal.getPopup().querySelector('#houseName').value;
-        const street = Swal.getPopup().querySelector('#street').value;
-        const city = Swal.getPopup().querySelector('#city').value;
-        const state = Swal.getPopup().querySelector('#state').value;
-        const country = Swal.getPopup().querySelector('#country').value;
-        const pincode = Swal.getPopup().querySelector('#pincode').value;
-        const phoneNumber = Swal.getPopup().querySelector('#phoneNumber').value;
-        const addressType = Swal.getPopup().querySelector('#addressType').value;
-        
-        fetch('/update_address', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            addressId: button.getAttribute('data-address-id'),
-            houseName,
-            street,
-            city,
-            state,
-            country,
-            pincode,
-            phoneNumber,
-            addressType
-          }),
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log('Success:', data);
-          window.location.reload();
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-      }
+  // editing a address
+
+  // Delete address
+  document.querySelectorAll('.deleteButton').forEach(button => {
+    button.addEventListener('click', function() {
+      console.log('Delete button clicked');
+      const i = this.querySelector('input[type="hidden"]').value;
+
+      console.log('Value of i:', i);
+
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'You are about to delete this address. This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Send a request to delete the address
+          fetch(`/delete_address?i=${i}`, {
+            method: 'DELETE'
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('Success:', data);
+            // Reload the page after successful deletion
+            window.location.reload();
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        }
+      });
     });
   });
-});
 
 </script>
+
 
 
 <%- include('../partials/page_footer.ejs') %> 

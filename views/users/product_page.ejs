@@ -7,22 +7,19 @@ include('../partials/page_header.ejs') %>
     height: 100px; /* Adjust as needed */
     margin-right: 5px; /* Adjust as needed */
     display: inline-block;
-}
+  }
 
-.thumbnail-img {
+  .thumbnail-img {
     width: 100%;
     height: 100%;
     object-fit: cover; /* Ensure the image covers the thumbnail box */
     border-radius: 5px; /* Add border radius for rounded corners */
-}
+  }
 
-</style>
-
-<style>
-    .border-radius-10:hover img {
-        transform: scale(1.6); /* Adjust the scale factor as needed */
-        transition: transform 0.3s ease; /* Add a smooth transition effect */
-    }
+  .border-radius-10:hover img {
+    transform: scale(1.6); /* Adjust the scale factor as needed */
+    transition: transform 0.3s ease; /* Add a smooth transition effect */
+  }
 </style>
 
 
@@ -53,8 +50,6 @@ include('../partials/page_header.ejs') %>
                 src="/uploads/<%= image %>"
                 alt="<%= image %>"
                 data-index="<%= index %>"
-                onmousemove="zoomImage(event)"
-                onmouseleave="resetZoom()"
             />
         </figure>
         <% }) %>
@@ -125,6 +120,7 @@ include('../partials/page_header.ejs') %>
                   </div>
                   <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                   <div class="detail-extralink">
+                    <!-- Quantity button -->
                     <div class="detail-qty border radius">
                       <a href="#" class="qty-down"
                         ><i class="fi-rs-angle-small-down"></i
@@ -135,12 +131,23 @@ include('../partials/page_header.ejs') %>
                       ></a>
                     </div>
                     <div class="product-extra-link2">
-                      <button type="submit" class="button button-add-to-cart">
+                      <% if (user) { %>
+                      <button class="button button-add-to-cart">
                         Add to cart
                       </button>
+                      <% } else { %>
+                        <button onclick="goHome()" class="button button-add-to-cart" > Add to Cart
+                      </button>
+                      <% } %>
+                      <% if (user) { %>
                       <button type="submit" class="button button-add-to-cart">
                         Buy Now
                       </button>
+                      <% } else { %>
+                        <button onclick="goHome()" class="button button-add-to-cart">
+                        Buy Now
+                      </button>
+                      <% } %>
                       <a
                         aria-label="Add To Wishlist"
                         class="action-btn hover-up"
@@ -158,7 +165,7 @@ include('../partials/page_header.ejs') %>
                   <ul class="product-meta font-xs color-grey mt-50">
                     <li>
                       Availability:<span class="in-stock text-success ml-5"
-                        >8 Items In Stock</span
+                        ><%= product.stock %> Items In Stock</span
                       >
                     </li>
                   </ul>
@@ -174,7 +181,7 @@ include('../partials/page_header.ejs') %>
                     <%= product.description %>
                   </p>
                 <h3 class="section-title style-1 mb-30 mt-30">Reviews (3)</h3>
-                <!--Comments-->
+                <!--customer's review-->
                 <div class="comments-area style-2">
                   <div class="row">
                     <div class="col-lg-8">
@@ -244,7 +251,7 @@ include('../partials/page_header.ejs') %>
                             </div>
                           </div>
                         </div>
-                        <!--single-comment -->
+                        <!-- -->
                         <div
                           class="single-comment justify-content-between d-flex"
                         >
@@ -278,9 +285,9 @@ include('../partials/page_header.ejs') %>
                             </div>
                           </div>
                         </div>
-                        <!--single-comment -->
                       </div>
                     </div>
+                    <!-- Reviews Section -->
                     <div class="col-lg-4">
                       <h4 class="mb-30">Customer reviews</h4>
                       <div class="d-flex mb-30">
@@ -440,49 +447,58 @@ include('../partials/page_header.ejs') %>
 </main>
 
 <script>
-    // Function to show the main slide corresponding to the given index
-    function showMainSlide(index) {
-        // Get the main slide container
-        const mainSlide = document.getElementById('mainSlide');
+  // Product image with zoom in feature.
+  function showMainSlide(index) {
+    const mainSlide = document.getElementById('mainSlide');
+    const images = mainSlide.querySelectorAll('img');
+    images.forEach(image => {
+      image.style.display = 'none';
+    });
+    images[index].style.display = 'block';
+  }
+  window.onload = function() {
+    showMainSlide(0);
+  };
 
-        // Get all images in the main slide container
-        const images = mainSlide.querySelectorAll('img');
+  // go to home page.
+  function goHome() {
+    window.location.href = '/login';
+  }
 
-        // Loop through each image and hide it
-        images.forEach(image => {
-            image.style.display = 'none';
-        });
+  // add to cart
+const addToCartButton = document.querySelector('.button-add-to-cart');
+addToCartButton.addEventListener('click', addToCart);
 
-        // Show the image corresponding to the clicked thumbnail
-        images[index].style.display = 'block';
+function addToCart(event) {
+  console.log(`adding to cart.`);
+  event.preventDefault();
+
+  const quantity = document.querySelector('.qty-val').textContent;
+  fetch('/add_to_cart', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      productId: '<%= product._id %>',
+      quantity: quantity,
+    }),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to add product to cart');
     }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Product added to cart successfully:', data);
+  })
+  .catch(error => {
+    console.error('Error adding product to cart:', error.message);
+  });
+}
 
-    // Function to select the first image when the page loads
-    window.onload = function() {
-        // Call the showMainSlide function with index 0 to select the first image
-        showMainSlide(0);
-    };
 </script>
-
-
-<script>
-    function showMainSlide(index) {
-        // Get the main slide container
-        const mainSlide = document.getElementById('mainSlide');
-
-        // Get all images in the main slide container
-        const images = mainSlide.querySelectorAll('img');
-
-        // Loop through each image and hide it
-        images.forEach(image => {
-            image.style.display = 'none';
-        });
-
-        // Show the image corresponding to the clicked thumbnail
-        images[index].style.display = 'block';
-    }
-</script>
-
 
 <%- include('../partials/page_footer.ejs') %> <%-
 include('../partials/footer.ejs')%>

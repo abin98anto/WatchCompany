@@ -4,7 +4,6 @@ const multer = require("multer");
 const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs");
-const { stopCoverage } = require("v8");
 
 // Multer Configuring.
 const storage = multer.diskStorage({
