@@ -116,12 +116,10 @@
                 <td class="text-center">
                   <% if (users[j].isBlocked) { %>
                   <span class="rounded-pill alert-danger" style="padding: 8px"
-                    >Blocked</span
-                  >
+                    >Blocked</span>
                   <% } else { %>
                   <span class="rounded-pill alert-success" style="padding: 8px"
-                    >Active</span
-                  >
+                    >Active</span>
                   <% } %>
                 </td>
                 <td>
@@ -147,7 +145,8 @@
           </table>
         </div>
       </div>
-
+      
+      // Pagination.
       <nav aria-label="Page navigation example">
         <ul class="pagination">
           <li class="page-item <%= !hasPreviousPage ? 'disabled' : '' %>">

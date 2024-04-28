@@ -171,7 +171,11 @@ include('../partials/page_header.ejs') %>
                   <a
                     aria-label="Add To Cart"
                     class="action-btn hover-up"
-                    href="#"
+                    <% if (user) { %>
+                        onclick="addToCart('<%= products[i]._id %>')"
+                        <% } else { %>
+                          onclick="goHome()"
+                          <% } %>
                     ><i class="fi-rs-shopping-bag-add"></i
                   ></a>
                   <a
@@ -255,23 +259,16 @@ include('../partials/page_header.ejs') %>
                   <span>$ <%= products[i].price %> </span>
                   <!-- <span class="old-price">$245.8</span> -->
                   <div class="product-action-1 show">
-                    <% if (user) { %>
-                    <!-- <button class="add-to-cart"> -->
                     <a
                       aria-label="Add To Cart"
                       class="action-btn hover-up"
-                      href="#"
-                      ><i class="fi-rs-check"></i
-                    ></a>
-                    <!-- </button> -->
-                    <% } else { %>
-                    <a
-                      aria-label="Add To Cart"
-                      class="action-btn hover-up"
-                      href="/login"
+                      <% if (user) { %>
+                        onclick="addToCart('<%= products[i]._id %>')"
+                        <% } else { %>
+                          onclick="goHome()"
+                          <% } %>
                       ><i class="fi-rs-shopping-bag-add"></i
                     ></a>
-                    <% } %>
                     <a
                       aria-label="Add To Wishlist"
                       class="action-btn hover-up"
@@ -350,6 +347,8 @@ include('../partials/page_header.ejs') %>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
 <!-- Slider logic -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -368,7 +367,7 @@ include('../partials/page_header.ejs') %>
           prevItem.classList.remove("carousel-item-prev");
           activeItem.classList.remove("carousel-item-active");
           activeItem.classList.add("carousel-item-next");
-        }, 50); // Adjust as needed
+        }, 50);
       });
 
     document
@@ -382,108 +381,73 @@ include('../partials/page_header.ejs') %>
           nextItem.classList.remove("carousel-item-next");
           activeItem.classList.remove("carousel-item-active");
           activeItem.classList.add("carousel-item-prev");
-        }, 50); // Adjust as needed
+        }, 50);
       });
-  });
-</script>
-
-<!-- Bestseller logic : "not working" -->
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Function to load products based on category
-    function loadProducts(category) {
-      fetch("/load_products?category=" + category)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json(); // Assuming response is JSON
-        })
-        .then((data) => {
-          // Assuming data is an array of products
-          const productsHTML = data
-            .slice(0, 4)
-            .map(
-              (product) => `
-        <div class="col-lg-4 col-md-4 col-12 col-sm-6">
-          <div class="product-cart-wrap mb-30">
-            <div class="product-img-action-wrap">
-              <div class="product-img product-img-zoom">
-                <a href="/load_product?id=${product.id}">
-                  <img class="default-img" style="height: 100%;" src="/uploads/${product.media[0]}" alt="${product.media[0]}"/>
-                  <img class="hover-img" style="height: 100%;" src="/uploads/${product.media[0]}" alt="${product.media[0]}"/>
-                </a>
-              </div>
-              <div class="product-action-1">
-                <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#"><i class="fi-rs-heart"></i></a>
-              </div>
-            </div>
-            <div class="product-content-wrap">
-              <div class="product-category">
-                <a href="#">${product.category}</a>
-              </div>
-              <h2><a href="/load_product?id=${product.id}">${product.name}</a></h2>
-              <div class="rating-result" title="90%"><span><span>90%</span></span></div>
-              <div class="product-price"><span>$ ${product.price}</span></div>
-              <div class="product-action-1 show">
-                <a aria-label="Add To Cart" class="action-btn hover-up" href="#"><i class="fi-rs-shopping-bag-add"></i></a>
-              </div>
-            </div>
-          </div>
-        </div>
-      `
-            )
-            .join("");
-
-          // Replace existing products with the newly generated HTML
-          document.getElementById("productGrid").innerHTML = productsHTML;
-        })
-        .catch((error) => {
-          console.error("Error loading products:", error);
-        });
-    }
-
-    // By default, load products for Men
-    loadProducts("Men");
   });
 </script>
 
 <!-- Add to cart logic -->
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Add event listener to all "Add to Cart" buttons
-    const addToCartButtons = document.querySelectorAll(".action-btn");
-    addToCartButtons.forEach((button) => {
-      button.addEventListener("click", function (event) {
-        event.preventDefault();
-        const productId = button.dataset.productId;
-        addToCart(productId);
-      });
+  async function addToCart(productId) {
+  try {
+    const response = await fetch('/check_product_in_cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        productId: productId
+      })
     });
 
-    // Function to add product to cart
-    function addToCart(productId) {
-      // Send a POST request to your server to add the product ID to the cart
-      fetch("/add_to_cart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ productId: productId }),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          // Reload the page upon successful addition to the cart
-          // location.reload();
-          response.redirect("/my_address");
-        })
-        .catch((error) => {
-          console.error("Error adding product to cart:", error);
-        });
+    if (!response.ok) {
+      throw new Error('Failed to check product in cart');
     }
-  });
+
+    const data = await response.json();
+
+    if (data.exists) {
+      Swal.fire({
+        title: 'Product Already in Cart',
+        text: 'This product is already in your cart.',
+        icon: 'warning',
+        confirmButtonText: "Go to Cart",
+        showCancelButton: true
+      }).then((value) => {
+        if (value.isConfirmed) {
+          window.location.href = '/cart';
+        }
+      });
+    } else {
+      const addToCartResponse = await fetch('/add_to_cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: productId
+        })
+      });
+
+      if (!addToCartResponse.ok) {
+        throw new Error('Failed to add product to cart');
+      }
+
+      const cartData = await addToCartResponse.json();
+      console.log('Product added to cart successfully:', cartData);
+      window.location.href = '/cart';
+    }
+  } catch (error) {
+    console.error('Error adding product to cart:', error.message);
+    swal('Error', 'Failed to add product to cart. Please try again later.', 'error');
+  }
+}
+
+ // go to home page (for add to cart).
+  function goHome() {
+    window.location.href = '/login';
+  }
+
 </script>
 
 <%- include('../partials/page_footer.ejs') %> <%-

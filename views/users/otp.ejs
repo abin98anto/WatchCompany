@@ -1,4 +1,6 @@
 <%- include('../partials/header.ejs') %>
+
+<!-- Content -->
 <div
   style="
     background-color: #2b2b2b;
@@ -63,13 +65,15 @@
       </form>
     </div>
   </div>
+</div>
 
-  <script>
+<script>
     let countdown = 20;
     const timerDisplay = document.getElementById("timer");
     const submitButton = document.getElementById("submitBtn");
     const resendButton = document.getElementById("resendBtn");
 
+    // Timer functionality.
     function startTimer() {
       let minutes, seconds;
 
@@ -92,6 +96,7 @@
     }
     startTimer();
 
+    // Resend OTP functionality.
     document.getElementById("resendBtn").addEventListener("click", function () {
       fetch("/resend-otp", {
         method: "POST",
@@ -132,6 +137,7 @@
       submitButton.disabled = this.value.trim() === "";
     });
 
+    // OTP submission functionality.
     document
       .getElementById("otpForm")
       .addEventListener("submit", function (event) {
@@ -173,5 +179,4 @@
       otpStatusElement.className = className;
     }
   </script>
-</div>
 <%- include('../partials/footer.ejs') %>

@@ -1,13 +1,12 @@
 <%- include('../partials/header.ejs') %> <%- include('../partials/page_header.ejs') %>
 <!-- SweetAlert -->
 <style>
-  /* Adjusting SweetAlert input and select box size */
   .swal2-input,
   .swal2-select {
-    font-size: 14px; /* You can adjust the font size as needed */
-    padding: 10px; /* Adjust padding for inputs */
-    margin: 5px 0; /* Adjust margin for inputs */
-    width: 100%; /* Make inputs and select box full width */
+    font-size: 14px;
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
   }
 </style>
 
@@ -54,7 +53,7 @@
       </div>
     </div>
 
-    <!-- content -->
+    <!-- Main Content -->
     <div class="container text-center pt-25">
         <button class="btn" style="background-color: black" id="addNewAddressBtn">Add New Address</button>
     
@@ -91,8 +90,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 <script>
-  console.log('Script loaded');
-
+  
   // Adding new address
   document.getElementById('addNewAddressBtn').addEventListener('click', function() {
     Swal.fire({
@@ -177,45 +175,6 @@
   // editing a address
 
   // Delete address
-  document.querySelectorAll('.deleteButton').forEach(button => {
-    button.addEventListener('click', function() {
-      console.log('Delete button clicked');
-      const i = this.querySelector('input[type="hidden"]').value;
-
-      console.log('Value of i:', i);
-
-      Swal.fire({
-        title: 'Are you sure?',
-        text: 'You are about to delete this address. This action cannot be undone.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // Send a request to delete the address
-          fetch(`/delete_address?i=${i}`, {
-            method: 'DELETE'
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json();
-          })
-          .then(data => {
-            console.log('Success:', data);
-            // Reload the page after successful deletion
-            window.location.reload();
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
-        }
-      });
-    });
-  });
 
 </script>
 

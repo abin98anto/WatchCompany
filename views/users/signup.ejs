@@ -120,6 +120,7 @@ include('../partials/page_header.ejs') %>
   const passwordError = document.getElementById("passwordError");
   const confirmError = document.getElementById("confirmError");
 
+  // Submission functionality.
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -152,7 +153,7 @@ include('../partials/page_header.ejs') %>
     }
 
     if (errors) {
-      return; // Exit function if there are errors
+      return;
     }
 
     // Check if email already exists in the database

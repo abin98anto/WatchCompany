@@ -4,8 +4,6 @@ const Product = require("../models/productModel");
 // Render Category Management Page.
 const loadCategoryManagement = async (req, res) => {
   try {
-    // if (req.session.adminData) {
-    // console.log(`Loading Category Management.`);
     const categories = await Category.find({ isDeleted: false }).sort({
       createdOn: -1,
     });
@@ -13,10 +11,6 @@ const loadCategoryManagement = async (req, res) => {
       categories: categories,
       message: "",
     });
-    // } else {
-    // console.log(`Couldn't Load Category Mangement.`);
-    // res.redirect("/admin/");
-    // }
   } catch (error) {
     res.send(`Error Loading Category Mangement.`);
   }
@@ -25,7 +19,6 @@ const loadCategoryManagement = async (req, res) => {
 // Get Categories
 const getCategories = async (req, res) => {
   try {
-    // console.log(`getting categories.`);
     const categories = await Category.find({ isDeleted: false }).sort({
       createdOn: -1,
     });
@@ -38,7 +31,6 @@ const getCategories = async (req, res) => {
 // Add Category to Database.
 const addCategory = async (req, res) => {
   try {
-    // console.log(`Adding A New Category to DB.`);
     const { category_name } = req.body;
     const cat_name =
       category_name.charAt(0).toUpperCase() +
@@ -72,19 +64,15 @@ const addCategory = async (req, res) => {
 // Unlist/List Category.
 const toggleCategoryStatus = async (req, res) => {
   try {
-    // console.log(`Toggling Category Status.`);
     let id = req.query.id;
     const category = await Category.findById(id);
-    // const products = await Product.find({});
     if (!category) {
       res.status(404).send("Category not found");
       return;
     }
     const products = await Product.find({});
-    // console.log(products);
     products.forEach((product) => {
       if (product.category == category.name.toLowerCase()) {
-        // console.log(product.name);
         product.isUnlisted = !product.isUnlisted;
         product.save();
       }
@@ -105,7 +93,6 @@ const toggleCategoryStatus = async (req, res) => {
 // Edit Categories.
 const editCategory = async (req, res) => {
   try {
-    // console.log(`Making Changes To A Category.`);
     let id = req.query.id;
     let { new_name } = req.body;
     await Category.updateOne({ _id: id }, { $set: { name: new_name } });
@@ -118,9 +105,8 @@ const editCategory = async (req, res) => {
 
 // Delete Categories.
 const deleteCategory = async (req, res) => {
-  const categoryId = req.query.id;
-  // console.log(`deleting a category`);
   try {
+    const categoryId = req.query.id;
     await Category.findByIdAndUpdate(categoryId, { isDeleted: true });
     await Category.findByIdAndUpdate(categoryId, { isUnlisted: true });
     res.status(200).send("Category deleted successfully");

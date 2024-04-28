@@ -76,7 +76,6 @@
 
 <main class="main-wrap">
   <section class="content-main">
-    <!-- <form method="post"> -->
     <form method="post" enctype="multipart/form-data">
       <div class="row">
         <div class="col-9">
@@ -90,7 +89,6 @@
               <h4>Basic Informations</h4>
             </div>
             <div class="card-body">
-              <!-- <form> -->
               <div class="mb-4">
                 <label for="product_name" class="form-label"
                   >Product title</label
@@ -164,7 +162,6 @@
                   </button>
                 </div>
               </div>
-              <!-- </form> -->
             </div>
           </div>
         </div>
@@ -193,19 +190,15 @@
 </main>
 
 <script>
+  // logic to upload images.
   const fileInput = document.getElementById("uploads");
   const imagePreview = document.getElementById("imagePreview");
 
   fileInput.addEventListener("change", function () {
-    imagePreview.innerHTML = ""; // Clear previous previews
+    imagePreview.innerHTML = "";
 
     const files = this.files;
     const numFiles = files.length;
-
-    // if (numFiles > 3) {
-    //   alert("Please select up to three images.");
-    //   return;
-    // }
 
     for (let i = 0; i < numFiles; i++) {
       const file = files[i];

@@ -22,7 +22,6 @@ const hashPassword = async (password) => {
 // check if user exists function.
 const checkEmail = async (req, res) => {
   try {
-    // console.log(`Checking If Email Exists in DB.`);
     const { email } = req.body;
     const userFound = await User.findOne({ email });
     res.json({ exists: !!userFound });
@@ -33,7 +32,6 @@ const checkEmail = async (req, res) => {
 };
 // generate OTP function.
 const generateOTP = (length) => {
-  // console.log(`Generating OTP.`);
   const digits = "0123456789";
   let OTP = "";
   for (let i = 0; i < length; i++) {
@@ -48,9 +46,7 @@ const loadSignUp = async (req, res) => {
     const user = await User.findById(req.session.userData);
     const categories = await Category.find({
       isUnlisted: false,
-      isDeleted: false,
     });
-    console.log(`rendering signup page`);
     res.render("signup", {
       categories: categories,
       user: user,
@@ -63,9 +59,7 @@ const loadSignUp = async (req, res) => {
 // to send OTP.
 const sendOTP = async (req, res) => {
   try {
-    // console.log(`Sending OTP To User Email.`);
     let { username, email, password, confirm_password } = req.body;
-    // console.log(`sending the otp to ${email}`);
     req.session.formData = { username, email, password, confirm_password };
 
     let newOTP = generateOTP(6);
@@ -109,8 +103,6 @@ const sendOTP = async (req, res) => {
         console.log(error);
         res.status(500).send("Error sending email.The errror is");
       } else {
-        console.log("Email sent successfully!");
-        // console.log("Message ID:", info.messageId);
         req.session.newOTP = newOTP;
         req.session.email = email;
         res.render("otp");
@@ -123,7 +115,6 @@ const sendOTP = async (req, res) => {
 
 // to verify OTP.
 const verifyOTP = async (req, res) => {
-  // console.log(`Verifying OTP.`);
   try {
     const enteredOTP = req.body.otp;
     const generatedOTP = req.session.newOTP;
@@ -151,7 +142,6 @@ const verifyOTP = async (req, res) => {
 const resendOTP = async (req, res) => {
   try {
     const { email } = req.session.email;
-    console.log(`Resending OTP To ${email}`);
     const newOTP = generateOTP(6);
     console.log(`resended otp : ${newOTP}`);
     req.session.newOTP = newOTP;
@@ -194,8 +184,6 @@ const resendOTP = async (req, res) => {
         console.error("Error occurred:", error);
         res.status(500).json({ success: false });
       } else {
-        console.log("Resend OTP email sent successfully!");
-        console.log("Message ID:", info.messageId);
         res.json({ success: true });
       }
     });
@@ -210,18 +198,12 @@ const loadLogin = async (req, res) => {
   try {
     const user = await User.findById(req.session.userData);
     const categories = await Category.find({ isUnlisted: false });
-    // if (!req.session.userData) {
-    // console.log(`Rendering Login Page.`);
     const message = "";
     res.render("login", {
       message: message,
       categories: categories,
       user: user,
     });
-    // } else {
-    // console.log(`Couldn't Render Login Page.`);
-    // res.redirect("/home");
-    // }
   } catch (error) {
     res.send(`Error Rendering Login Page.`);
   }
@@ -251,19 +233,15 @@ const loadForgotPassword = async (req, res) => {
 const loadLandingPage = async (req, res) => {
   try {
     console.log(`Rendering Landing Page.`);
-    // const id = req.session.userData || req.user.id;
-    // console.log(id);
     if (req.user) {
       const user = await User.findById(req.user.id);
       const cart = await Cart.findById(req.user.id);
-      // console.log("landing req.user", user);
       const products = await Product.find({ isUnlisted: false });
       const categories = await Category.find({
         isUnlisted: false,
         isDeleted: false,
       });
       req.session.userData = user.id;
-      // console.log(categories);
       res.render("landing_page", {
         categories: categories,
         products: products,
@@ -274,13 +252,11 @@ const loadLandingPage = async (req, res) => {
     } else {
       const user = await User.findById(req.session.userData);
       const cart = await Cart.findById(req.session.userData);
-      // console.log('landing',users);
       const products = await Product.find({ isUnlisted: false });
       const categories = await Category.find({
         isUnlisted: false,
         isDeleted: false,
       });
-      // console.log(categories);
       res.render("landing_page", {
         categories: categories,
         products: products,
@@ -297,7 +273,6 @@ const loadLandingPage = async (req, res) => {
 // to check login credentials.
 const verifyLogin = async (req, res) => {
   try {
-    // console.log(`Verifying User Login Credentials.`);
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
     const categories = await Category.find({
@@ -307,21 +282,17 @@ const verifyLogin = async (req, res) => {
     const message = "Username or password is incorrect.";
 
     if (!user) {
-      console.log(`No User Found!`);
       res.render("login", {
         message: message,
         categories: categories,
         user: req.user.userData,
       });
     } else {
-      console.log(`User Found.`);
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (passwordMatch && user.isAdmin == 0) {
-        console.log(`User Password Matched.`);
         req.session.userData = user._id;
         res.redirect("/");
       } else {
-        console.log(`Wrong Password.`);
         req.session.message = message;
         res.render("login", {
           message: message,
@@ -340,17 +311,8 @@ const verifyLogin = async (req, res) => {
 // to logout user.
 const logoutUser = async (req, res) => {
   try {
-    if (req.user) {
-      console.log(`req.user : ${req.user}`);
-      req.session.userData = null;
-      // req.user = null;
-      req.logout();
-      res.redirect("/");
-    } else {
-      console.log(`Logging Out ${req.session.userData}`);
-      req.session.userData = null;
-      res.redirect("/");
-    }
+    req.session.userData = null;
+    res.redirect("/");
   } catch (error) {
     console.error("Error Logging Out User.");
     res.status(500).send("Internal Server Error");
@@ -360,22 +322,17 @@ const logoutUser = async (req, res) => {
 // load single product.
 const loadProduct = async (req, res) => {
   try {
-    console.log(`loading single product page.`);
     const id = req.query.id;
-    // console.log(`id: ${id}`);
     const user = await User.findById(req.session.userData);
-
     const product = await Product.findOne({ isUnlisted: false, _id: id });
-    // console.log(`product ${product.name}`);
-    const categories = await Category.find({
-      isUnlisted: false,
-      isDeleted: false,
-    });
+    const categories = await Category.find({ isUnlisted: false });
+    let google;
+    req.user ? (google = true) : (google = false);
     res.render("product_page", {
       product: product,
       categories: categories,
       user: user,
-      google: "",
+      google,
     });
   } catch (error) {
     console.log(`errr loading single product page.`);
@@ -388,11 +345,9 @@ const loadShop = async (req, res) => {
   try {
     const user = await User.findById(req.session.userData);
     let products;
-    const categories = await Category.find({
-      isUnlisted: false,
-      isDeleted: false,
-    });
-
+    const categories = await Category.find({ isUnlisted: false });
+    let google;
+    req.user ? (google = true) : (google = false);
     if (req.query.category) {
       products = await Product.find({
         category: req.query.category,
@@ -405,103 +360,10 @@ const loadShop = async (req, res) => {
       products: products,
       categories: categories,
       user: user,
-      google: "",
+      google,
     });
   } catch (error) {
     console.log(`error rendering shop page.`);
-  }
-};
-
-// filter category.
-const filterCategory = async (req, res) => {
-  console.log(`filtering category.`);
-  const category = req.params.category;
-  try {
-    const user = await User.findById(req.session.userData);
-    const products = await Product.find({ category: category }).lean();
-    const categories = await Category.find().lean();
-    console.log(products);
-    console.log(categories);
-    res.render("shopping_page", {
-      products: products,
-      categories: categories,
-      user: user,
-    });
-  } catch (err) {
-    console.error(`Error filtering category: ${err}`);
-    res.status(500).send("Error filtering category");
-  }
-};
-
-// cart page.
-const loadCart = async (req, res) => {
-  try {
-    console.log(`req.body: ${req.body}`);
-    const user = await User.findById(req.session.userData);
-    const products = await Product.find({ isUnlisted: false });
-    const categories = await Category.find({
-      isUnlisted: false,
-      isDeleted: false,
-    });
-    const cart = await Cart.findOne({ userID: req.session.userData }).populate(
-      "products.productID"
-    );
-    // const populatedCart = cart.products.map((item) => ({
-    //   productID: item.productID,
-    //   quantity: item.quantity,
-    // }));
-
-    // console.log(populatedCart);
-    // console.log(cart);
-    res.render("cart", {
-      categories: categories,
-      products: products,
-      user: user,
-      cart: cart,
-      google: "",
-    });
-  } catch (error) {
-    console.log(`error loading cart page. ${error}`);
-  }
-};
-
-// add to cart
-const addToCart = async (req, res) => {
-  console.log(`addd to cart in server side.`);
-  const { productId, quantity } = req.body;
-  console.log("reqest body : ", req.body);
-  try {
-    // Check if the user has an existing cart
-    let cart = await Cart.findOne({ userID: req.session.userData });
-    console.log(`cart found ? ${cart}`);
-    if (!cart) {
-      console.log(`no cart found so creating a new one for the user `);
-      cart = new Cart({
-        userID: req.session.userData,
-        products: [{ productID: productId, quantity: quantity }],
-      });
-    } else {
-      // If the user has a cart, check if the product already exists in the cart
-      const existingProduct = cart.products.find(
-        (product) => product.productID.toString() === productId
-      );
-
-      if (existingProduct) {
-        // If the product exists, update its quantity
-        existingProduct.quantity += quantity;
-      } else {
-        // If the product doesn't exist, add it to the cart
-        cart.products.push({ productID: productId, quantity: quantity });
-      }
-    }
-
-    // Save the updated cart
-    await cart.save();
-
-    res.status(200).json({ message: "Product added to cart successfully" });
-  } catch (error) {
-    console.error("Error adding product to cart:", error);
-    res.status(500).json({ error: "Failed to add product to cart" });
   }
 };
 
@@ -509,13 +371,8 @@ const addToCart = async (req, res) => {
 const loadMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.session.userData);
-    // console.log(user.name);
-    // console.log(`loading my_profile.`);
     const products = await Product.find({ isUnlisted: false });
-    const categories = await Category.find({
-      isUnlisted: false,
-      isDeleted: false,
-    });
+    const categories = await Category.find({ isUnlisted: false });
     let google, logout;
     req.user
       ? ((google = true), (logout = "/auth/logout"))
@@ -552,13 +409,9 @@ const updateProfile = async (req, res) => {
 // Render my_address.
 const loadMyAddress = async (req, res) => {
   try {
-    // console.log(`loading setting.`);
     const user = await User.findById(req.session.userData);
     const products = await Product.find({ isUnlisted: false });
-    const categories = await Category.find({
-      isUnlisted: false,
-      isDeleted: false,
-    });
+    const categories = await Category.find({ isUnlisted: false });
     let google;
     req.user
       ? ((google = true), (logout = "/auth/logout"))
@@ -578,8 +431,6 @@ const loadMyAddress = async (req, res) => {
 // Add address
 const addAddress = async (req, res) => {
   try {
-    console.log(`adding new address.`);
-
     const {
       houseName,
       street,
@@ -617,9 +468,6 @@ const addAddress = async (req, res) => {
 // Update address.
 const updateAddress = async (req, res) => {
   try {
-    console.log(`updating address`);
-    console.log(`userid: ${req.session.userData}`);
-
     const {
       addressId,
       houseName,
@@ -632,17 +480,13 @@ const updateAddress = async (req, res) => {
       addressType,
     } = req.body;
 
-    // Find the user and update the address by ID
     const user = await User.findById(req.session.userData);
     const addressIndex = user.address.findIndex(
       (address) => address._id === addressId
     );
-    // console.log("address index:", addressIndex);
-    // console.log(`old address: ${user.address[addressIndex]}`);
     let google;
     req.user ? (google = true) : (google = false);
     if (addressIndex !== -1) {
-      // Update the address details
       user.address[addressIndex] = {
         _id: addressId,
         houseName,
@@ -653,18 +497,15 @@ const updateAddress = async (req, res) => {
         pincode,
         phoneNumber,
         addressType,
-        google: google,
+        google,
       };
 
       await user.save();
-      console.log(`new address: ${user.address[addressIndex]}`);
-      // Respond with success message
       return res.status(200).json({ message: "Address updated successfully" });
     } else {
       return res.status(404).json({ error: "Address not found" });
     }
   } catch (error) {
-    // Handle errors
     console.error("Error updating address:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -674,9 +515,6 @@ const updateAddress = async (req, res) => {
 const deleteAddress = async (req, res) => {
   try {
     const i = req.query.i;
-    console.log("Value of i:", i);
-
-    // Delete the address from the user model (replace this with your actual logic)
     User.findById(req.user.id, (err, user) => {
       if (err) {
         res.status(500).json({ error: "Internal server error" });
@@ -684,9 +522,7 @@ const deleteAddress = async (req, res) => {
         if (!user) {
           res.status(404).json({ error: "User not found" });
         } else {
-          // Remove the address at index i
           user.address.splice(i, 1);
-          // Save the updated user object
           user.save((err, savedUser) => {
             if (err) {
               res.status(500).json({ error: "Internal server error" });
@@ -702,16 +538,12 @@ const deleteAddress = async (req, res) => {
   }
 };
 
-// Render my_ordersawait bcrypt.genSalt(10)
+// Render my_orders
 const loadMyOrders = async (req, res) => {
   try {
-    console.log(`loading my_orders.`);
     const user = await User.findById(req.session.userData);
     const products = await Product.find({ isUnlisted: false });
-    const categories = await Category.find({
-      isUnlisted: false,
-      isDeleted: false,
-    });
+    const categories = await Category.find({ isUnlisted: false });
     let google;
     req.user
       ? ((google = true), (logout = "/auth/logout"))
@@ -720,7 +552,7 @@ const loadMyOrders = async (req, res) => {
       categories: categories,
       products: products,
       user: user,
-      google: google,
+      google,
       logout,
     });
   } catch (error) {
@@ -731,13 +563,9 @@ const loadMyOrders = async (req, res) => {
 // Render my_wallet
 const loadMyWallet = async (req, res) => {
   try {
-    console.log(`loading my_wallet.`);
     const user = await User.findById(req.session.userData);
     const products = await Product.find({ isUnlisted: false });
-    const categories = await Category.find({
-      isUnlisted: false,
-      isDeleted: false,
-    });
+    const categories = await Category.find({ isUnlisted: false });
     let google;
     req.user
       ? ((google = true), (logout = "/auth/logout"))
@@ -759,15 +587,11 @@ const passwordOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Generate OTP
     const newOTP = generateOTP(6);
     console.log(`The OTP is ${newOTP} to change the password.`);
-
-    // Store OTP and email in session
     req.session.newOTP = newOTP;
     req.session.email = email;
 
-    // Send OTP to the user's email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.com",
@@ -788,12 +612,9 @@ const passwordOTP = async (req, res) => {
 
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
-        console.log(error);
+        console.log('error sending mail to resent password.',error);
         return res.status(500).send("Error sending OTP email.");
       } else {
-        console.log("OTP Email sent successfully!");
-        // Render OTP input form
-        // res.render("otp", { email });
         res.status(200).send("OTP Email sent successfully!");
       }
     });
@@ -805,7 +626,6 @@ const passwordOTP = async (req, res) => {
 
 // verify otp to change password
 const passwordVerifyOTP = async (req, res) => {
-  // console.log(`Verifying OTP.`);
   try {
     const enteredOTP = req.body.otp;
     const generatedOTP = req.session.newOTP;
@@ -883,8 +703,6 @@ module.exports = {
   logoutUser,
   loadProduct,
   loadShop,
-  filterCategory,
-  loadCart,
   loadMyProfile,
   loadMyAddress,
   loadMyWallet,
@@ -898,5 +716,4 @@ module.exports = {
   changePassword,
   resetPassword,
   deleteAddress,
-  addToCart,
 };

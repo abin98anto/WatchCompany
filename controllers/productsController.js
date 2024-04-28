@@ -47,7 +47,6 @@ const loadProductManagement = async (req, res) => {
 // Render add new product page.
 const loadAddProduct = async (req, res) => {
   try {
-    // console.log(`Rendering Add New Product Page.`);
     const categories = await Category.find({ isUnlisted: false });
     res.render("add_new_product", { categories: categories });
   } catch (error) {
@@ -58,9 +57,6 @@ const loadAddProduct = async (req, res) => {
 // Adding the product to database.
 const addProduct = async (req, res) => {
   try {
-    // console.log(`Adding New Product to DB.`);
-    console.log(req.body);
-
     upload(req, res, async function (err) {
       if (err instanceof multer.MulterError) {
         console.log(`Multer error: ${err}`);
@@ -88,31 +84,20 @@ const addProduct = async (req, res) => {
             filename
           );
 
-          // Check if the file exists before processing
-          // if (!fs.existsSync(file.path)) {
-          //   console.log(`Input file is missing: ${file.path}`);
-          //   res.status(400).send("Input file is missing");
-          //   return;
-          // }
-
           try {
-            // Process the image using Sharp
             const imageBuffer = await sharp(file.path)
               .resize(440, 440)
               .toBuffer();
 
-            // Write the processed image to the specified path
             fs.writeFileSync(imagePath, imageBuffer);
 
-            // Remove the original file after processing
             fs.unlinkSync(file.path);
 
             processedImages.push(filename);
           } catch (error) {
             console.log(`Error occurred while processing the image: ${error}`);
-            // Handle the error appropriately
             res.status(500).send("Error processing the image");
-            return; // Stop further execution
+            return;
           }
         }
 
@@ -146,7 +131,6 @@ const addProduct = async (req, res) => {
 // List/ Unlist Products.
 const toggleProductStatus = async (req, res) => {
   try {
-    console.log(`Toggling Product Status.`);
     let id = req.query.id;
     const product = await Product.findById(id);
     if (!product) {
@@ -165,10 +149,8 @@ const toggleProductStatus = async (req, res) => {
 const loadEditProduct = async (req, res) => {
   try {
     const id = req.query.id;
-    console.log(`id: ${id}`);
     const Categories = await Category.find({ isUnlisted: false });
     const product = await Product.findById(id);
-    console.log(`Editing the product : ${product.name}`);
     res.render("edit_product", { product: product, categories: Categories });
   } catch (error) {
     console.log(`Error loading Edit Products`);
@@ -178,10 +160,7 @@ const loadEditProduct = async (req, res) => {
 // Edit product.
 const editProduct = async (req, res) => {
   try {
-    // console.log(`Adding New Product to DB.`);
-    console.log(req.body);
     const { id } = req.query;
-    console.log(id);
 
     upload(req, res, async function (err) {
       if (err instanceof multer.MulterError) {
@@ -193,11 +172,6 @@ const editProduct = async (req, res) => {
         res.status(500).send("Unknown Error Occurred. The Error: ", err);
         return;
       }
-      // if (!req.files || req.files.length === 0) {
-      // res.status(400).send(`No images uploaded.`);
-      // return;
-      // req.files =
-      // }
 
       try {
         const processedImages = [];
@@ -211,29 +185,18 @@ const editProduct = async (req, res) => {
             filename
           );
 
-          // Check if the file exists before processing
-          // if (!fs.existsSync(file.path)) {
-          //   console.log(`Input file is missing: ${file.path}`);
-          //   res.status(400).send("Input file is missing");
-          //   return;
-          // }
-
           try {
-            // Process the image using Sharp
             const imageBuffer = await sharp(file.path)
               .resize(440, 440)
               .toBuffer();
 
-            // Write the processed image to the specified path
             fs.writeFileSync(imagePath, imageBuffer);
 
-            // Remove the original file after processing
             fs.unlinkSync(file.path);
 
             processedImages.push(filename);
           } catch (error) {
             console.log(`Error occurred while processing the image: ${error}`);
-            // Handle the error appropriately
             res.status(500).send("Error processing the image");
             return; // Stop further execution
           }
@@ -269,31 +232,17 @@ const editProduct = async (req, res) => {
 // delete single images in edit product
 const deleteImage = async (req, res) => {
   try {
-    // console.log(req.body);
-    // console.log(req.query);
     const { productId, index } = req.body;
-    // console.log(productId);
-    // Find the product by ID
     const product = await Product.findById(productId);
 
-    console.log(`deleting the image ${index} of ${product.name}`);
-
-    // Check if product exists
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Remove the image from the product's media array
     product.media.splice(index, 1);
-
-    // Save the updated product
     await product.save();
-
-    // Respond with success message
-    // res.status(200).json({ message: "Image deleted successfully" });
     res.redirect(`/admin/edit_product?id=${productId}`);
   } catch (error) {
-    // Handle errors
     console.error("Error deleting image:", error);
     res.status(500).json({ error: "Failed to delete image" });
   }
@@ -302,7 +251,6 @@ const deleteImage = async (req, res) => {
 //  get products
 const getProducts = async (req, res) => {
   try {
-    // console.log(`getting products.`);
     const products = await Product.find({ isUnlisted: false });
     res.json(products);
   } catch (error) {

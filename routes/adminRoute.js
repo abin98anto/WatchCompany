@@ -75,7 +75,6 @@ admin_route.get(
   productController.loadEditProduct
 );
 admin_route.post("/edit_product", productController.editProduct);
-// admin_route.post("/delete_product_image", productController.deleteImage);
 admin_route.post("/delete_image", productController.deleteImage);
 admin_route.get(
   "/load_products",

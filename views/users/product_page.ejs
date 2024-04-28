@@ -23,7 +23,6 @@ include('../partials/page_header.ejs') %>
 </style>
 
 
-
 <main class="main">
   <div class="page-header breadcrumb-wrap">
     <div class="container">
@@ -130,37 +129,29 @@ include('../partials/page_header.ejs') %>
                         ><i class="fi-rs-angle-small-up"></i
                       ></a>
                     </div>
-                    <div class="product-extra-link2">
-                      <% if (user) { %>
-                      <button class="button button-add-to-cart">
-                        Add to cart
-                      </button>
-                      <% } else { %>
-                        <button onclick="goHome()" class="button button-add-to-cart" > Add to Cart
-                      </button>
-                      <% } %>
-                      <% if (user) { %>
-                      <button type="submit" class="button button-add-to-cart">
-                        Buy Now
-                      </button>
-                      <% } else { %>
-                        <button onclick="goHome()" class="button button-add-to-cart">
-                        Buy Now
-                      </button>
-                      <% } %>
-                      <a
-                        aria-label="Add To Wishlist"
-                        class="action-btn hover-up"
-                        href="shop-wishlist.html"
-                        ><i class="fi-rs-heart"></i
-                      ></a>
-                      <a
-                        aria-label="Compare"
-                        class="action-btn hover-up"
-                        href="shop-compare.html"
-                        ><i class="fi-rs-shuffle"></i
-                      ></a>
-                    </div>
+                    <div class="detail-extra-link">
+    <% if (user) { %>
+      <button class="button button-add-to-cart" onclick="addToCart('<%= product._id %>')">
+        Add to Cart
+      </button>
+      <button class="button button-add-to-cart">
+        Buy Now
+      </button>
+    <% } else { %>
+      <button onclick="goHome()" class="button button-add-to-cart">
+        Add to Cart
+      </button>
+      <button onclick="goHome()" class="button button-add-to-cart">
+        Buy Now
+      </button>
+    <% } %>
+    <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html">
+      <i class="fi-rs-heart"></i>
+    </a>
+    <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html">
+      <i class="fi-rs-shuffle"></i>
+    </a>
+  </div>
                   </div>
                   <ul class="product-meta font-xs color-grey mt-50">
                     <li>
@@ -446,6 +437,8 @@ include('../partials/page_header.ejs') %>
   </section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
 <script>
   // Product image with zoom in feature.
   function showMainSlide(index) {
@@ -456,6 +449,7 @@ include('../partials/page_header.ejs') %>
     });
     images[index].style.display = 'block';
   }
+  
   window.onload = function() {
     showMainSlide(0);
   };
@@ -466,36 +460,59 @@ include('../partials/page_header.ejs') %>
   }
 
   // add to cart
-const addToCartButton = document.querySelector('.button-add-to-cart');
-addToCartButton.addEventListener('click', addToCart);
+async function addToCart(productId) {
+  try {
+    const response = await fetch('/check_product_in_cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        productId: productId
+      })
+    });
 
-function addToCart(event) {
-  console.log(`adding to cart.`);
-  event.preventDefault();
-
-  const quantity = document.querySelector('.qty-val').textContent;
-  fetch('/add_to_cart', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      productId: '<%= product._id %>',
-      quantity: quantity,
-    }),
-  })
-  .then(response => {
     if (!response.ok) {
-      throw new Error('Failed to add product to cart');
+      throw new Error('Failed to check product in cart');
     }
-    return response.json();
-  })
-  .then(data => {
-    console.log('Product added to cart successfully:', data);
-  })
-  .catch(error => {
+
+    const data = await response.json();
+
+    if (data.exists) {
+      Swal.fire({
+        title: 'Product Already in Cart',
+        text: 'This product is already in your cart.',
+        icon: 'warning',
+        confirmButtonText: "Go to Cart",
+        showCancelButton: true
+      }).then((value) => {
+        if (value.isConfirmed) {
+          window.location.href = '/cart';
+        }
+      });
+    } else {
+      const addToCartResponse = await fetch('/add_to_cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: productId
+        })
+      });
+
+      if (!addToCartResponse.ok) {
+        throw new Error('Failed to add product to cart');
+      }
+
+      const cartData = await addToCartResponse.json();
+      console.log('Product added to cart successfully:', cartData);
+      window.location.href = '/cart';
+    }
+  } catch (error) {
     console.error('Error adding product to cart:', error.message);
-  });
+    swal('Error', 'Failed to add product to cart. Please try again later.', 'error');
+  }
 }
 
 </script>

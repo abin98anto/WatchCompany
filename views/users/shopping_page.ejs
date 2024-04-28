@@ -19,12 +19,13 @@ include('../partials/page_header.ejs') %>
       </div>
     </div>
   </div>
+
   <!-- product lists -->
   <section class="mt-50 mb-50">
     <div class="container">
       <div class="row flex-row-reverse">
         <div class="col-lg-9">
-            <!-- sorting -->
+            <!-- sorting top bar -->
           <div class="shop-product-fillter">
             <div class="totall-product">
               <p>
@@ -94,11 +95,17 @@ include('../partials/page_header.ejs') %>
                   <div class="product-price">
                     <span>$<%= products[i].price %></span>
                   </div>
+                  <form action="/"></form>
                   <div class="product-action-1 show">
                     <a
                       aria-label="Add To Cart"
                       class="action-btn hover-up"
-                      href="#"
+                      <% if (user) { %>
+                        onclick="addToCart('<%= products[i]._id %>')"
+                        <% } else { %>
+                          onclick="goHome()"
+                          <% } %>
+                      
                       ><i class="fi-rs-shopping-bag-add"></i
                     ></a>
                     <a
@@ -174,48 +181,71 @@ include('../partials/page_header.ejs') %>
 </main>
 
 
-<!-- <script>
-  function filterByCategory(category) {
-    fetch('/filterByCategory?category=' + category)
-      .then(response => response.json())
-      .then(data => {
-        // Replace the product grid with filtered products
-        document.querySelector('.product-grid-3').innerHTML = data.productsHTML;
-      });
-  }
-
-  function sortProducts(sortBy) {
-    fetch('/sortProducts?sortBy=' + sortBy)
-      .then(response => response.json())
-      .then(data => {
-        // Replace the product grid with sorted products
-        document.querySelector('.product-grid-3').innerHTML = data.productsHTML;
-      });
-  }
-</script> -->
-
-<!-- Inside your EJS template -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 <script>
-  function filterByCategory(category) {
-    fetch('/filterByCategory?category=' + category)
-      .then(response => response.json())
-      .then(data => {
-        // Replace the product grid with filtered products
-        document.querySelector('.product-grid-3').innerHTML = data.productsHTML;
+
+// add to cart.
+  async function addToCart(productId) {
+  try {
+    const response = await fetch('/check_product_in_cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        productId: productId
       })
-      .catch(error => console.error('Error filtering products:', error));
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to check product in cart');
+    }
+
+    const data = await response.json();
+
+    if (data.exists) {
+      Swal.fire({
+        title: 'Product Already in Cart',
+        text: 'This product is already in your cart.',
+        icon: 'warning',
+        confirmButtonText: "Go to Cart",
+        showCancelButton: true
+      }).then((value) => {
+        if (value.isConfirmed) {
+          window.location.href = '/cart';
+        }
+      });
+    } else {
+      const addToCartResponse = await fetch('/add_to_cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: productId
+        })
+      });
+
+      if (!addToCartResponse.ok) {
+        throw new Error('Failed to add product to cart');
+      }
+
+      const cartData = await addToCartResponse.json();
+      console.log('Product added to cart successfully:', cartData);
+      window.location.href = '/cart';
+    }
+  } catch (error) {
+    console.error('Error adding product to cart:', error.message);
+    swal('Error', 'Failed to add product to cart. Please try again later.', 'error');
+  }
+}
+
+ // go to home page (for add to cart).
+  function goHome() {
+    window.location.href = '/login';
   }
 
-  function sortProducts(sortBy) {
-    fetch('/sortProducts?sortBy=' + sortBy)
-      .then(response => response.json())
-      .then(data => {
-        // Replace the product grid with sorted products
-        document.querySelector('.product-grid-3').innerHTML = data.productsHTML;
-      })
-      .catch(error => console.error('Error sorting products:', error));
-  }
 </script>
 
 
