@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 // load controllers.
+const Orders = require("../models/orderModel");
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 const User = require("../models/userModel");
@@ -232,14 +233,12 @@ const loadForgotPassword = async (req, res) => {
 // to load landing page.
 const loadLandingPage = async (req, res) => {
   try {
-    console.log(`Rendering Landing Page.`);
     if (req.user) {
       const user = await User.findById(req.user.id);
       const cart = await Cart.findById(req.user.id);
       const products = await Product.find({ isUnlisted: false });
       const categories = await Category.find({
         isUnlisted: false,
-        isDeleted: false,
       });
       req.session.userData = user.id;
       res.render("landing_page", {
@@ -364,6 +363,91 @@ const loadShop = async (req, res) => {
     });
   } catch (error) {
     console.log(`error rendering shop page.`);
+  }
+};
+
+// Get Products
+const getProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isUnlisted: false });
+    res.json(products);
+  } catch (error) {
+    console.log(`error getting the products : ${error}`);
+  }
+};
+
+// Sort By Category
+const byCategory = async (req, res) => {
+  try {
+    const { category } = req.query;
+    let products;
+    category != "Show all"
+      ? (products = await Product.find({ category }))
+      : (products = await Product.find());
+    res.json(products);
+  } catch (error) {
+    console.error("Error fetching products by category:", error.message);
+    res.status(500).json({ error: "Failed to fetch products by category" });
+  }
+};
+
+// Sort By Everything
+const sortingProducts = async (req, res) => {
+  try {
+    const { sortBy } = req.query;
+    let sortOption = {};
+    if (sortBy == "lowToHigh") {
+      sortOption = { price: 1 };
+    } else if (sortBy == "highToLow") {
+      sortOption = { price: -1 };
+    } else if (sortBy == "atoz") {
+      sortOption = { name: 1 };
+    } else if (sortBy == "ztoa") {
+      sortOption = { name: -1 };
+    }
+    const sortedProducts = await Product.find({
+      isUnlisted: { $ne: true },
+    }).sort(sortOption);
+    res.json(sortedProducts);
+  } catch (error) {
+    console.log(`error sorting products : ${error}`);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Search Products
+// const searchProducts = async (req, res) => {
+//   const { query } = req.query;
+
+//   try {
+//     const searchResults = await Product.find({
+//       $or: [
+//         { name: { $regex: new RegExp(query, "i") } },
+//         { category: { $regex: new RegExp(query, "i") } },
+//       ],
+//     });
+
+//     res.json(searchResults);
+//   } catch (error) {
+//     console.error("Error searching products:", error);
+//     res.status(500).json({ error: "Failed to fetch search results" });
+//   }
+// };
+const searchProducts = async (req, res) => {
+  const { query } = req.query;
+
+  try {
+    const searchResults = await Product.find({
+      $or: [
+        { name: { $regex: new RegExp(query, "i") } },
+        { category: { $regex: new RegExp(query, "i") } },
+      ],
+    });
+
+    res.json(searchResults);
+  } catch (error) {
+    console.error("Error searching products:", error);
+    res.status(500).json({ error: "Failed to fetch search results" });
   }
 };
 
@@ -514,27 +598,15 @@ const updateAddress = async (req, res) => {
 // Delete Address
 const deleteAddress = async (req, res) => {
   try {
-    const i = req.query.i;
-    User.findById(req.user.id, (err, user) => {
-      if (err) {
-        res.status(500).json({ error: "Internal server error" });
-      } else {
-        if (!user) {
-          res.status(404).json({ error: "User not found" });
-        } else {
-          user.address.splice(i, 1);
-          user.save((err, savedUser) => {
-            if (err) {
-              res.status(500).json({ error: "Internal server error" });
-            } else {
-              res.json({ message: "Address deleted successfully" });
-            }
-          });
-        }
-      }
-    });
+    const { index } = req.query;
+    const id = req.session.userData || req.user.id;
+    const user = await User.findById(id);
+    user.address.splice(index, 1);
+    await user.save();
+    res.json({ message: "Address deleted successfully" });
   } catch (error) {
-    console.log(`error deleting address.`);
+    console.error("Error deleting address:", error);
+    res.status(500).json({ error: "Failed to delete address" });
   }
 };
 
@@ -544,19 +616,24 @@ const loadMyOrders = async (req, res) => {
     const user = await User.findById(req.session.userData);
     const products = await Product.find({ isUnlisted: false });
     const categories = await Category.find({ isUnlisted: false });
+    const orders = await Orders.find().sort({ createdOn: -1 }); // Sort orders by createdOn in descending order
+
     let google;
     req.user
       ? ((google = true), (logout = "/auth/logout"))
       : ((google = false), (logout = "/logout"));
+
     res.render("my_orders", {
       categories: categories,
       products: products,
       user: user,
       google,
       logout,
+      orders,
     });
   } catch (error) {
-    console.log(`Error loading my_orders`);
+    console.log(`Error loading my_orders: ${error}`);
+    res.status(500).send("Internal Server Error");
   }
 };
 
@@ -612,7 +689,7 @@ const passwordOTP = async (req, res) => {
 
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
-        console.log('error sending mail to resent password.',error);
+        console.log("error sending mail to resent password.", error);
         return res.status(500).send("Error sending OTP email.");
       } else {
         res.status(200).send("OTP Email sent successfully!");
@@ -667,6 +744,7 @@ const changePassword = async (req, res) => {
   }
 };
 
+// Reset password.
 const resetPassword = async (req, res) => {
   try {
     const { id, oldPassword, newPassword } = req.body;
@@ -716,4 +794,8 @@ module.exports = {
   changePassword,
   resetPassword,
   deleteAddress,
+  byCategory,
+  sortingProducts,
+  searchProducts,
+  getProducts,
 };

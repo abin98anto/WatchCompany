@@ -1,0 +1,1077 @@
+<%- include('../partials/header.ejs') %> <%-
+include('../partials/page_header.ejs') %>
+
+<style>
+  .swal2-input,
+  .swal2-select {
+    font-size: 14px;
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+  }
+
+  .btn {
+    transition: transform 0.2s ease;
+    background-color: black;
+  }
+
+  .btn:hover {
+    transform: scale(1.05);
+    background-color: black;
+  }
+
+  .address {
+    transition: box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+
+  .address:hover, .address.clicked {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<main class="main">
+  <!-- Breadcrumbs -->
+  <div class="page-header breadcrumb-wrap pb-5 pt-5"  style="padding: 0px">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html" rel="nofollow">Home</a>
+        <span> Shop </span><span> Checkout</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="mt-30 mb-30">
+    <div class="container d-flex">
+
+      <!-- Payment Side -->
+      <div class="col-md-7">
+        <div class="order_review">
+          <div class="mb-20 text-center">
+            <h4>Your Orders</h4>
+            <p class="text-end"><a href="/cart">Edit</a></p>
+          </div>
+          <div class="table-responsive order_table text-center">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th colspan="2">Product</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <span class="hidden" id="userId"><%= user.id %></span>
+              <tbody>
+                <% cart.products.forEach((prod)=> { %>
+                <tr class="products">
+                  <td class="product-thumbnail">
+                    <img class="image" src="/uploads/<%= prod.productID.media[0] %>" alt="<%= prod.productID.name %>" />
+                    <span class="hidden productImages"> <%= prod.productID.media %> </span>
+                  </td>
+                  <td>
+                    <h5>
+                      <a class="productName" href="shop-product-full.html"><%= prod.productID.name %></a>
+                    </h5>
+                  </td>
+                  <td class="productPrice"><%= prod.productID.price %></td>
+                  <td><span id="<%= prod.productID.name %>" data-product-id="<%= prod.productID._id %>" class="product-qty"><%= prod.quantity %></span></td>
+                  <td class="subtotal-value">$<%= prod.quantity * prod.productID.price %></td>
+                </tr>
+                <% }); %>
+                <tr>
+                  <th colspan="2" >SubTotal</th>
+                  <td class="product-subtotal" colspan="3" id="cart-total"></td>
+                </tr>
+                <tr>
+                  <th colspan="2">Shipping</th>
+                  <td colspan="3"><em>Free Shipping</em></td>
+                </tr>
+                <tr>
+                  <th colspan="2">Total</th>
+                  <td colspan="3" class="product-subtotal">
+                    <span class="billTotal font-xl text-brand fw-900" id="grand-total"></span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+          <div class="payment_method">
+            <div class="mb-25">
+              <h5>Payment</h5>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="paymentMethod" id="cod" >
+              <label class="form-check-label" for="cod">
+                Cash on Delivery
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="paymentMethod" id="wallet">
+              <label class="form-check-label" for="wallet">
+                Wallet
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay">
+              <label class="form-check-label" for="razorpay">
+                Razor Pay
+              </label>
+            </div>
+          </div>
+          <div class="text-center">
+            <a href="#" id="placeOrder" class="btn mt-30">Place Order</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Side -->
+      <div class="col-md-5 ml-10 flex-grow h-50" style="border: 1px solid lightgray; border-radius: 5px;">
+        <div class="heading d-flex p-20" style="justify-content: space-between;">
+          <h4>Address Book</h4>
+          <button id="addNewAddressBtn" class="btn" onclick="addNewAddress()">Add New Address</button>
+        </div>
+        <div class="addresses d-flex flex-wrap p-20" style="justify-content: space-around;">
+          <% if (user.address.length) { %>
+            <% for (let i=0; i<user.address.length; i++) { %>
+              <div class="address p-20" style="width: 200px;" id="<%= i %>" onclick="toggleClicked(this)">
+                <div class="add-heading d-flex justify-content-between">
+                  <h5 class="addressType"><%= user.address[i].addressType %></h5>
+                  <input type="hidden" value="<%= i %>">
+                  <button id="<%= i %>" onclick="fetchAndDisplayAddress('<%= i %>')">Edit</button>
+                </div>
+                <p>
+                  <span class="houseName"> <%= user.address[i].houseName %>,</span><br>
+                  <span class="street"> <%= user.address[i].street %>,</span><br>
+                  <span class="city"> <%= user.address[i].city %>,</span><br>
+                  <span class="state"> <%= user.address[i].state %>,</span><br>
+                  <span class="country"> <%= user.address[i].country %>,</span><br>
+                  <span class="pincode"> <%= user.address[i].pincode %>,</span><br>
+                  <span class="phoneNumber"> <%= user.address[i].phoneNumber %></span>
+                </p>
+              </div>
+            <% }; %>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+  let addressIndex;
+
+  // Address Click Functionality.
+  function toggleClicked(clickedAddress) {
+        const addresses = document.querySelectorAll('.addresses .address');
+        addresses.forEach(address => {
+            if (address !== clickedAddress) {
+                address.classList.remove('clicked');
+            }
+        });
+        addressIndex = clickedAddress.id;
+        clickedAddress.classList.toggle('clicked');
+  }
+
+  // Edit address functionality.
+  function fetchAndDisplayAddress(addressIndex) {
+  fetch(`/get_address?index=${addressIndex}`, {
+    method: "POST",
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(address => {
+    Swal.fire({
+      title: 'Edit Address',
+      html: `
+        <input id="houseNameInput" class="swal2-input" value="${address.address.houseName}" placeholder="House Name">
+        <input id="streetInput" class="swal2-input" value="${address.address.street}" placeholder="Street">
+        <input id="cityInput" class="swal2-input" value="${address.address.city}" placeholder="City">
+        <input id="stateInput" class="swal2-input" value="${address.address.state}" placeholder="State">
+        <input id="countryInput" class="swal2-input" value="${address.address.country}" placeholder="Country">
+        <input id="pincodeInput" class="swal2-input" value="${address.address.pincode}" placeholder="Pincode">
+        <input id="phoneInput" class="swal2-input" value="${address.address.phoneNumber}" placeholder="Phone Number">
+        <select id="addressTypeInput" class="swal2-select" style="width: 100%">
+          <option value="Home" ${address.address.addressType === 'Home' ? 'selected' : ''}>Home</option>
+          <option value="Work" ${address.address.addressType === 'Work' ? 'selected' : ''}>Work</option>
+          <option value="Other" ${address.address.addressType === 'Other' ? 'selected' : ''}>Other</option>
+        </select>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Save Changes',
+      preConfirm: () => {
+        const houseName = document.getElementById('houseNameInput').value;
+        const street = document.getElementById('streetInput').value;
+        const city = document.getElementById('cityInput').value;
+        const state = document.getElementById('stateInput').value;
+        const country = document.getElementById('countryInput').value;
+        const pincode = document.getElementById('pincodeInput').value;
+        const phoneNumber = document.getElementById('phoneInput').value;
+        const addressType = document.getElementById('addressTypeInput').value;
+
+        if (!/^\d+$/.test(pincode)) {
+          Swal.showValidationMessage('Please enter only numbers for Pincode.');
+          return false;
+        }
+
+        if (!/^\d+$/.test(phoneNumber)) {
+          Swal.showValidationMessage('Please enter only numbers for Phone Number.');
+          return false;
+        }
+
+        return {
+          houseName: houseName,
+          street: street,
+          city: city,
+          state: state,
+          country: country,
+          pincode: pincode,
+          phoneNumber: phoneNumber,
+          addressType: addressType
+        };
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/update_address?index=${addressIndex}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(result.value)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(updatedAddress => {
+          console.log(updatedAddress);
+          const addressElement = document.querySelector(`.addresses .address:nth-child(${parseInt(addressIndex) + 1})`);
+          addressElement.querySelector('h5').innerText = updatedAddress.address.addressType;
+          addressElement.querySelector('p').innerHTML = `
+            ${updatedAddress.address.houseName},<br>
+            ${updatedAddress.address.street},<br>
+            ${updatedAddress.address.city},<br>
+            ${updatedAddress.address.state}, ${updatedAddress.address.country},<br>
+            ${updatedAddress.address.pincode}<br>
+            Ph: ${updatedAddress.address.phoneNumber}
+          `;
+
+          Swal.fire('Address Updated', 'Your address has been updated successfully!', 'success');
+        })
+        .catch(error => {
+          console.error('Error updating address:', error);
+          Swal.fire('Error', 'Failed to update address. Please try again.', 'error');
+        });
+      }
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching address:', error);
+    Swal.fire('Error', 'Failed to fetch address details. Please try again.', 'error');
+  });
+}
+
+  // Add address functionality.
+  document.getElementById('addNewAddressBtn').addEventListener('click', function() {
+    Swal.fire({
+      title: 'Add New Address',
+      html:
+        '<input id="houseName" class="swal2-input" placeholder="House Name">' +
+        '<input id="street" class="swal2-input" placeholder="Street Name">' +
+        '<input id="city" class="swal2-input" placeholder="City">' +
+        '<input id="state" class="swal2-input" placeholder="State">' +
+        '<input id="country" class="swal2-input" placeholder="Country">' +
+        '<input id="pincode" class="swal2-input" placeholder="Pincode">' +
+        '<input id="phoneNumber" class="swal2-input" placeholder="Phone Number">' +
+        '<select id="addressType" class="swal2-select" style="width: 100%"><option value="Home">Home</option><option value="Work">Work</option><option value="Other">Other</option></select>',
+      showCancelButton: true,
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'Cancel',
+      focusConfirm: false,
+      preConfirm: () => {
+        const houseName = Swal.getPopup().querySelector('#houseName').value;
+        const street = Swal.getPopup().querySelector('#street').value;
+        const city = Swal.getPopup().querySelector('#city').value;
+        const state = Swal.getPopup().querySelector('#state').value;
+        const country = Swal.getPopup().querySelector('#country').value;
+        const pincode = Swal.getPopup().querySelector('#pincode').value;
+        const phoneNumber = Swal.getPopup().querySelector('#phoneNumber').value;
+        const addressType = Swal.getPopup().querySelector('#addressType').value;
+
+        // Form validation
+        if (!houseName || !street || !city || !state || !country || !pincode || !phoneNumber) {
+          Swal.showValidationMessage('All fields are required');
+          return false;
+        }
+
+        // Validate pincode and phone number
+        const pincodePattern = /^\d{6}$/;
+        const phoneNumberPattern = /^\d+$/;
+
+        if (!pincodePattern.test(pincode)) {
+          Swal.showValidationMessage('Invalid pincode. Please enter a 6-digit number');
+          return false;
+        }
+
+        if (!phoneNumberPattern.test(phoneNumber)) {
+          Swal.showValidationMessage('Invalid phone number. Only numbers are allowed');
+          return false;
+        }
+
+        // If all validations pass, submit the form
+        fetch('/add_address', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            houseName,
+            street,
+            city,
+            state,
+            country,
+            pincode,
+            phoneNumber,
+            addressType
+          }),
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Success:', data);
+          window.location.reload();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      }
+    });
+  });
+
+  // Update Cart Total
+  function updateCartTotals() {
+  const subtotalElements = document.querySelectorAll(".subtotal-value");
+  let newCartTotal = 0;
+
+  subtotalElements.forEach((subEl) => {
+    const subValue = parseFloat(subEl.textContent.trim().replace("$", ""));
+    newCartTotal += subValue;
+  });
+
+  const cartTotalElement = document.getElementById("cart-total");
+  const grandTotalElement = document.getElementById("grand-total");
+
+  if (cartTotalElement && grandTotalElement) {
+    const formattedTotal = `$${newCartTotal.toFixed(2)}`;
+    cartTotalElement.textContent = formattedTotal;
+    grandTotalElement.textContent = formattedTotal;
+  }
+}
+
+  // Initial cart total calculation
+  document.addEventListener("DOMContentLoaded", () => {
+  updateCartTotals();
+});
+
+  // Function to check stock availability for a product
+async function checkStockAvailability(productId, quantity) {
+  try {
+    const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error checking stock availability:', error);
+    return { error: 'Internal server error' };
+  }
+}
+
+  // Function to remove a product from the cart
+  function removeFromCart(productId) {
+  fetch(`/deleteItem?productId=${productId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to delete item from cart');
+    }
+    console.log('Item deleted from cart successfully');
+    location.reload();
+  })
+  .catch(error => {
+    console.error('Error deleting item from cart:', error);
+  });
+}
+
+  // Function to redirect to the cart page
+  function redirectToCart() {
+  window.location.href = '/cart';
+}
+
+  // Place Order
+//   document.querySelector('#placeOrder').addEventListener('click', async function(event) {
+//   event.preventDefault();
+
+//   // Check if a payment method is selected
+//   const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+//   if (!selectedPaymentMethod) {
+//     Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
+//     return;
+//   }
+
+//   // Check if an address is selected
+//   if (addressIndex === undefined) {
+//     Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
+//     return;
+//   }
+
+//   const cartProducts = document.querySelectorAll(".product-qty");
+//   const cart = document.querySelectorAll(".qty-val");
+//   // if (cart) {
+//   console.log(`cart : ${cartProducts}`);
+//     let allProductsAvailable = true;
+//     for (const product of cart) {
+//       console.log('product : ', product);
+//       const productId = product.id.replace("qty-", "");
+//       const quantityElement = product.textContent.trim();
+//       if (quantityElement) {
+//         const quantity = parseInt(quantityElement);
+//         console.log('quantity : ', quantity);
+//         const response = await fetch(
+//           `/checkStock?productId=${productId}&quantity=${quantity}`
+//         );
+//         if (response.ok) {
+//           const data = await response.json();
+//           const { productName, available, stock } = data;
+//           if (quantity > stock) {
+//             allProductsAvailable = false;
+//             Swal.fire({
+//               icon: "error",
+//               title: "Not Enough Stock",
+//               text: `There are ${stock} stock left for ${productName}.`,
+//               confirmButtonText: "OK",
+//             });
+//             break;
+//           }
+//         } else {
+//           console.error("Failed to check stock:", response.statusText);
+//           allProductsAvailable = false;
+//           break;
+//         }
+//       } else {
+//         console.error(
+//           `Quantity element not found for product ID: ${productId}`
+//         );
+//         allProductsAvailable = false;
+//         break;
+//       }
+//     // } else {
+
+//   try {
+//     console.log(`trying...`);
+//     const productRows = document.querySelectorAll('.products');
+//     // const productsToCheck = [];
+
+//     // Collect product IDs and quantities for stock check
+//     // productRows.forEach(row => {
+//     //   const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
+//     //   const quantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+//     //   productsToCheck.push({ productId, quantity });
+//     // });
+
+//     // Array to hold products with insufficient stock
+//     // const outOfStockProducts = [];
+
+//     // Check stock availability for each product
+//     // for (const product of productsToCheck) {
+//     //   const { productId, quantity } = product;
+//     //   const stockData = await checkStockAvailability(productId, quantity);
+
+//     //   if (!stockData.available) {
+//     //     outOfStockProducts.push({ productName: stockData.productName, availableStock: stockData.stock });
+//     //   }
+//     // }
+
+//     // if (outOfStockProducts.length > 0) {
+//     //   let message = "The following products do not have sufficient stock:<br><ul>";
+//     //   outOfStockProducts.forEach(product => {
+//     //     message += `<li>${product.productName} (Available Stock: ${product.availableStock})</li>`;
+//     //   });
+//     //   message += "</ul>";
+
+//     //   Swal.fire('Insufficient Stock', message, 'error');
+//     // } else {
+//       const userId = document.querySelector("#userId").textContent.trim();
+//       console.log(`userId : ${userId}`);
+//       const addressElement = document.getElementById(addressIndex);
+//       console.log('address element : ',addressElement)
+//       if (!addressElement) {
+//         Swal.fire('Error', 'Selected address not found.', 'error');
+//         return;
+//       }
+
+//       const addressType = addressElement.querySelector('.addressType').textContent.trim();
+//       const houseName = addressElement.querySelector('.houseName').textContent.trim();
+//       const street = addressElement.querySelector('.street').textContent.trim();
+//       const city = addressElement.querySelector('.city').textContent.trim();
+//       const state = addressElement.querySelector('.state').textContent.trim();
+//       const country = addressElement.querySelector('.country').textContent.trim();
+//       const pincode = addressElement.querySelector('.pincode').textContent.trim();
+//       const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
+
+//       const address = {
+//         addressType,
+//         houseName,
+//         street,
+//         city,
+//         state,
+//         country,
+//         pincode,
+//         phoneNumber
+//       };
+
+//       const products = [];
+
+//       // Gather order details from the page
+//       productRows.forEach(row => {
+//         const productName = row.querySelector('.productName').textContent.trim();
+//         const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
+//         const productPriceText = row.querySelector('.productPrice').textContent.trim();
+//         const productPrice = parseFloat(productPriceText.replace('$', ''));
+//         const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+//         const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
+//         const subtotal = parseFloat(subtotalText.replace('$', ''));
+
+//         products.push({
+//           productName,
+//           media: productImage,
+//           price: productPrice,
+//           quantity: productQuantity,
+//           subtotal
+//         });
+//       });
+
+//       const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
+
+//       const orderDetails = {
+//         user: userId,
+//         products,
+//         orderId : "order number",
+//         orderStatus: 'pending',
+//         billTotal,
+//         address,
+//         paymentMethod: selectedPaymentMethod.id,
+//         paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
+//         createdOn: new Date().toISOString()
+//       };
+
+//       // Place the order
+//       const response = await fetch('/createOrder', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(orderDetails)
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to place order');
+//       }
+
+//       const savedOrder = await response.json();
+
+//       // Show success message and redirect
+//       Swal.fire({
+//         icon: 'success',
+//         title: 'Order Placed Successfully',
+//         text: 'You will now be redirected to your orders.',
+//         showConfirmButton: false,
+//         timer: 2000
+//       }).then(() => {
+//         window.location.href = '/my_orders';
+//       });
+//     // }
+
+//   } catch (error) {
+//     console.error('Error placing order:', error);
+//     Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
+//   }
+// }
+// });
+
+
+// Place Order
+// document.querySelector('#placeOrder').addEventListener('click', async function(event) {
+//   event.preventDefault();
+
+//   // Check if a payment method is selected
+//   const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+//   if (!selectedPaymentMethod) {
+//     Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
+//     return;
+//   }
+
+//   // Check if an address is selected
+//   if (addressIndex === undefined) {
+//     Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
+//     return;
+//   }
+
+//   try {
+//     // Fetch all product rows
+//     const productRows = document.querySelectorAll('.products');
+
+//     // Prepare an array to hold products for the order
+//     const products = [];
+
+//     // Iterate over each product row to gather order details
+//     productRows.forEach(row => {
+//       const productName = row.querySelector('.productName').textContent.trim();
+//       const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
+//       const productPriceText = row.querySelector('.productPrice').textContent.trim();
+//       const productPrice = parseFloat(productPriceText.replace('$', ''));
+//       const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+//       const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
+//       const subtotal = parseFloat(subtotalText.replace('$', ''));
+
+//       // Construct product object
+//       const product = {
+//         productName,
+//         media: productImage,
+//         price: productPrice,
+//         quantity: productQuantity,
+//         subtotal
+//       };
+
+//       // Push product to the products array
+//       products.push(product);
+//     });
+
+//     // Calculate total bill amount
+//     const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
+
+//     // Fetch user ID from hidden span element
+//     const userId = document.querySelector("#userId").textContent.trim();
+
+//     // Fetch selected address details from the DOM
+//     const addressElement = document.getElementById(addressIndex);
+//     if (!addressElement) {
+//       throw new Error('Selected address not found.');
+//     }
+
+//     const addressType = addressElement.querySelector('.addressType').textContent.trim();
+//     const houseName = addressElement.querySelector('.houseName').textContent.trim();
+//     const street = addressElement.querySelector('.street').textContent.trim();
+//     const city = addressElement.querySelector('.city').textContent.trim();
+//     const state = addressElement.querySelector('.state').textContent.trim();
+//     const country = addressElement.querySelector('.country').textContent.trim();
+//     const pincode = addressElement.querySelector('.pincode').textContent.trim();
+//     const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
+
+//     // Construct address object
+//     const address = {
+//       addressType,
+//       houseName,
+//       street,
+//       city,
+//       state,
+//       country,
+//       pincode,
+//       phoneNumber
+//     };
+
+//     // Prepare order details object
+//     const orderDetails = {
+//       user: userId,
+//       products,
+//       orderId: "order number", // Replace with actual order ID logic
+//       orderStatus: 'pending',
+//       billTotal,
+//       address,
+//       paymentMethod: selectedPaymentMethod.id,
+//       paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
+//       createdOn: new Date().toISOString()
+//     };
+
+//     // Place the order via API call
+//     const response = await fetch('/createOrder', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify(orderDetails)
+//     });
+
+//     // Check if order placement was successful
+//     if (!response.ok) {
+//       throw new Error('Failed to place order.');
+//     }
+
+//     // Retrieve the saved order data
+//     const savedOrder = await response.json();
+
+//     // Display success message and redirect to orders page
+//     Swal.fire({
+//       icon: 'success',
+//       title: 'Order Placed Successfully',
+//       text: 'You will now be redirected to your orders.',
+//       showConfirmButton: false,
+//       timer: 2000
+//     }).then(() => {
+//       window.location.href = '/my_orders';
+//     });
+
+//   } catch (error) {
+//     console.error('Error placing order:', error);
+//     Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
+//   }
+// });
+
+  
+// Place Order
+// document.querySelector('#placeOrder').addEventListener('click', async function(event) {
+//   event.preventDefault();
+
+//   // Check if a payment method is selected
+//   const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+//   if (!selectedPaymentMethod) {
+//     Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
+//     return;
+//   }
+
+//   // Check if an address is selected
+//   if (addressIndex === undefined) {
+//     Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
+//     return;
+//   }
+
+//   try {
+//     // Fetch all product rows
+//     const productRows = document.querySelectorAll('.products');
+
+//     // Array to hold out-of-stock products
+//     const outOfStockProducts = [];
+
+//     // Iterate over each product row to check stock availability
+//     for (const row of productRows) {
+//       const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
+//       const productName = row.querySelector('.productName').textContent.trim();
+//       const quantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+
+//       // Check stock availability for the product
+//       const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`);
+//       if (response.ok) {
+//         const data = await response.json();
+//         const { available, stock } = data;
+
+//         if (!available) {
+//           // Product is out of stock or insufficient stock
+//           outOfStockProducts.push({ productName, availableStock: stock });
+//         }
+//       } else {
+//         throw new Error('Failed to check stock availability.');
+//       }
+//     }
+
+//     // If any products are out of stock, display a warning message
+//     if (outOfStockProducts.length > 0) {
+//       let message = "The following products do not have sufficient stock:<br>";
+//       outOfStockProducts.forEach(product => {
+//         message += `${product.productName} (Available Stock: ${product.availableStock})<br>`;
+//       });
+
+//       Swal.fire({
+//         icon: "error",
+//         title: "Insufficient Stock",
+//         html: message,
+//         confirmButtonText: "OK"
+//       });
+//       return;
+//     }
+
+//     // If all products have sufficient stock, proceed with order placement
+//     const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
+//     const userId = document.querySelector("#userId").textContent.trim();
+
+//     const addressElement = document.getElementById(addressIndex);
+//     if (!addressElement) {
+//       throw new Error('Selected address not found.');
+//     }
+
+//     const addressType = addressElement.querySelector('.addressType').textContent.trim();
+//     const houseName = addressElement.querySelector('.houseName').textContent.trim();
+//     const street = addressElement.querySelector('.street').textContent.trim();
+//     const city = addressElement.querySelector('.city').textContent.trim();
+//     const state = addressElement.querySelector('.state').textContent.trim();
+//     const country = addressElement.querySelector('.country').textContent.trim();
+//     const pincode = addressElement.querySelector('.pincode').textContent.trim();
+//     const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
+
+//     const address = {
+//       addressType,
+//       houseName,
+//       street,
+//       city,
+//       state,
+//       country,
+//       pincode,
+//       phoneNumber
+//     };
+
+//     const orderDetails = {
+//       user: userId,
+//       products: [], // This will be populated with detailed product info in next step
+//       orderId: "order number", // Replace with actual order ID logic
+//       orderStatus: 'pending',
+//       billTotal,
+//       address,
+//       paymentMethod: selectedPaymentMethod.id,
+//       paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
+//       createdOn: new Date().toISOString()
+//     };
+
+//     // Populate products array with detailed info for orderDetails
+//     productRows.forEach(row => {
+//       const productName = row.querySelector('.productName').textContent.trim();
+//       const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
+//       const productPriceText = row.querySelector('.productPrice').textContent.trim();
+//       const productPrice = parseFloat(productPriceText.replace('$', ''));
+//       const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+//       const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
+//       const subtotal = parseFloat(subtotalText.replace('$', ''));
+
+//       const product = {
+//         productName,
+//         media: productImage,
+//         price: productPrice,
+//         quantity: productQuantity,
+//         subtotal
+//       };
+
+//       orderDetails.products.push(product);
+//     });
+
+//     // Place the order
+//     const response = await fetch('/createOrder', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify(orderDetails)
+//     });
+
+//     if (!response.ok) {
+//       throw new Error('Failed to place order.');
+//     }
+
+//     // Order placement successful, display success message
+//     Swal.fire({
+//       icon: 'success',
+//       title: 'Order Placed Successfully',
+//       text: 'You will now be redirected to your orders.',
+//       showConfirmButton: false,
+//       timer: 2000
+//     }).then(() => {
+//       window.location.href = '/my_orders';
+//     });
+
+//   } catch (error) {
+//     console.error('Error placing order:', error);
+//     Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
+//   }
+// });
+
+
+// Place Order
+document.querySelector('#placeOrder').addEventListener('click', async function(event) {
+  event.preventDefault();
+
+  // Check if a payment method is selected
+  const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+  if (!selectedPaymentMethod) {
+    Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
+    return;
+  }
+
+  // Check if an address is selected
+  if (addressIndex === undefined) {
+    Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
+    return;
+  }
+
+  try {
+    // Fetch all product rows
+    const productRows = document.querySelectorAll('.products');
+    console.log(productRows);
+    // Array to hold out-of-stock products
+    const outOfStockProducts = [];
+
+    // Iterate over each product row to check stock availability
+    for (const row of productRows) {
+      const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
+      const productName = row.querySelector('.productName').textContent.trim();
+      const quantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+
+      // Check stock availability for the product
+      const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`);
+      const data = await response.json();
+      console.log(data);
+      if (!response.ok) {
+        throw new Error('Failed to fetch stock availability.');
+      }
+
+      const { available, stock } = data;
+
+      if (available || quantity > stock) {
+        // Product is out of stock or insufficient stock
+        outOfStockProducts.push({ productName, availableStock: stock });
+      }
+    }
+
+    // If any products are out of stock, display a warning message
+    if (outOfStockProducts.length > 0) {
+      let message = "The following products do not have sufficient stock:<br>";
+      outOfStockProducts.forEach(product => {
+        message += `${product.productName} (Available Stock: ${product.availableStock})<br>`;
+      });
+
+      Swal.fire({
+        icon: "error",
+        title: "Insufficient Stock",
+        html: message,
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+
+    // If all products have sufficient stock, proceed with order placement
+    const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
+    const userId = document.querySelector("#userId").textContent.trim();
+
+    const addressElement = document.getElementById(addressIndex);
+    if (!addressElement) {
+      throw new Error('Selected address not found.');
+    }
+
+    const addressType = addressElement.querySelector('.addressType').textContent.trim();
+    const houseName = addressElement.querySelector('.houseName').textContent.trim();
+    const street = addressElement.querySelector('.street').textContent.trim();
+    const city = addressElement.querySelector('.city').textContent.trim();
+    const state = addressElement.querySelector('.state').textContent.trim();
+    const country = addressElement.querySelector('.country').textContent.trim();
+    const pincode = addressElement.querySelector('.pincode').textContent.trim();
+    const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
+
+    const address = {
+      addressType,
+      houseName,
+      street,
+      city,
+      state,
+      country,
+      pincode,
+      phoneNumber
+    };
+
+    const orderDetails = {
+      user: userId,
+      products: [],
+      orderId: "order number", // Replace with actual order ID logic
+      orderStatus: 'pending',
+      billTotal,
+      address,
+      paymentMethod: selectedPaymentMethod.id,
+      paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
+      createdOn: new Date().toISOString()
+    };
+
+    // Populate products array with detailed info for orderDetails
+    productRows.forEach(row => {
+      const productName = row.querySelector('.productName').textContent.trim();
+      const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
+      const productPriceText = row.querySelector('.productPrice').textContent.trim();
+      const productPrice = parseFloat(productPriceText.replace('$', ''));
+      const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+      const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
+      const subtotal = parseFloat(subtotalText.replace('$', ''));
+
+      const product = {
+        productName,
+        media: productImage,
+        price: productPrice,
+        quantity: productQuantity,
+        subtotal
+      };
+
+      orderDetails.products.push(product);
+    });
+
+    // Place the order
+    const response = await fetch('/createOrder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderDetails)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to place order.');
+    }
+
+    // Order placement successful, display success message
+    Swal.fire({
+      icon: 'success',
+      title: 'Order Placed Successfully',
+      text: 'You will now be redirected to your orders.',
+      showConfirmButton: false,
+      timer: 2000
+    }).then(() => {
+      window.location.href = '/my_orders';
+    });
+
+  } catch (error) {
+    console.error('Error placing order:', error);
+    Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
+  }
+});
+
+
+  document.addEventListener("DOMContentLoaded", () => {
+  updateCartTotals();
+
+  // Check if cart is empty and redirect if needed
+  const cartProducts = document.querySelectorAll(".product-qty");
+  if (cartProducts.length === 0) {
+    window.location.href = '/shop';
+  }
+});
+
+</script>
+
+<%- include('../partials/page_footer.ejs') %> <%-
+include('../partials/footer.ejs')%>

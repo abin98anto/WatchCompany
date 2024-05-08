@@ -5,6 +5,9 @@ const userAuth = require("../middleware/userAuth");
 // Loading Controllers.
 const userController = require("../controllers/userController");
 const cartController = require("../controllers/cartController");
+const productController = require("../controllers/productsController");
+const checkoutController = require("../controllers/checkoutController");
+const orderController = require("../controllers/orderController");
 
 // Loads Landing Page.
 user_route.get("/", userController.loadLandingPage);
@@ -33,11 +36,28 @@ user_route.get("/logout", userController.logoutUser);
 
 // Shop Page.
 user_route.get("/shop", userController.loadShop);
+user_route.get("/products/byCategory", userController.byCategory);
+user_route.get("/products/sort_by", userController.sortingProducts);
+user_route.get("/products/search", userController.searchProducts);
+user_route.get("/get_products", userController.getProducts);
 
 // Cart functionalities.
-user_route.get("/cart", cartController.loadCart);
+user_route.get("/cart", userAuth.isLogin, cartController.loadCart);
 user_route.post("/add_to_cart", cartController.addToCart);
 user_route.post("/check_product_in_cart", cartController.checkProductInCart);
+user_route.post("/updateQuantity", cartController.updateQuantity);
+user_route.post("/deleteItem", cartController.deleteItem);
+// user_route.get(
+//   "/checkStock",
+//   userAuth.isLogin,
+//   productController.checkStockAvailability
+// );
+user_route.get("/checkStock", productController.checkStock);
+user_route.get("/checkout", userAuth.isLogin, checkoutController.loadCheckout);
+user_route.post("/get_address", checkoutController.getAddress);
+user_route.post("/update_address", checkoutController.updateAddress);
+user_route.delete("/delete_address", userController.deleteAddress);
+user_route.post("/createOrder", orderController.addOrder);
 
 //Settings Page.
 user_route.get("/my_profile", userAuth.isLogin, userController.loadMyProfile);

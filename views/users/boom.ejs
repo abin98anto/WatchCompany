@@ -20,7 +20,7 @@ include('../partials/page_header.ejs') %>
   }
 </style>
 
-<div class="main">
+<main class="main">
   <!-- Breadcrumbs -->
   <div class="page-header breadcrumb-wrap pb-5 pt-5" style="padding: 0px">
     <div class="container">
@@ -34,7 +34,7 @@ include('../partials/page_header.ejs') %>
   <section class="mt-50 mb-50">
     <div class="container">
       <div class="row">
-        <% if (cart) { %>
+        <% if(cart) { %>
         <div class="col-12 d-flex" style="flex-direction: column">
           <!-- Product Table -->
           <div class="table-responsive mb-20">
@@ -70,6 +70,7 @@ include('../partials/page_header.ejs') %>
                   <td data-title="Price">
                     <span class="price"> $ <%= prod.productID.price %> </span>
                   </td>
+                  <!-- Quantity Button -->
                   <td class="text-center" data-title="Stock">
                     <div class="detail-qty border radius m-auto">
                       <a
@@ -103,12 +104,13 @@ include('../partials/page_header.ejs') %>
                     </a>
                   </td>
                 </tr>
-
                 <% } else { %>
+                <!-- Handle case where productID or _id is missing -->
                 <tr>
                   <td colspan="6">Invalid Product Data</td>
                 </tr>
                 <% } %> <% }); %> <% } else { %>
+                <!-- Handle case where cart.products is missing or not an array -->
                 <tr>
                   <td colspan="6">No Products Found</td>
                 </tr>
@@ -116,6 +118,7 @@ include('../partials/page_header.ejs') %>
               </tbody>
             </table>
           </div>
+          <!-- Total Section -->
           <div class="row mb-50 text-center" style="justify-content: center">
             <div class="col-lg-6 col-md-12">
               <div class="border p-md-4 p-30 border-radius cart-totals">
@@ -143,13 +146,12 @@ include('../partials/page_header.ejs') %>
                       <tr>
                         <td class="cart_total_label">Total</td>
                         <td class="cart_total_amount">
-                          <strong>
-                            <span
+                          <strong
+                            ><span
                               class="font-xl fw-900 text-brand"
                               id="grand-total"
-                            >
-                            </span>
-                          </strong>
+                            ></span
+                          ></strong>
                         </td>
                       </tr>
                     </tbody>
@@ -162,8 +164,8 @@ include('../partials/page_header.ejs') %>
                   style="background-color: black"
                 >
                   <i class="fi-rs-box-alt mr-10"></i>
-                  Procced To Checkout
-                </a>
+                  Proceed To CheckOut</a
+                >
               </div>
             </div>
           </div>
@@ -191,6 +193,11 @@ include('../partials/page_header.ejs') %>
               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             "
           >
+            <!-- <img
+              src="empty-cart-image.png"
+              alt="Empty Cart Image"
+              style="width: 120px; margin-bottom: 20px"
+            /> -->
             <h2 style="color: #333; font-size: 24px; margin-bottom: 10px">
               Your cart is empty
             </h2>
@@ -214,11 +221,12 @@ include('../partials/page_header.ejs') %>
             </button>
           </div>
         </main>
+
         <% } %>
       </div>
     </div>
   </section>
-</div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -258,31 +266,6 @@ include('../partials/page_header.ejs') %>
           confirmButtonText: "OK",
         });
         return;
-      }
-      const quantity = currentQuantity + amount;
-
-      if (quantity > currentQuantity) {
-        const response = await fetch(
-          `/checkStock?productId=${productId}&quantity=${quantity}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          const { productName, available, stock } = data;
-          if (quantity > stock) {
-            allProductsAvailable = false;
-            Swal.fire({
-              icon: "error",
-              title: "Not Enough Stock",
-              text: `There are ${stock} stock left for ${productName}.`,
-              confirmButtonText: "OK",
-            });
-            return;
-          }
-        } else {
-          console.error("Failed to check stock:", response.statusText);
-          allProductsAvailable = false;
-          return;
-        }
       }
 
       const response = await fetch(
@@ -399,14 +382,19 @@ include('../partials/page_header.ejs') %>
     }
   };
 
-  // Checkout Functionality.
+  // Check Stock before Checkout.
   async function checkStockBeforeCheckout() {
     const cartProducts = document.querySelectorAll("tbody tr");
     const cart = document.querySelectorAll(".qty-val");
+    console.log(cart);
     let allProductsAvailable = true;
+    console.log(cartProducts);
     for (const product of cart) {
+      console.log(product);
       const productId = product.id.replace("qty-", "");
+      console.log(productId);
       const quantityElement = product.textContent.trim();
+      console.log(product.textContent.trim());
       if (quantityElement) {
         const quantity = parseInt(quantityElement);
 
@@ -415,13 +403,14 @@ include('../partials/page_header.ejs') %>
         );
         if (response.ok) {
           const data = await response.json();
-          const { productName, available, stock } = data;
-          if (quantity > stock) {
+          const { availableStock, productName } = data;
+
+          if (quantity > availableStock) {
             allProductsAvailable = false;
             Swal.fire({
               icon: "error",
               title: "Not Enough Stock",
-              text: `There are ${stock} stock left for ${productName}.`,
+              text: `There is not enough stock for ${productName}.`,
               confirmButtonText: "OK",
             });
             break;

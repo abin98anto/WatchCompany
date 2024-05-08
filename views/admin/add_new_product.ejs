@@ -10,6 +10,21 @@
     max-height: 100px;
     margin: 5px;
   }
+  .previewContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+
+  .previewImage {
+    max-width: 100px;
+    max-height: 100px;
+    margin-right: 10px;
+  }
+
+  .deleteButton {
+    margin-left: auto;
+  }
 </style>
 
 <aside class="navbar-aside" id="offcanvas_aside">
@@ -53,6 +68,12 @@
           <span class="text">Category Management</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/order_management">
+          <i class="icon material-icons md-shopping_cart"></i>
+          <span class="text">Order Management</span>
+        </a>
+      </li>
     </ul>
     <hr />
     <ul class="menu-aside">
@@ -76,7 +97,11 @@
 
 <main class="main-wrap">
   <section class="content-main">
-    <form method="post" enctype="multipart/form-data">
+    <form
+      method="post"
+      enctype="multipart/form-data"
+      onsubmit="validateForm(event)"
+    >
       <div class="row">
         <div class="col-9">
           <div class="content-header">
@@ -99,7 +124,6 @@
                   class="form-control"
                   id="product_name"
                   name="name"
-                  required
                 />
               </div>
               <div class="mb-4">
@@ -110,7 +134,6 @@
                   name="description"
                   class="form-control border"
                   rows="4"
-                  required
                 ></textarea>
               </div>
               <div class="row">
@@ -123,7 +146,6 @@
                         type="text"
                         class="form-control"
                         name="price"
-                        required
                       />
                     </div>
                   </div>
@@ -134,7 +156,6 @@
                     class="form-select"
                     name="category"
                     style="width: 150px"
-                    required
                   >
                     <% categories.forEach((category) => { %>
                     <option><%= category.name %></option>
@@ -149,7 +170,6 @@
                       class="form-control"
                       style="width: 100px"
                       name="stock"
-                      required
                     />
                   </div>
                 </div>
@@ -189,6 +209,8 @@
   </section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
 <script>
   // logic to upload images.
   const fileInput = document.getElementById("uploads");
@@ -214,6 +236,60 @@
       reader.readAsDataURL(file);
     }
   });
+
+  // Function to validate the form fields
+  function validateForm(event) {
+    event.preventDefault();
+
+    const productName = document.getElementById("product_name").value.trim();
+    const description = document.getElementById("descriptionid").value.trim();
+    const price = document.querySelector('input[name="price"]').value.trim();
+    const stock = document.querySelector('input[name="stock"]').value.trim();
+    const mediaFiles = document.getElementById("uploads").files;
+
+    // Check if any required field is empty
+    if (
+      !productName ||
+      !description ||
+      !price ||
+      !stock ||
+      mediaFiles.length === 0
+    ) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Some input fields are required!",
+      });
+      return;
+    }
+
+    // Validate price and stock
+    if (isNaN(price) || isNaN(stock) || price < 0 || stock < 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid input",
+        text: "Price and stock must be non-negative numbers!",
+      });
+      return;
+    }
+
+    // Validate file type (accept only images)
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    for (const file of mediaFiles) {
+      if (!allowedTypes.includes(file.type)) {
+        Swal.fire({
+          icon: "error",
+          title: "Invalid file type",
+          text: "Please upload only image files!",
+        });
+        return;
+      }
+    }
+
+    event.target.submit();
+  }
+
+  document.querySelector("form").addEventListener("submit", validateForm);
 </script>
 
 <%- include('../partials/admin/admin_footer.ejs') %>

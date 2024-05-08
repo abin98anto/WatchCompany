@@ -53,6 +53,12 @@
           <span class="text">Category Management</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/order_management">
+          <i class="icon material-icons md-shopping_cart"></i>
+          <span class="text">Order Management</span>
+        </a>
+      </li>
     </ul>
     <hr />
     <ul class="menu-aside">
@@ -76,7 +82,7 @@
 
 <main class="main-wrap">
   <section class="content-main">
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" onsubmit="validateForm(event)">
       <div class="row">
         <div class="col-9">
           <div class="content-header">
@@ -245,4 +251,54 @@
     }
   });
 </script>
+
+<!-- Form validation -->
+<script>
+  function validateForm(event) {
+    event.preventDefault();
+    const productName = document.getElementById("product_name").value.trim();
+    const description = document.getElementById("descriptionid").value.trim();
+    const price = document.querySelector('input[name="price"]').value.trim();
+    const stock = document.querySelector('input[name="stock"]').value.trim();
+    const mediaFiles = document.getElementById("uploads").files;
+
+    if (!productName || !description || !price || !stock) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'All fields are required!',
+      });
+      return;
+    }
+
+    if (isNaN(price) || isNaN(stock) || price < 0 || stock < 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid input',
+        text: 'Price and stock must be non-negative numbers!',
+      });
+      return;
+    }
+
+    if (mediaFiles.length > 0) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      for (const file of mediaFiles) {
+        if (!allowedTypes.includes(file.type)) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid file type',
+            text: 'Please upload only image files!',
+          });
+          return;
+        }
+      }
+    }
+
+    event.target.submit();
+  }
+
+  document.querySelector('form').addEventListener('submit', validateForm);
+</script>
+
+
 <%- include('../partials/admin/admin_footer.ejs') %>

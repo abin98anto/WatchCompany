@@ -68,7 +68,7 @@
 </div>
 
 <script>
-    let countdown = 20;
+    let countdown = 60;
     const timerDisplay = document.getElementById("timer");
     const submitButton = document.getElementById("submitBtn");
     const resendButton = document.getElementById("resendBtn");
@@ -113,7 +113,7 @@
         .then((data) => {
           if (data.success) {
             displayMessage("New OTP sent successfully!", "text-success");
-            countdown = 120;
+            countdown = 60;
             startTimer();
             submitButton.disabled = false;
             resendButton.disabled = true;
@@ -159,7 +159,7 @@
               }, 1000);
             } else {
               displayMessage(
-                "OTP verification failed. Please try again.",
+                "Wrong OTP. Please try again.",
                 "text-danger"
               );
             }

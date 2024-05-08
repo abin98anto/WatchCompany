@@ -29,6 +29,9 @@ const productSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  createdOn: {
+    type: Date,
+  },
 });
 
 const Product = mongoose.model("Product", productSchema);

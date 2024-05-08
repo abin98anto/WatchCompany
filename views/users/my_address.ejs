@@ -8,6 +8,21 @@
     margin: 5px 0;
     width: 100%;
   }
+
+  .btn {
+  color: white;
+  background-color: grey;
+  border-style: none;
+  transition: transform 0.2s ease;
+  border-style: none;
+}
+
+.editButton:hover,
+.deleteButton:hover,
+#addNewAddressBtn:hover {
+  transform: scale(1.1);
+}
+  
 </style>
 
   <main class="main d-flex" style="flex-direction: column">
@@ -66,17 +81,16 @@
                     <h5><%= user.address[i].addressType %></h5>
                     <!-- buttons -->
                     <div>
-                <button class="btn-warning btn-sm editButton" style="color: white;" data-address-id="<%= user.address[i]._id %>">Edit</button>
-                  <button class="btn-danger btn-sm deleteButton"> <input type="hidden" value="<%= i %>" id="i"> Delete</button>
+                <button class="btn editButton" style="color: white; padding: 5px 10px; font-size: 12px; background-color: grey; " onclick="fetchAndDisplayAddress('<%= i %>')">Edit</button>
+                  <button class="btn deleteButton" style="color: white; padding: 5px 10px; font-size: 12px; background-color: red;" onclick="confirmDeleteAddress('<%= i %>')">Delete</button>
                 </div>
               </div>
               <div class="card-body text-start" style="font-size: large;">
                 <address>
-                  <%= user.address[i].houseName %>,<br>
-                  <%= user.address[i].street %>,<br>
-                  <%= user.address[i].city %>,<br><%= user.address[i].State %>, <%= user.address[i].country %> <br> <%= user.address[i].pincode %>
+                  <%= user.address[i].houseName %><br>
+                  <%= user.address[i].street %><br>
+                  <%= user.address[i].city %><br><%= user.address[i].state %> <br> <%= user.address[i].country %> <br> <%= user.address[i].pincode %> <br><%= user.address[i].phoneNumber %>
                 </address>
-                <p><%= user.address[i].phoneNumber %></p>
               </div>
             </div>
           </div>
@@ -172,9 +186,130 @@
     });
   });
 
-  // editing a address
+  // Edit address functionality.
+  function fetchAndDisplayAddress(addressIndex) {
+  fetch(`/get_address?index=${addressIndex}`, {
+    method: "POST",
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(address => {
+    Swal.fire({
+      title: 'Edit Address',
+      html: `
+        <input id="houseNameInput" class="swal2-input" value="${address.address.houseName}" placeholder="House Name">
+        <input id="streetInput" class="swal2-input" value="${address.address.street}" placeholder="Street">
+        <input id="cityInput" class="swal2-input" value="${address.address.city}" placeholder="City">
+        <input id="stateInput" class="swal2-input" value="${address.address.state}" placeholder="State">
+        <input id="countryInput" class="swal2-input" value="${address.address.country}" placeholder="Country">
+        <input id="pincodeInput" class="swal2-input" value="${address.address.pincode}" placeholder="Pincode">
+        <input id="phoneInput" class="swal2-input" value="${address.address.phoneNumber}" placeholder="Phone Number">
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Save Changes',
+      preConfirm: () => {
+        const houseName = document.getElementById('houseNameInput').value;
+        const street = document.getElementById('streetInput').value;
+        const city = document.getElementById('cityInput').value;
+        const state = document.getElementById('stateInput').value;
+        const country = document.getElementById('countryInput').value;
+        const pincode = document.getElementById('pincodeInput').value;
+        const phoneNumber = document.getElementById('phoneInput').value;
+
+        if (!/^\d+$/.test(pincode)) {
+          Swal.showValidationMessage('Please enter only numbers for Pincode.');
+          return false;
+        }
+
+        if (!/^\d+$/.test(phoneNumber)) {
+          Swal.showValidationMessage('Please enter only numbers for Phone Number.');
+          return false;
+        }
+
+        return {
+          houseName: houseName,
+          street: street,
+          city: city,
+          state: state,
+          country: country,
+          pincode: pincode,
+          phoneNumber: phoneNumber
+        };
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/update_address?index=${addressIndex}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(result.value)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(updatedAddress => {
+          location.reload();
+        })
+        .catch(error => {
+          console.error('Error updating address:', error);
+          Swal.fire('Error', 'Failed to update address. Please try again.', 'error');
+        });
+      }
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching address:', error);
+    Swal.fire('Error', 'Failed to fetch address details. Please try again.', 'error');
+  });
+}
 
   // Delete address
+  function confirmDeleteAddress(addressIndex) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You are about to delete this address. This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/delete_address?index=${addressIndex}`, {
+          method: 'DELETE'
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to delete address');
+          }
+          return response.json();
+        })
+        .then(deletedAddress => {
+          const addressElement = document.getElementById(`address-${addressIndex}`);
+          if (addressElement) {
+            addressElement.remove();
+          }
+          location.reload();
+        })
+        .catch(error => {
+          console.error('Error deleting address:', error);
+          Swal.fire(
+            'Error!',
+            'Failed to delete address. Please try again.',
+            'error'
+          );
+        });
+      }
+    });
+  }
 
 </script>
 

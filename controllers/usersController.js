@@ -6,27 +6,16 @@ const loadUserManagement = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const pageSize = 7;
 
-    const users = await User.find({ isAdmin: 0 })
-      .sort({ createdOn: -1 })
-      .skip((page - 1) * pageSize)
-      .limit(pageSize);
+    const users = await User.find({ isAdmin: 0 }).sort({ createdOn: -1 });
 
     const totalUsers = await User.countDocuments({ isAdmin: 0 });
     const totalPages = Math.ceil(totalUsers / pageSize);
 
-    res.render("user_management", {
-      users: users,
-      currentPage: page,
-      totalPages,
-      hasPreviousPage: page>1, 
-      hasNextPage: page< totalPages,
-      usersPerPage: pageSize,
-    });
+    res.render("user_management", { users });
   } catch (error) {
     res.send(`Error Rendering User Management.`);
   }
 };
-
 
 // Block/ Unblock users.
 const toggleUserStatus = async (req, res) => {

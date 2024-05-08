@@ -1,0 +1,139 @@
+<%- include('../partials/admin/admin_header.ejs') %>
+
+<!-- side bar -->
+<aside class="navbar-aside" id="offcanvas_aside">
+  <div class="aside-top">
+    <a href="index.html" class="brand-wrap">
+      <img
+        src="/admin_assets/imgs/theme/watchcompany_logo.webp"
+        class="logo"
+        alt="Watch Company Dashboard"
+      />
+    </a>
+    <div>
+      <button class="btn btn-icon btn-aside-minimize">
+        <i class="text-muted material-icons md-menu_open"></i>
+      </button>
+    </div>
+  </div>
+  <nav>
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/dashboard">
+          <i class="icon material-icons md-home"></i>
+          <span class="text">Dashboard</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/product_management">
+          <i class="icon material-icons md-shopping_bag"></i>
+          <span class="text">Product Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/user_management">
+          <i class="icon material-icons md-person"></i>
+          <span class="text">User Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/category_management">
+          <i class="icon material-icons md-stars"></i>
+          <span class="text">Category Management</span>
+        </a>
+      </li>
+      <li class="menu-item active">
+        <a class="menu-link" href="/admin/order_management">
+          <i class="icon material-icons md-shopping_cart"></i>
+          <span class="text">Order Management</span>
+        </a>
+      </li>
+    </ul>
+    <hr />
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/settings">
+          <i class="icon material-icons md-settings"></i>
+          <span class="text">Settings</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/logout">
+          <i class="icon material-icons md-local_offer"></i>
+          <span class="text"> Logout </span>
+        </a>
+      </li>
+    </ul>
+    <br />
+    <br />
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-wrap">
+  <section class="content-main">
+    <div class="content-header">
+      <div>
+        <h2 class="content-title card-title">Order List</h2>
+      </div>
+    </div>
+    <div class="card mb-4">
+      <header class="card-header">
+        <div class="row gx-3">
+          <div class="col-lg-2 col-6 col-md-3">
+            <select class="form-select">
+              <option>Status</option>
+              <option>Delivered</option>
+              <option>Pending</option>
+              <option>Shipped</option>
+              <option>Cancelled</option>
+              <option>Show all</option>
+            </select>
+          </div>
+        </div>
+      </header>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr class="text-start">
+                <th class="text-start">Order ID</th>
+                <th scope="col">Products Name</th>
+                <th scope="col">User</th>
+                <th scope="col">Total</th>
+                <th scope="col">Status</th>
+                <th scope="col">Order Date</th>
+                <th scope="col" class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+                <% for (let i=0; i<orders.length; i++) { %>
+              <tr>
+                <td><%= orders[i].orderId %></td>
+                <td>
+                    <% for (let j=0; j<orders[i].products.length; j++) { %>
+                    <ul class="text-start">
+                        <li><b><%= orders[i].products[j].productName %></b></li>
+                    </ul>
+                    <% } %>
+                </td>
+                <td><%= orders[i].user.name %></td>
+                <td><%= orders[i].billTotal %></td>
+                <td>
+                  <span><%= orders[i].orderStatus %></span>
+                </td>
+                <td><%= orders[i].showDate %></td>
+                <td class="text-end">
+                  <a href="#" class="btn btn-md rounded font-sm">Detail</a>
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/admin/admin_footer.ejs') %>

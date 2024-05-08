@@ -28,6 +28,31 @@ const getCategories = async (req, res) => {
   }
 };
 
+// Duplicate Category Check
+const categoryCheck = async (req, res) => {
+  const { categoryName } = req.body;
+
+  try {
+    const cat_name =
+      categoryName.charAt(0).toUpperCase() +
+      categoryName.slice(1).toLowerCase();
+    const catFound = await Category.findOne({
+      name: cat_name,
+      isDeleted: false,
+    });
+
+    // const catFound = await Category.findOne({
+    //   name: categoryName,
+    //   isDeleted: false,
+    // });
+
+    res.json({ exists: catFound !== null });
+  } catch (error) {
+    console.error("Error checking category existence:", error);
+    res.status(500).json({ error: "Failed to check category existence." });
+  }
+};
+
 // Add Category to Database.
 const addCategory = async (req, res) => {
   try {
@@ -93,12 +118,14 @@ const toggleCategoryStatus = async (req, res) => {
 // Edit Categories.
 const editCategory = async (req, res) => {
   try {
-    let id = req.query.id;
-    let { new_name } = req.body;
+    const { id } = req.query;
+    const { new_name } = req.body;
+    console.log("new name :", new_name);
     await Category.updateOne({ _id: id }, { $set: { name: new_name } });
-    res.status(200).send("Category deleted successfully");
+
+    res.status(200).send("Category updated successfully");
   } catch (error) {
-    console.log(`Error Making Changes To A Category.`);
+    console.log(`Error Making Changes To A Category: ${error}`);
     res.status(500).send("Internal server error");
   }
 };
@@ -123,4 +150,5 @@ module.exports = {
   editCategory,
   deleteCategory,
   getCategories,
+  categoryCheck,
 };

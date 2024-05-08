@@ -42,6 +42,12 @@
           <span class="text">Category Management</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/order_management">
+          <i class="icon material-icons md-shopping_cart"></i>
+          <span class="text">Order Management</span>
+        </a>
+      </li>
     </ul>
     <hr />
     <ul class="menu-aside">
@@ -165,6 +171,8 @@
                     type="submit"
                     class="btn btn-danger"
                     style="font-size: smaller"
+                    data-product-id="<%= product._id %>"
+                    data-product-name="<%= product.name %>"
                   >
                     <i class="material-icons md-playlist_add_check"></i>
                     Unlist
@@ -180,6 +188,8 @@
                     type="submit"
                     class="btn btn-success"
                     style="font-size: small"
+                    data-product-id="<%= product._id %>"
+                    data-product-name="<%= product.name %>"
                   >
                     <i class="material-icons md-playlist_add"></i>
                     List
@@ -230,5 +240,96 @@
     </div>
   </section>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Wait for the DOM to be fully loaded
+  // document.addEventListener("DOMContentLoaded", () => {
+  //   // Add click event listeners to List buttons
+  //   const listButtons = document.querySelectorAll(".btn-list");
+  //   listButtons.forEach((btn) => {
+  //     btn.addEventListener("click", () => {
+  //       const productId = btn.getAttribute("data-product-id");
+  //       const productName = btn.getAttribute("data-product-name");
+
+  //       // Show SweetAlert confirmation dialog
+  //       Swal.fire({
+  //         title: `Are you sure you want to list ${productName}?`,
+  //         icon: "question",
+  //         showCancelButton: true,
+  //         confirmButtonText: "Yes",
+  //         cancelButtonText: "Cancel",
+  //       }).then((result) => {
+  //         if (result.isConfirmed) {
+  //           // User confirmed, make AJAX request to list product
+  //           handleListProduct(productId);
+  //         }
+  //       });
+  //     });
+  //   });
+
+  // Add click event listeners to Unlist buttons
+  // const unlistButtons = document.querySelectorAll(".btn-unlist");
+  // unlistButtons.forEach((btn) => {
+  //   btn.addEventListener("click", () => {
+  //     const productId = btn.getAttribute("data-product-id");
+  //     const productName = btn.getAttribute("data-product-name");
+
+  //     // Show SweetAlert confirmation dialog
+  //     Swal.fire({
+  //       title: `Are you sure you want to unlist ${productName}?`,
+  //       icon: "question",
+  //       showCancelButton: true,
+  //       confirmButtonText: "Yes",
+  //       cancelButtonText: "Cancel",
+  //     }).then((result) => {
+  //       if (result.isConfirmed) {
+  //         // User confirmed, make AJAX request to unlist product
+  //         handleUnlistProduct(productId);
+  //       }
+  //     });
+  //   });
+  // });
+
+  // Function to handle listing a product via AJAX
+  // const handleListProduct = async (productId) => {
+  //   try {
+  //     const response = await fetch(`/admin/list_product?id=${productId}`, {
+  //       method: "GET",
+  //     });
+  //     if (response.ok) {
+  //       Swal.fire("Success!", "Product listed successfully.", "success");
+  //       // Optionally, update the UI here
+  //       // Example: Refresh the product list, etc.
+  //     } else {
+  //       throw new Error("Failed to list product");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     Swal.fire("Error!", "Failed to list product.", "error");
+  //   }
+  // };
+
+  // Function to handle unlisting a product via AJAX
+  //   const handleUnlistProduct = async (productId) => {
+  //     try {
+  //       const response = await fetch(`/admin/unlist_product?id=${productId}`, {
+  //         method: "GET",
+  //       });
+  //       if (response.ok) {
+  //         Swal.fire("Success!", "Product unlisted successfully.", "success");
+  //         // Optionally, update the UI here
+  //         // Example: Refresh the product list, etc.
+  //       } else {
+  //         throw new Error("Failed to unlist product");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error:", error);
+  //       Swal.fire("Error!", "Failed to unlist product.", "error");
+  //     }
+  //   };
+  // });
+</script>
 
 <%- include('../partials/admin/admin_footer.ejs') %>

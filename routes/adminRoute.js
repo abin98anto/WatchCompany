@@ -7,6 +7,7 @@ const adminController = require("../controllers/adminController");
 const productController = require("../controllers/productsController");
 const usersController = require("../controllers/usersController");
 const categoriesController = require("../controllers/categoriesController");
+const orderController = require("../controllers/orderController");
 
 const adminAuth = require("../middleware/adminAuth");
 
@@ -36,6 +37,7 @@ admin_route.get(
   adminAuth.adminLogin,
   categoriesController.loadCategoryManagement
 );
+admin_route.post("/check_category", categoriesController.categoryCheck);
 admin_route.post("/addCategory", categoriesController.addCategory);
 admin_route.post("/unlist", categoriesController.toggleCategoryStatus);
 admin_route.post("/list", categoriesController.toggleCategoryStatus);
@@ -81,6 +83,9 @@ admin_route.get(
   adminAuth.adminLogin,
   productController.getProducts
 );
+
+// Order Management.
+admin_route.get("/order_management", orderController.loadOrderManagement);
 
 // Admin logout.
 admin_route.get("/logout", adminAuth.adminLogin, adminController.logout);

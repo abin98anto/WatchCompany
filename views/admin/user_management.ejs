@@ -45,6 +45,12 @@
           <span class="text">Category Management</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/order_management">
+          <i class="icon material-icons md-shopping_cart"></i>
+          <span class="text">Order Management</span>
+        </a>
+      </li>
     </ul>
     <hr />
     <ul class="menu-aside">
@@ -76,12 +82,7 @@
       <header class="card-header">
         <div class="row gx-3">
           <div class="col-lg-4 col-md-6 me-auto">
-            <input
-              type="text"
-              placeholder="Search..."
-              id="searchInput"
-              class="form-control"
-            />
+            <input type="text" placeholder="Search..." id="searchInput" />
           </div>
           <div class="col-lg-2 col-md-3 col-6">
             <select class="form-select">
@@ -106,20 +107,20 @@
               </tr>
             </thead>
             <tbody id="userTableBody">
-              <% let i = (currentPage - 1) * usersPerPage + 1; %> <% for (let j
-              = 0; j < users.length; j++) { %> <% if (j >= (currentPage - 1) *
-              usersPerPage && j < currentPage * usersPerPage) { %>
+              <% for (let j = 0; j < users.length; j++) { %>
               <tr class="text-center">
-                <td class="text-center"><%= i %></td>
+                <td class="text-center"><%= j+1 %></td>
                 <td class="text-center"><%= users[j].name %></td>
                 <td class="text-center"><%= users[j].email %></td>
                 <td class="text-center">
                   <% if (users[j].isBlocked) { %>
                   <span class="rounded-pill alert-danger" style="padding: 8px"
-                    >Blocked</span>
+                    >Blocked</span
+                  >
                   <% } else { %>
                   <span class="rounded-pill alert-success" style="padding: 8px"
-                    >Active</span>
+                    >Active</span
+                  >
                   <% } %>
                 </td>
                 <td>
@@ -140,137 +141,87 @@
                   <% } %>
                 </td>
               </tr>
-              <% i++ %> <% } %> <% } %>
+              <% } %>
             </tbody>
           </table>
         </div>
       </div>
-      
-      // Pagination.
-      <nav aria-label="Page navigation example">
-        <ul class="pagination">
-          <li class="page-item <%= !hasPreviousPage ? 'disabled' : '' %>">
-            <a
-              class="page-link"
-              href="/admin/user_management?page=<%= currentPage - 1 %>"
-              tabindex="-1"
-              aria-disabled="<%= !hasPreviousPage %>"
-              >Previous</a
-            >
-          </li>
-          <% for (let i = 1; i <= totalPages; i++) { %>
-          <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-            <a class="page-link" href="/admin/user_management?page=<%= i %>"
-              ><%= i %></a
-            >
-          </li>
-          <% } %>
-          <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
-            <a
-              class="page-link"
-              href="/admin/user_management?page=<%= currentPage + 1 %>"
-              tabindex="-1"
-              aria-disabled="<%= !hasNextPage %>"
-              >Next</a
-            >
-          </li>
-        </ul>
-      </nav>
     </div>
   </section>
 </main>
 
 <script>
-  // Block/Unblock, Search with filter Functionalities.
   document.addEventListener("DOMContentLoaded", () => {
-    console.log(`going to fetch.`);
     fetch("/admin/get_users")
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        return response.json();
+      })
       .then((users) => {
         console.log(users);
+
         const searchInput = document.getElementById("searchInput");
         const userTableBody = document.getElementById("userTableBody");
         const formSelect = document.querySelector(".form-select");
 
-        // Function to filter users based on selected option and search term
         const filterAndRenderUsers = (status, searchTerm) => {
-          const filteredUsers =
-            status === "Show all"
-              ? users.filter(
-                  (user) =>
-                    user.name.toLowerCase().includes(searchTerm) ||
-                    user.email.toLowerCase().includes(searchTerm)
-                )
-              : users.filter((user) => {
-                  return (
-                    ((status === "Active" && !user.isBlocked) ||
-                      (status === "Blocked" && user.isBlocked)) &&
-                    (user.name.toLowerCase().includes(searchTerm) ||
-                      user.email.toLowerCase().includes(searchTerm))
-                  );
-                });
+          const filteredUsers = users.filter((user) => {
+            const isMatch =
+              user.name.toLowerCase().includes(searchTerm) ||
+              user.email.toLowerCase().includes(searchTerm);
+
+            if (status === "Show all") {
+              return isMatch;
+            } else if (status === "Active") {
+              return !user.isBlocked && isMatch;
+            } else if (status === "Blocked") {
+              return user.isBlocked && isMatch;
+            }
+
+            return false;
+          });
+
           renderUsers(filteredUsers);
         };
 
-        // Function to render users in the table
         const renderUsers = (users) => {
           userTableBody.innerHTML = "";
           users.forEach((user, index) => {
-            const statusBadgeClass = user.isBlocked ? "danger" : "success";
+            const statusBadgeClass = user.isBlocked
+              ? "alert-danger"
+              : "alert-success";
             const statusText = user.isBlocked ? "Blocked" : "Active";
 
             const row = `
-                <tr>
-                  <td>${index + 1}</td>
-                  <td>${user.name}</td>
-                  <td>${user.email}</td>
-                  <td>
-                    <span class="rounded-pill alert-${statusBadgeClass}" style="padding: 8px">${statusText}</span>
-                  </td>
-                  <td class="text-end">
-                    <button class="btn btn-${
-                      user.isBlocked ? "success" : "danger"
-                    } toggle-button" data-id="${
-              user._id
-            }" style="width: 80px; font-size: small">
-                      ${user.isBlocked ? "Unblock" : "Block"}
-                    </button>
-                  </td>
-                </tr>
-              `;
+              <tr class="text-center">
+                <td class="text-center">${index + 1}</td>
+                <td class="text-center">${user.name}</td>
+                <td class="text-center">${user.email}</td>
+                <td class="text-center">
+                  <span class="rounded-pill ${statusBadgeClass}" style="padding: 8px">${statusText}</span>
+                </td>
+                <td>
+                  <button class="btn ${
+                    user.isBlocked ? "btn-success" : "btn-danger"
+                  } toggle-button" data-id="${user._id}">
+                    ${user.isBlocked ? "Unblock" : "Block"}
+                  </button>
+                </td>
+              </tr>
+            `;
 
-            userTableBody.insertAdjacentHTML("beforeend", row);
+            userTableBody.innerHTML += row;
           });
         };
 
-        // Event listener for search input and form-select
-        searchInput.addEventListener("input", () => {
-          const searchTerm = searchInput.value.toLowerCase().trim();
-          const selectedOption = formSelect.value;
-          filterAndRenderUsers(selectedOption, searchTerm);
-        });
-
-        formSelect.addEventListener("change", (event) => {
-          const selectedOption = event.target.value;
-          const searchTerm = searchInput.value.toLowerCase().trim();
-          filterAndRenderUsers(selectedOption, searchTerm);
-        });
-
-        // Event listener for block/unblock buttons
-        userTableBody.addEventListener("click", (event) => {
-          if (event.target.classList.contains("toggle-button")) {
-            const userId = event.target.dataset.id;
-            const action = event.target.textContent.trim().toLowerCase();
-            toggleStatus(userId, action);
-          }
-        });
-
-        // Function to toggle user status (block/unblock)
-        function toggleStatus(userId, action) {
+        const toggleStatus = (userId, action) => {
           const confirmationMessage =
             action === "block"
               ? "Are you sure you want to block this user?"
               : "Are you sure you want to unblock this user?";
+
           Swal.fire({
             title: "Confirm",
             text: confirmationMessage,
@@ -288,22 +239,119 @@
                 },
               })
                 .then(() => {
-                  location.reload();
+                  location.reload(); // Refresh the page after successful toggle
                 })
                 .catch((error) => {
                   console.error("Error toggling user status:", error);
+                  Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Failed to toggle user status. Please try again later.",
+                  });
                 });
             }
           });
-        }
+        };
 
-        // Initial render
+        searchInput.addEventListener("input", () => {
+          const searchTerm = searchInput.value.toLowerCase().trim();
+          const selectedOption = formSelect.value;
+          filterAndRenderUsers(selectedOption, searchTerm);
+        });
+
+        formSelect.addEventListener("change", (event) => {
+          const selectedOption = event.target.value;
+          const searchTerm = searchInput.value.toLowerCase().trim();
+          filterAndRenderUsers(selectedOption, searchTerm);
+        });
+
+        // Use event delegation to handle button click events
+        userTableBody.addEventListener("click", (event) => {
+          if (event.target.classList.contains("toggle-button")) {
+            const userId = event.target.dataset.id;
+            const action = event.target.textContent.toLowerCase().trim(); // Get button text
+            toggleStatus(userId, action);
+          }
+        });
+
+        // Initial rendering of all users
         renderUsers(users);
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Failed to fetch users. Please try again later.",
+        });
       });
   });
+
+  // Search fetch
+  function setupSearch() {
+    const searchInput = document.getElementById("searchInput");
+
+    searchInput.addEventListener("input", async () => {
+      const query = searchInput.value.trim();
+
+      try {
+        const response = await fetch(
+          `/products/search?query=${encodeURIComponent(query)}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch search results");
+        }
+
+        const searchResults = await response.json();
+        displayProducts(searchResults); // Display the search results on the page
+      } catch (error) {
+        console.error("Error searching products:", error.message);
+      }
+    });
+  }
+
+  // Call setupSearch() to initialize real-time search functionality
+  setupSearch();
+
+  // Search Function
+  function displayProducts(products) {
+    const productGrid = document.querySelector(".product-grid-3");
+    productGrid.innerHTML = ""; // Clear existing products
+
+    products.forEach((product) => {
+      const productHTML = `
+      <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+        <div class="product-cart-wrap mb-30">
+          <!-- Product image and details -->
+          <a href="/load_product?id=${product._id}">
+            <img class="default-img" src="/uploads/${product.media[0]}" alt="${product.name}" />
+          </a>
+          <div class="product-content-wrap">
+            <div class="product-category">
+              <a href="#">${product.category}</a>
+            </div>
+            <h2 class="product-name">
+              <a href="/load_product?id=${product._id}">${product.name}</a>
+            </h2>
+            <div class="product-price">
+              <span>$${product.price}</span>
+            </div>
+            <div class="product-action-1 show">
+              <a aria-label="Add To Cart" class="action-btn hover-up" onclick="addToCart('${product._id}')">
+                <i class="fi-rs-shopping-bag-add"></i>
+              </a>
+              <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#">
+                <i class="fi-rs-heart"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+      productGrid.insertAdjacentHTML("beforeend", productHTML);
+    });
+  }
 </script>
 
 <%- include('../partials/admin/admin_footer.ejs') %>
