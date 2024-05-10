@@ -263,17 +263,13 @@ const getProducts = async (req, res) => {
 // Check Stock
 const checkStock = async (req, res) => {
   try {
-    console.log(`checking stock...`);
     const { productId, quantity } = req.query;
-    // console.log(`product id : ${productId} quantity : ${quantity}`);
     const product = await Product.findById(productId);
-    // console.log(`product : ${product}`);
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
 
     const available = product.quantity >= parseInt(quantity);
-    console.log(`available : ${available}`);
     res.json({
       available: available,
       productName: product.name,

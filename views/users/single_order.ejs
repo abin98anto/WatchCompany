@@ -1,0 +1,444 @@
+<%- include('../partials/header.ejs') %> <%-
+include('../partials/page_header.ejs') %>
+
+<style>
+  .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-style: none;
+    margin: 2px;
+    transition: transform 0.2s ease;
+    background-color: black;
+  }
+
+  .btn:hover {
+    transform: scale(1.05);
+    background-color: black;
+  }
+
+  .btn-warning {
+    background-color: yellow;
+    color: black;
+  }
+
+  .btn-danger {
+    background-color: red;
+    color: white;
+  }
+
+  .btn-warning:hover {
+    background-color: #ffea00;
+  }
+
+  .btn-danger:hover {
+    background-color: #d32f2f;
+  }
+
+  .product-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
+
+<main class="main d-flex" style="flex-direction: column">
+  <!-- breadcrumbs -->
+  <div class="page-header breadcrumb-wrap pb-5 pt-5">
+    <div class="container">
+      <div class="breadcrumb" style="height: 10px">
+        <a href="/" rel="nofollow">Home</a>
+        <span>Account</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- side menu -->
+  <div>
+    <div class="row">
+      <div>
+        <div class="dashboard-menu">
+          <ul
+            class="nav text-center"
+            style="justify-content: center"
+            role="tablist"
+          >
+            <li class="nav-item text-center">
+              <a
+                class="nav-link"
+                id="account-detail-tab"
+                href="/my_profile"
+                ><i class="fi-rs-user mr-10 text-center"></i>Account details</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="account-detail-tab" href="/my_address"
+                ><i class="fi-rs-marker mr-10"></i>My Address</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="account-detail-tab" href="/my_orders"
+                style="background-color: black; color: white"
+                ><i class="fi-rs-shopping-bag mr-10"></i>Orders</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="account-detail-tab" href="/my_wallet"
+                ><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" fillRule="evenodd" d="M20 9c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zm-2 0V6H4v12h14v-3h-2c-1.1 0-2-1.1-2-2v-1.968C14 9.9 14.9 9 16 9zm-2 4h2v-2h-2z"></path></svg></i>Wallet</a
+              >
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" class="nav-link" href="/logout"
+                ><i class="fi-rs-sign-out mr-10"></i>Logout</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <section class="pt-30 pb-30">
+    <div class="container">
+      <!-- Loop through orders -->
+      <% orders.forEach((orde) => { %>
+        <div class="row justify-content-center">
+          <!-- Loop through products -->
+          <% orde.products.forEach((element) => { %>
+            <% if (element.cancelProduct === false) { %>
+            <div class="col-md-3">
+              <!-- Product Card -->
+              <div class="product-cart-wrap m-10">
+                <!-- Product Image -->
+                <div class="product-img-action-wrap">
+                  <div class="product-img product-img-zoom">
+                    <div class="product-img-inner">
+                      <a href="shop-product-right.html">
+                        <img class="default-img" src="/uploads/<%= element.media %>" alt="">
+                        <img class="hover-img" src="/uploads/<%= element.media %>" alt="">
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <!-- Product Content -->
+                <div class="product-content-wrap">
+                  <h2 class="product-name">
+                    <a href="shop-product-right.html"><%= element.productName %></a>
+                  </h2>
+                  <div class="product-price">
+                    <span>$ <%= element.price %></span>
+                    <span>x <%= element.quantity %> Pcs</span>
+                  </div>
+                </div>
+                <!-- Conditional Button -->
+                <!-- <div class="d-flex justify-content-center p-10">
+                  <% if (orde.orderStatus === "pending") { %>
+                    <button class="cancel-button" data-order-id="<%= orde._id %>" data-product-id="<%= element.productId %>">Cancel</button>
+                  <% } else { %>
+                    <button>Return</button>
+                  <% } %>
+                </div> -->
+                <div class="d-flex justify-content-center p-10">
+                    <% if (orde.orderStatus === "pending") { %>
+                      <button onclick="cancelProduct('<%= orde._id %>', '<%= element.productId %>')" class="btn btn-danger">Cancel</button>
+                    <% } else { %>
+                      <button onclick="returnProduct('<%= orde._id %>', '<%= element.productId %>')" class="btn btn-warning">Return</button>
+                    <% } %>
+                  </div>
+              </div>
+            </div>
+            <% } %>
+          <% }) %>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <!-- Totals Section -->
+  <section>
+    <div class="container">
+      <!-- Loop through orders for totals -->
+      <% orders.forEach((order) => { %>
+        <div class="row mb-50 mt-15 text-center" style="justify-content: center">
+          <div class="col-lg-8 col-md-12">
+            <div class="border p-md-4 border-radius cart-totals">
+              <div class="heading_s1 mb-3">
+                <h4>Order Info</h4>
+              </div>
+              <div class="d-flex" style="justify-content: space-evenly;">
+                <!-- Table for Order Info -->
+                <div class="table mt-10" style="width: 400px;">
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <td class="cart_total_label">Cart Subtotal</td>
+                        <td class="cart_total_amount">
+                          <span class="font-lg fw-900 text-brand" id="cart-total"><%= order.billTotal %></span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="cart_total_label">Shipping</td>
+                        <td class="cart_total_amount">
+                          <i class="ti-gift mr-5"></i> Free Shipping
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="cart_total_label">Total</td>
+                        <td class="cart_total_amount">
+                          <strong>
+                            <span class="font-xl fw-900 text-brand" id="grand-total"><%= order.billTotal %></span>
+                          </strong>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- Address -->
+                <div>
+                  <div class="address p-20" style="width: 200px;">
+                    <div class="add-heading d-flex justify-content-between">
+                      <h5 class="addressType text-center">Delivery Address :</h5>
+                    </div>
+                    <p>
+                      <span class="houseName"> <%= user.name %></span><br>
+                      <span class="houseName"> <%= order.address.houseName %></span><br>
+                      <span class="street"> <%= order.address.street %></span><br>
+                      <span class="city"> <%= order.address.city %></span><br>
+                      <span class="state"> <%= order.address.state %></span><br>
+                      <span class="country"> <%= order.address.country %></span><br>
+                      <span class="pincode"> <%= order.address.pincode %></span><br>
+                      <span class="phoneNumber"> <%= order.address.phoneNumber %></span>
+                    </p>
+                  </div>
+                </div>
+                <!-- Details -->
+                <div>
+                  <div class="table mt-10" style="width: 400px;">
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <td class="cart_total_label">Order ID</td>
+                        <td class="cart_total_amount"><%= order.orderId %></td>
+                      </tr>
+                      <tr>
+                        <td class="cart_total_label">Order Status</td>
+                        <td class="cart_total_amount"><%= order.orderStatus %></td>
+                      </tr>
+                      <tr>
+                        <td class="cart_total_label">Payment Status</td>
+                        <td class="cart_total_amount"><%= order.paymentStatus %></td>
+                      </tr>
+                      <tr>
+                        <td class="cart_total_label">Order Date</td>
+                        <td class="cart_total_amount"><%= order.showDate %></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                </div>
+              </div>
+              <!-- Checkout Button -->
+              <a class="btn">
+                Cancel Order
+              </a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+//   document.addEventListener('DOMContentLoaded', () => {
+//   const cancelButtons = document.querySelectorAll('.cancel-button');
+
+//   cancelButtons.forEach((button) => {
+//     button.addEventListener('click', async () => {
+//       const { value: cancelReason } = await Swal.fire({
+//         title: 'Provide a reason for cancellation',
+//         input: 'text',
+//         inputPlaceholder: 'Enter your reason here...',
+//         inputValidator: (value) => {
+//           if (!value) {
+//             return 'You need to provide a reason!';
+//           }
+//         },
+//       });
+
+//       if (cancelReason) {
+//         // User provided a reason, proceed with cancellation
+//         const orderId = button.dataset.orderId;
+//         const productId = button.dataset.productId;
+
+//         await fetch(`/cancelOrder/${orderId}/${productId}`, {
+//           method: 'PUT',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify({ cancelReason }),
+//         });
+
+//         // Reload or update UI as needed
+//         location.reload();
+//       }
+//     });
+//   });
+// });
+
+// document.addEventListener('DOMContentLoaded', () => {
+//   const cancelButtons = document.querySelectorAll('.cancel-button');
+
+//   cancelButtons.forEach((button) => {
+//     button.addEventListener('click', async () => {
+//       const orderId = button.dataset.orderId;
+//       const productId = button.dataset.productId;
+
+//       const shouldCancel = await Swal.fire({
+//         title: 'Are you sure you want to cancel this order?',
+//         showCancelButton: true,
+//         confirmButtonText: 'Yes',
+//         cancelButtonText: 'No',
+//         icon: 'warning',
+//         customClass: {
+//           confirmButton: 'btn btn-danger',
+//           cancelButton: 'btn btn-secondary ml-2',
+//         },
+//       });
+
+//       if (shouldCancel.isConfirmed) {
+//         const { value: cancelReason } = await Swal.fire({
+//           title: 'State reason for cancellation',
+//           input: 'text',
+//           inputPlaceholder: 'Enter your reason here...',
+//           inputValidator: (value) => {
+//             if (!value) {
+//               return 'You need to provide a reason!';
+//             }
+//           },
+//         });
+
+//         if (cancelReason) {
+//           // User provided a reason, proceed with cancellation
+//           await fetch(`/cancelOrder/${orderId}/${productId}`, {
+//             method: 'PUT',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify({ cancelReason }),
+//           });
+//           location.reload();
+//         }
+//       }
+//     });
+//   });
+// });
+
+// Function to handle cancellation of a product
+  // const cancelProduct = async (orderId, productId) => {
+  //   const { value: cancelReason } = await Swal.fire({
+  //     title: 'Are you sure you want to cancel this product?',
+  //     input: 'text',
+  //     inputLabel: 'State reason for cancellation',
+  //     inputPlaceholder: 'Enter reason here...',
+  //     showCancelButton: true,
+  //     confirmButtonText: 'Yes, Cancel',
+  //     cancelButtonText: 'No, Keep Product',
+  //     inputValidator: (value) => {
+  //       if (!value) {
+  //         return 'Please enter a reason for cancellation';
+  //       }
+  //     }
+  //   });
+
+  //   if (cancelReason) {
+  //     try {
+  //       const response = await fetch(`/cancelOrder/${orderId}/${productId}`, {
+  //         method: 'PUT',
+  //         headers: {
+  //           'Content-Type': 'application/json'
+  //         },
+  //         body: JSON.stringify({ cancelReason })
+  //       });
+
+  //       const data = await response.json();
+  //       console.log(data.allProductsCanceled);
+  //       if (response.ok) {
+  //         if (data.allProductsCanceled) {
+  //           // Redirect to '/my_orders' if all products are canceled
+  //           window.location.href = '/my_orders';
+  //         } else {
+  //           // Display success message or update UI as needed
+  //           Swal.fire('Success', 'Product canceled successfully', 'success');
+  //           // location.reload()
+  //         }
+  //       } else {
+  //         // Display error message if cancellation failed
+  //         Swal.fire('Error', data.error || 'Failed to cancel product', 'error');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error cancelling product:', error);
+  //       Swal.fire('Error', 'Failed to cancel product', 'error');
+  //     }
+  //   }
+  // };
+
+
+// definitive version
+const cancelProduct = async (orderId, productId) => {
+  const { value: cancelReason } = await Swal.fire({
+    title: 'Are you sure you want to cancel this product?',
+    input: 'text',
+    inputLabel: 'State reason for cancellation',
+    inputPlaceholder: 'Enter reason here...',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Cancel',
+    cancelButtonText: 'No, Keep Product',
+    inputValidator: (value) => {
+      if (!value) {
+        return 'Please enter a reason for cancellation';
+      }
+    }
+  });
+
+  if (cancelReason) {
+    try {
+      const response = await fetch(`/cancelOrder/${orderId}/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cancelReason })
+      });
+
+      const data = await response.json();
+      console.log(data.allProductsCanceled);
+
+      if (response.ok) {
+        if (data.allProductsCanceled) {
+          // Redirect to '/my_orders' if all products are canceled
+          window.location.href = '/my_orders';
+        } else {
+          // Display success message or update UI as needed
+          Swal.fire('Success', 'Product canceled successfully', 'success').then(() => {
+            // Reload the page
+            window.location.reload();
+          });
+        }
+      } else {
+        // Display error message if cancellation failed
+        Swal.fire('Error', data.error || 'Failed to cancel product', 'error');
+      }
+    } catch (error) {
+      console.error('Error cancelling product:', error);
+      Swal.fire('Error', 'Failed to cancel product', 'error');
+    }
+  }
+};
+
+</script>
+
+<%- include('../partials/page_footer.ejs') %> <%-
+include('../partials/footer.ejs')%>

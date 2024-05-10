@@ -47,11 +47,6 @@ user_route.post("/add_to_cart", cartController.addToCart);
 user_route.post("/check_product_in_cart", cartController.checkProductInCart);
 user_route.post("/updateQuantity", cartController.updateQuantity);
 user_route.post("/deleteItem", cartController.deleteItem);
-// user_route.get(
-//   "/checkStock",
-//   userAuth.isLogin,
-//   productController.checkStockAvailability
-// );
 user_route.get("/checkStock", productController.checkStock);
 user_route.get("/checkout", userAuth.isLogin, checkoutController.loadCheckout);
 user_route.post("/get_address", checkoutController.getAddress);
@@ -68,6 +63,8 @@ user_route.post("/add_address", userController.addAddress);
 user_route.delete("/delete_address", userController.deleteAddress);
 user_route.post("/update_address", userController.updateAddress);
 user_route.get("/my_orders", userAuth.isLogin, userController.loadMyOrders);
+user_route.get("/order", userAuth.isLogin, orderController.loadSingleOrder);
+user_route.put('/cancelOrder/:orderId/:productId', userAuth.isLogin, orderController.cancelProduct);
 user_route.get("/my_wallet", userAuth.isLogin, userController.loadMyWallet);
 
 // Single Product Page.

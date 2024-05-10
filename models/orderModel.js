@@ -11,6 +11,9 @@ const orderSchema = new mongoose.Schema({
   },
   products: [
     {
+      productId: {
+        type: String,
+      },
       productPrice: {
         type: Number,
       },
@@ -28,6 +31,14 @@ const orderSchema = new mongoose.Schema({
       },
       subtotal: {
         type: Number,
+      },
+      cancelProduct: {
+        type: Boolean,
+        default: false,
+      },
+      cancelReason: {
+        type: String,
+        default: "",
       },
     },
   ],
@@ -51,6 +62,14 @@ const orderSchema = new mongoose.Schema({
   },
   showDate: {
     type: String,
+  },
+  cancelAll: {
+    type: Boolean,
+    default: false,
+  },
+  cancelReason: {
+    type: String,
+    default: "",
   },
 });
 

@@ -416,23 +416,6 @@ const sortingProducts = async (req, res) => {
 };
 
 // Search Products
-// const searchProducts = async (req, res) => {
-//   const { query } = req.query;
-
-//   try {
-//     const searchResults = await Product.find({
-//       $or: [
-//         { name: { $regex: new RegExp(query, "i") } },
-//         { category: { $regex: new RegExp(query, "i") } },
-//       ],
-//     });
-
-//     res.json(searchResults);
-//   } catch (error) {
-//     console.error("Error searching products:", error);
-//     res.status(500).json({ error: "Failed to fetch search results" });
-//   }
-// };
 const searchProducts = async (req, res) => {
   const { query } = req.query;
 
@@ -616,7 +599,9 @@ const loadMyOrders = async (req, res) => {
     const user = await User.findById(req.session.userData);
     const products = await Product.find({ isUnlisted: false });
     const categories = await Category.find({ isUnlisted: false });
-    const orders = await Orders.find().sort({ createdOn: -1 }); // Sort orders by createdOn in descending order
+    const orders = await Orders.find({
+      user: req.session.userData || req.user.id,
+    }).sort({ createdOn: -1 });
 
     let google;
     req.user

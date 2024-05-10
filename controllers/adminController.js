@@ -46,7 +46,6 @@ const loadDashboard = async (req, res) => {
 // Logging Out Admin (not for google login).
 const logout = async (req, res) => {
   try {
-    console.log(`Logging Out ${req.session.adminData.name}`);
     req.session.adminData == null;
     res.redirect("/admin/");
   } catch (error) {

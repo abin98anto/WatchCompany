@@ -163,6 +163,7 @@ include('../partials/page_header.ejs') %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+  
 
   let addressIndex;
 
@@ -926,8 +927,6 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
   try {
     // Fetch all product rows
     const productRows = document.querySelectorAll('.products');
-    console.log(productRows);
-    // Array to hold out-of-stock products
     const outOfStockProducts = [];
 
     // Iterate over each product row to check stock availability
@@ -939,7 +938,6 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
       // Check stock availability for the product
       const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`);
       const data = await response.json();
-      console.log(data);
       if (!response.ok) {
         throw new Error('Failed to fetch stock availability.');
       }
@@ -947,7 +945,6 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
       const { available, stock } = data;
 
       if (available || quantity > stock) {
-        // Product is out of stock or insufficient stock
         outOfStockProducts.push({ productName, availableStock: stock });
       }
     }
@@ -997,20 +994,39 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
       phoneNumber
     };
 
+    const randomNumber = Math.floor(1000 + Math.random() * 9000);
+    const orderId = `ord${randomNumber}`;
+
+    const myDate = new Date();
+
+      const options = {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      };
+
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const formattedDate = formatter.format(myDate);
+
     const orderDetails = {
       user: userId,
       products: [],
-      orderId: "order number", // Replace with actual order ID logic
+      orderId,
       orderStatus: 'pending',
       billTotal,
       address,
       paymentMethod: selectedPaymentMethod.id,
       paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
-      createdOn: new Date().toISOString()
+      createdOn: new Date().toISOString(),
+      showDate: formattedDate
     };
 
     // Populate products array with detailed info for orderDetails
     productRows.forEach(row => {
+      const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
       const productName = row.querySelector('.productName').textContent.trim();
       const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
       const productPriceText = row.querySelector('.productPrice').textContent.trim();
@@ -1020,6 +1036,7 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
       const subtotal = parseFloat(subtotalText.replace('$', ''));
 
       const product = {
+        productId,
         productName,
         media: productImage,
         price: productPrice,

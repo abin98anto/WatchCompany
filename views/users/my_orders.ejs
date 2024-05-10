@@ -91,85 +91,65 @@ include('../partials/page_header.ejs') %>
     <div class="container">
       <div class="col-lg-12 m-auto">
         <div class="card">
-                        <div class="card-header text-center">
-                          <h5 class="mb-0 ">Your Order History</h5>
-                        </div>
-                        <div class="card-body">
-                          <div class="table-responsive">
-                            <% if(orders.length !== 0) { %>
-                              
-                            <table class="table text-center">
-                              <thead>
-                                <tr>
-                                  <th>Order ID</th>
-                                  <th>Products</th>
-                                  <th>Purchase Date</th>
-                                  <th>Status</th>
-                                  <!-- <th>Total</th> -->
-                                  <th>Actions</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <% for(let i=0; i<orders.length; i++) { %>
-                                <tr>
-                                  <td><%= orders[i].orderId %></td>
-                                  <td>
-                                    <ul class="text-start">
-                                      <% let k = 1 %>
-                                      <% orders[i].products.forEach(element => { %>
-                                      <li><%= k %>.<%= element.productName %></li>
-                                      <% k++ %>
-                                     <% }); %>
-                                    </ul>
-                                  </td>
-                                  <td><%= orders[i].showDate %></td>
-                                  <td><%= orders[i].orderStatus %></td>
-                                  <td>
-                                    <ul>
-                                      <% if(orders[i].orderStatus === "delivered") { %>
-                                        <li><button class="btn btn-danger">Return Product</button></li>
-                                        <% } else { %>
-                                          <li><button class="btn btn-warning">Cancel Order</button></li>
-                                          <% } %>
-                                    </ul>
-                                    <a href="#" class="btn"
-                                      >View Details</a
-                                    >
-                                  </td>
-                                </tr>
-                                <% } %>
-                              </tbody>
-                            </table> 
-                                <% } else { %>
-                                  <h1>Nothing ordered yet...</h1>
-                                  <% } %>
-                          </div>
-                        </div>
-                      </div>
+          <div class="card-header text-center">
+            <h5 class="mb-0 ">Your Order History</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <% if(orders.length !== 0) { %>
+                <table class="table text-center">
+                  <thead>
+                    <tr>
+                      <th>Sl No.</th>
+                      <th>Order ID</th>
+                      <th>Product Image</th>
+                      <th>Products</th>
+                      <th>Purchase Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for(let i=0; i<orders.length; i++) { %>
+                      <% if (orders[i].cancelAll === false) { %>
+                      <tr>
+                        <td><%= i+1 %></td>
+                        <td><%= orders[i].orderId %></td>
+                        <td>
+                          <% orders[i].products.forEach((product)=>{ %>
+                            <% if (product.cancelProduct === false){ %>
+                            <img style="height: 90px; width: 90px;" src="/uploads/<%= product.media %>" alt="">
+                            <% } %>
+                          <% }) %>
+                        </td>
+                        <td>
+                          <ul class="text-start">
+                            
+                            <% orders[i].products.forEach(element => { %>
+                              <% if (element.cancelProduct === false) { %>
+                              <li class="mt-15"><h5><%= element.productName %></h5></li>
+                              <% } %>
+                            <% }); %>
+                          </ul>
+                        </td>
+                        <td><%= orders[i].showDate %></td>
+                        <td><%= orders[i].orderStatus %></td>
+                        <td><a href="/order?id=<%= orders[i]._id %>" class="btn">View Details</a></td>
+                      </tr>
+                      <% } %>
+                    <% } %>
+                  </tbody>
+                </table> 
+              <% } else { %>
+                <h1 class="text-center">Nothing ordered yet...</h1>
+              <% } %>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 </main>
-
-<script>
-// Helper function to format date and time as "hours:minutes day-month-year"
-function formatDateTime(date) {
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const day = date.getDate();
-  const monthIndex = date.getMonth();
-  const year = date.getFullYear();
-
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  const month = months[monthIndex];
-
-  return `${hours}:${minutes} ${day}-${month}-${year}`;
-}
-</script>
 
 <%- include('../partials/page_footer.ejs') %> <%-
 include('../partials/footer.ejs')%>
