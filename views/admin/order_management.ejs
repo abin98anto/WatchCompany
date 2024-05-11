@@ -101,7 +101,8 @@
                 <th scope="col">Products Name</th>
                 <th scope="col">User</th>
                 <th scope="col">Total</th>
-                <th scope="col">Status</th>
+                <th scope="col">Payment Method</th>
+                <th scope="col">Order Status</th>
                 <th scope="col">Order Date</th>
                 <th scope="col" class="text-end">Action</th>
               </tr>
@@ -119,12 +120,13 @@
                 </td>
                 <td><%= orders[i].user.name %></td>
                 <td><%= orders[i].billTotal %></td>
+                <td><%= orders[i].paymentMethod %></td>
                 <td>
-                  <span><%= orders[i].orderStatus %></span>
+                  <span id="orderStatus-<%= orders[i]._id %>"><%= orders[i].orderStatus %></span>
                 </td>
                 <td><%= orders[i].showDate %></td>
                 <td class="text-end">
-                  <a href="#" class="btn btn-md rounded font-sm">Detail</a>
+                  <a class="btn btn-md rounded btn-change-status" data-order-id="<%= orders[i]._id %>">Change Order Status</a>
                 </td>
               </tr>
               <% } %>
@@ -135,5 +137,57 @@
     </div>
   </section>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+  const changeStatusButtons = document.querySelectorAll(".btn-change-status");
+
+  changeStatusButtons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const orderId = button.getAttribute("data-order-id");
+
+      Swal.fire({
+        title: 'Change Order Status',
+        html: `
+          <select id="orderStatus" class="form-select">
+            <option value="Pending">Pending</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        `,
+        confirmButtonText: 'Confirm',
+        preConfirm: () => {
+          const newStatus = document.getElementById('orderStatus').value;
+          return fetch(`/admin/order_status?id=${orderId}&status=${newStatus}`, {
+            method: 'POST'
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(response.statusText);
+            }
+            return response.json();
+          })
+          .then(data => {
+            const statusElement = document.querySelector(`#orderStatus-${orderId}`);
+            if (statusElement) {
+              statusElement.textContent = newStatus;
+            }
+            Swal.fire('Order Status Updated!', '', 'success');
+          })
+          .catch(error => {
+            Swal.fire('Error', error.message, 'error');
+          });
+        }
+      });
+    });
+  });
+});
+
+</script>
 
 <%- include('../partials/admin/admin_footer.ejs') %>

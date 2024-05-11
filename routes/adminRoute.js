@@ -86,6 +86,8 @@ admin_route.get(
 
 // Order Management.
 admin_route.get("/order_management", orderController.loadOrderManagement);
+// admin_route.get("/order_details", orderController.loadOrderDetails);
+admin_route.post("/order_status", orderController.changeStatus);
 
 // Admin logout.
 admin_route.get("/logout", adminAuth.adminLogin, adminController.logout);

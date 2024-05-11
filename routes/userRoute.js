@@ -54,7 +54,7 @@ user_route.post("/update_address", checkoutController.updateAddress);
 user_route.delete("/delete_address", userController.deleteAddress);
 user_route.post("/createOrder", orderController.addOrder);
 
-//Settings Page.
+// Profile page.
 user_route.get("/my_profile", userAuth.isLogin, userController.loadMyProfile);
 user_route.post("/update_profile", userController.updateProfile);
 user_route.post("/reset_password", userController.resetPassword);
@@ -62,9 +62,24 @@ user_route.get("/my_address", userAuth.isLogin, userController.loadMyAddress);
 user_route.post("/add_address", userController.addAddress);
 user_route.delete("/delete_address", userController.deleteAddress);
 user_route.post("/update_address", userController.updateAddress);
+
+// My Orders page.
 user_route.get("/my_orders", userAuth.isLogin, userController.loadMyOrders);
 user_route.get("/order", userAuth.isLogin, orderController.loadSingleOrder);
-user_route.put('/cancelOrder/:orderId/:productId', userAuth.isLogin, orderController.cancelProduct);
+user_route.put(
+  "/cancelOrder/:orderId/:productId",
+  orderController.cancelProduct
+);
+user_route.put("/cancelOrder", orderController.cancelOrder);
+user_route.put("/returnProduct", orderController.returnProduct);
+user_route.get(
+  "/return_order",
+  userAuth.isLogin,
+  orderController.loadReturnSingleOrder
+);
+user_route.put("/returnOrder", orderController.returnOrder);
+
+// My Wallet Page.
 user_route.get("/my_wallet", userAuth.isLogin, userController.loadMyWallet);
 
 // Single Product Page.

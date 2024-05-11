@@ -91,16 +91,39 @@ include('../partials/page_header.ejs') %>
     <div class="container">
       <div class="col-lg-12 m-auto">
         <div class="card">
-          <div class="card-header text-center">
-            <h5 class="mb-0 ">Your Order History</h5>
+          <!-- Order Heading -->
+          <div class="card-header dashboard-menu">
+            <ul class="nav flex-row justify-content-center" role="tablist">
+              <li class="nav-item">
+                <a href="#pending" id="dashboard-tab" data-bs-toggle="tab" class="nav-link active" role="tab" aria-controls="dashboard" aria-selected="false" >
+                  <h5>Your Order History</h5>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#canceled" id="dashboard-tab" data-bs-toggle="tab" class="nav-link" role="tab" aria-controls="dashboard" aria-selected="false" >
+                  <h5>Canceled Orders</h5>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#returned" id="dashboard-tab" data-bs-toggle="tab" class="nav-link" role="tab" aria-controls="dashboard" aria-selected="false" >
+                  <h5>Returned Orders</h5>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#delivered" id="dashboard-tab" data-bs-toggle="tab" class="nav-link" role="tab" aria-controls="dashboard" aria-selected="false" >
+                  <h5>Delivered Orders</h5>
+                </a>
+              </li>
+            </ul>
           </div>
-          <div class="card-body">
-            <div class="table-responsive">
+          <!-- Order Body -->
+          <div class="card-body tab-content dashboard-content">
+            <!-- Pending Orders -->
+            <div class="table-responsive tab-pane fade active show" id="pending" role="tabpanel" aria-labelledby="dashboard-tab">
               <% if(orders.length !== 0) { %>
                 <table class="table text-center">
                   <thead>
                     <tr>
-                      <th>Sl No.</th>
                       <th>Order ID</th>
                       <th>Product Image</th>
                       <th>Products</th>
@@ -111,9 +134,8 @@ include('../partials/page_header.ejs') %>
                   </thead>
                   <tbody>
                     <% for(let i=0; i<orders.length; i++) { %>
-                      <% if (orders[i].cancelAll === false) { %>
+                      <% if (orders[i].orderStatus === 'pending' || orders[i].orderStatus === 'partially-cancelled') { %>
                       <tr>
-                        <td><%= i+1 %></td>
                         <td><%= orders[i].orderId %></td>
                         <td>
                           <% orders[i].products.forEach((product)=>{ %>
@@ -135,6 +157,148 @@ include('../partials/page_header.ejs') %>
                         <td><%= orders[i].showDate %></td>
                         <td><%= orders[i].orderStatus %></td>
                         <td><a href="/order?id=<%= orders[i]._id %>" class="btn">View Details</a></td>
+                      </tr>
+                      <% } %>
+                    <% } %>
+                  </tbody>
+                </table> 
+              <% } else { %>
+                <h1 class="text-center">Nothing ordered yet...</h1>
+              <% } %>
+            </div>
+            <!-- Canceled Orders -->
+            <div class="table-responsive tab-pane fade" id="canceled" role="tabpanel" aria-labelledby="dashboard-tab">
+              <% if(orders.length !== 0) { %>
+                <table class="table text-center">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Product Image</th>
+                      <th>Products</th>
+                      <th>Purchase Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for(let i=0; i<orders.length; i++) { %>
+                      <% if (orders[i].orderStatus === 'partially-cancelled' || orders[i].orderStatus === 'cancelled' ) { %>
+                      <tr>
+                        <td><%= orders[i].orderId %></td>
+                        <td>
+                          <% orders[i].products.forEach((product)=>{ %>
+                            <% if (product.cancelProduct === true){ %>
+                            <img style="height: 90px; width: 90px;" src="/uploads/<%= product.media %>" alt="">
+                            <% } %>
+                          <% }) %>
+                        </td>
+                        <td>
+                          <ul class="text-start">
+                            
+                            <% orders[i].products.forEach(element => { %>
+                              <% if (element.cancelProduct === true) { %>
+                              <li class="mt-15"><h5><%= element.productName %></h5></li>
+                              <% } %>
+                            <% }); %>
+                          </ul>
+                        </td>
+                        <td><%= orders[i].showDate %></td>
+                        <td><%= orders[i].orderStatus %></td>
+                      </tr>
+                      <% } %>
+                    <% } %>
+                  </tbody>
+                </table> 
+              <% } else { %>
+                <p>No orders</p>
+                <% } %>
+            </div>
+            <!-- Returned Orders -->
+            <div class="table-responsive tab-pane fade" id="returned" role="tabpanel" aria-labelledby="dashboard-tab">
+              <% if(orders.length !== 0) { %>
+                <table class="table text-center">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Product Image</th>
+                      <th>Products</th>
+                      <th>Purchase Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for(let i=0; i<orders.length; i++) { %>
+                      <% if (orders[i].orderStatus === 'returned') { %>
+                      <tr>
+                        <td><%= orders[i].orderId %></td>
+                        <td>
+                          <% orders[i].products.forEach((product)=>{ %>
+                            <% if (product.returnProduct === true){ %>
+                            <img style="height: 90px; width: 90px;" src="/uploads/<%= product.media %>" alt="">
+                            <% } %>
+                          <% }) %>
+                        </td>
+                        <td>
+                          <ul class="text-start">
+                            
+                            <% orders[i].products.forEach(element => { %>
+                              <% if (element.returnProduct === true) { %>
+                              <li class="mt-15"><h5><%= element.productName %></h5></li>
+                              <% } %>
+                            <% }); %>
+                          </ul>
+                        </td>
+                        <td><%= orders[i].showDate %></td>
+                        <td><%= orders[i].orderStatus %></td>
+                        <td><a href="/order?id=<%= orders[i]._id %>" class="btn">View Details</a></td>
+                      </tr>
+                      <% } %>
+                    <% } %>
+                  </tbody>
+                </table> 
+              <% } else { %>
+                <h1 class="text-center">Nothing ordered yet...</h1>
+              <% } %>
+            </div>
+            <!-- Delivered Orders -->
+            <div class="table-responsive tab-pane fade" id="delivered" role="tabpanel" aria-labelledby="dashboard-tab">
+              <% if(orders.length !== 0) { %>
+                <table class="table text-center">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Product Image</th>
+                      <th>Products</th>
+                      <th>Purchase Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for(let i=0; i<orders.length; i++) { %>
+                      <% if (orders[i].orderStatus === 'delivered' || orders[i].orderStatus === 'partially-returned') { %>
+                      <tr>
+                        <td><%= orders[i].orderId %></td>
+                        <td>
+                          <% orders[i].products.forEach((product)=>{ %>
+                            <% if (product.returnProduct === false){ %>
+                            <img style="height: 90px; width: 90px;" src="/uploads/<%= product.media %>" alt="">
+                            <% } %>
+                          <% }) %>
+                        </td>
+                        <td>
+                          <ul class="text-start">
+                            
+                            <% orders[i].products.forEach(element => { %>
+                              <% if (element.returnProduct === false) { %>
+                              <li class="mt-15"><h5><%= element.productName %></h5></li>
+                              <% } %>
+                            <% }); %>
+                          </ul>
+                        </td>
+                        <td><%= orders[i].showDate %></td>
+                        <td><%= orders[i].orderStatus %></td>
+                        <td><a href="/return_order?id=<%= orders[i]._id %>" class="btn">View Details</a></td>
                       </tr>
                       <% } %>
                     <% } %>

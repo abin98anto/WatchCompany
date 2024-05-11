@@ -1,0 +1,268 @@
+<%- include('../partials/admin/admin_header.ejs') %>
+
+<!-- side bar -->
+<aside class="navbar-aside" id="offcanvas_aside">
+  <div class="aside-top">
+    <a href="index.html" class="brand-wrap">
+      <img
+        src="/admin_assets/imgs/theme/watchcompany_logo.webp"
+        class="logo"
+        alt="Watch Company Dashboard"
+      />
+    </a>
+    <div>
+      <button class="btn btn-icon btn-aside-minimize">
+        <i class="text-muted material-icons md-menu_open"></i>
+      </button>
+    </div>
+  </div>
+  <nav>
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/dashboard">
+          <i class="icon material-icons md-home"></i>
+          <span class="text">Dashboard</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/product_management">
+          <i class="icon material-icons md-shopping_bag"></i>
+          <span class="text">Product Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/user_management">
+          <i class="icon material-icons md-person"></i>
+          <span class="text">User Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/category_management">
+          <i class="icon material-icons md-stars"></i>
+          <span class="text">Category Management</span>
+        </a>
+      </li>
+      <li class="menu-item active">
+        <a class="menu-link" href="/admin/order_management">
+          <i class="icon material-icons md-shopping_cart"></i>
+          <span class="text">Order Management</span>
+        </a>
+      </li>
+    </ul>
+    <hr />
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/settings">
+          <i class="icon material-icons md-settings"></i>
+          <span class="text">Settings</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/logout">
+          <i class="icon material-icons md-local_offer"></i>
+          <span class="text"> Logout </span>
+        </a>
+      </li>
+    </ul>
+    <br />
+    <br />
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main d-flex" style="flex-direction: column">
+  <section class="pt-30 pb-30">
+    <div class="container">
+      <!-- Loop through orders -->
+      <% orders.forEach((orde) => { %>
+      <div class="row justify-content-center">
+        <!-- Loop through products -->
+        <% orde.products.forEach((element) => { %> <% if (element.cancelProduct
+        == false) { %>
+        <div class="col-md-3">
+          <!-- Product Card -->
+          <div class="product-cart-wrap m-10">
+            <!-- Product Image -->
+            <div class="product-img-action-wrap">
+              <div class="product-img product-img-zoom">
+                <div class="product-img-inner">
+                  <a href="shop-product-right.html">
+                    <img
+                      class="default-img"
+                      src="/uploads/<%= element.media %>"
+                      alt=""
+                    />
+                    <img
+                      class="hover-img"
+                      src="/uploads/<%= element.media %>"
+                      alt=""
+                    />
+                  </a>
+                </div>
+              </div>
+            </div>
+            <!-- Product Content -->
+            <div class="product-content-wrap">
+              <h2 class="product-name">
+                <a href="shop-product-right.html"><%= element.productName %></a>
+              </h2>
+              <div class="product-price">
+                <span>$ <%= element.price %></span>
+                <span>x <%= element.quantity %> Pcs</span>
+              </div>
+            </div>
+            <!-- Buttons -->
+            <div class="d-flex justify-content-center p-10">
+              <% if (orde.products.length != 1) { %> <% if (orde.orderStatus ===
+              "delivered" || orde.orderStatus === "partially-returned") { %>
+              <button
+                onclick="returnProduct('<%= orde._id %>', '<%= element.productId %>')"
+                class="btn btn-warning"
+              >
+                Return
+              </button>
+              <% } else { %>
+              <button
+                onclick="cancelProduct('<%= orde._id %>', '<%= element.productId %>')"
+                class="btn btn-danger"
+              >
+                Cancel
+              </button>
+              <% } %> <% } %>
+            </div>
+          </div>
+        </div>
+        <% } %> <% }) %>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+  <section>
+    <div class="container">
+      <!-- Loop through orders for totals -->
+      <% orders.forEach((order) => { %>
+      <div class="row mb-50 mt-15 text-center" style="justify-content: center">
+        <div class="col-lg-8 col-md-12">
+          <div class="border p-md-4 border-radius cart-totals">
+            <div class="heading_s1 mb-3">
+              <h4>Order Info</h4>
+            </div>
+            <div class="d-flex" style="justify-content: space-evenly">
+              <!-- Table for Order Info -->
+              <div class="table mt-10" style="width: 400px">
+                <table class="table">
+                  <tbody>
+                    <tr>
+                      <td class="cart_total_label">Cart Subtotal</td>
+                      <td class="cart_total_amount">
+                        <span class="font-lg fw-900 text-brand" id="cart-total"
+                          ><%= order.billTotal %></span
+                        >
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="cart_total_label">Shipping</td>
+                      <td class="cart_total_amount">
+                        <i class="ti-gift mr-5"></i> Free Shipping
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="cart_total_label">Total</td>
+                      <td class="cart_total_amount">
+                        <strong>
+                          <span
+                            class="font-xl fw-900 text-brand"
+                            id="grand-total"
+                            ><%= order.billTotal %></span
+                          >
+                        </strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- Address -->
+              <div>
+                <div class="address p-20" style="width: 200px">
+                  <div class="add-heading d-flex justify-content-between">
+                    <h5 class="addressType text-center">Delivery Address :</h5>
+                  </div>
+                  <p>
+                    <span class="houseName"> <%= order.user.name %></span><br />
+                    <span class="houseName">
+                      <%= order.address.houseName %></span
+                    ><br />
+                    <span class="street"> <%= order.address.street %></span
+                    ><br />
+                    <span class="city"> <%= order.address.city %></span><br />
+                    <span class="state"> <%= order.address.state %></span><br />
+                    <span class="country"> <%= order.address.country %></span
+                    ><br />
+                    <span class="pincode"> <%= order.address.pincode %></span
+                    ><br />
+                    <span class="phoneNumber">
+                      <%= order.address.phoneNumber %></span
+                    >
+                  </p>
+                </div>
+              </div>
+              <!-- Details -->
+              <div>
+                <div class="table mt-10" style="width: 400px">
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <td class="cart_total_label">Order ID</td>
+                        <td class="cart_total_amount"><%= order.orderId %></td>
+                      </tr>
+                      <tr>
+                        <td class="cart_total_label">Order Status</td>
+                        <td class="cart_total_amount">
+                          <%= order.orderStatus %>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="cart_total_label">Payment Status</td>
+                        <td class="cart_total_amount">
+                          <%= order.paymentStatus %>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="cart_total_label">Order Date</td>
+                        <td class="cart_total_amount"><%= order.showDate %></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!-- Checkout Button -->
+            <!-- <a class="btn">
+                Cancel Order
+              </a> -->
+            <div class="d-flex justify-content-center p-10">
+              <% if (order.orderStatus === "delivered") { %>
+              <button
+                onclick="returnOrder('<%= order._id %>')"
+                class="btn btn-warning"
+              >
+                Return
+              </button>
+              <% } else { %>
+              <button
+                onclick="cancelOrder('<%= order._id %>')"
+                class="btn btn-danger"
+              >
+                Cancel
+              </button>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/admin/admin_footer.ejs') %>

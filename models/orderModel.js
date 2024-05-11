@@ -40,6 +40,14 @@ const orderSchema = new mongoose.Schema({
         type: String,
         default: "",
       },
+      returnProduct: {
+        type: Boolean,
+        default: false,
+      },
+      returnReason: {
+        type: String,
+        default: "",
+      },
     },
   ],
   orderStatus: {
@@ -68,6 +76,14 @@ const orderSchema = new mongoose.Schema({
     default: false,
   },
   cancelReason: {
+    type: String,
+    default: "",
+  },
+  returnAll: {
+    type: Boolean,
+    default: false,
+  },
+  returnReason: {
     type: String,
     default: "",
   },

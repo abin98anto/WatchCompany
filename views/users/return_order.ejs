@@ -106,7 +106,7 @@ include('../partials/page_header.ejs') %>
         <div class="row justify-content-center">
           <!-- Loop through products -->
           <% orde.products.forEach((element) => { %>
-            <% if (element.cancelProduct == false) { %>
+            <% if (element.returnProduct == false) { %>
             <div class="col-md-3">
               <!-- Product Card -->
               <div class="product-cart-wrap m-10">
@@ -238,11 +238,7 @@ include('../partials/page_header.ejs') %>
                 Cancel Order
               </a> -->
               <div class="d-flex justify-content-center p-10">
-                    <% if (order.orderStatus === "delivered") { %>
                       <button onclick="returnOrder('<%= order._id %>')" class="btn btn-warning">Return</button>
-                      <% } else { %>
-                        <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">Cancel</button>
-                    <% } %>
                 </div>
             </div>
           </div>
@@ -390,6 +386,51 @@ const returnProduct = async (orderId, productId) => {
     }
   }
 }
+
+// Return a Order
+const returnOrder = async (orderId) => {
+  console.log(`returning the order`);
+  const { value: returnReason } = await Swal.fire({
+    title: 'Are you sure you want to return this order?',
+    input: 'text',
+    inputLabel: 'State reason for return',
+    inputPlaceholder: 'Enter reason here...',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Cancel',
+    cancelButtonText: 'No',
+    inputValidator: (value) => {
+      if (!value) {
+        return 'Please enter a reason for return';
+      }
+    }
+  });
+  console.log(`return reason : ${returnReason}`);
+  if (returnReason) {
+    try {
+        console.log(`inside the try catch`);
+      const response = await fetch(`/returnOrder?id=${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ returnReason })
+      });
+      console.log(`response : ${response}`)
+      await response.json();
+
+      if (response.ok) {
+        Swal.fire('Success', 'Order canceled successfully', 'success').then(() => {
+          window.location.href = '/my_orders';
+        });
+      } else {
+        Swal.fire('Error', data.error || 'Failed to cancel order', 'error');
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      Swal.fire('Error', 'Failed to cancel order', 'error');
+    }
+  }
+};
 
 
 </script>
