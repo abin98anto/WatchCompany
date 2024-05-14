@@ -276,7 +276,7 @@ include('../partials/page_header.ejs') %>
                   </thead>
                   <tbody>
                     <% for(let i=0; i<orders.length; i++) { %>
-                      <% if (orders[i].orderStatus === 'delivered' || orders[i].orderStatus === 'partially-returned') { %>
+                      <% if (orders[i].orderStatus === 'Delivered' || orders[i].orderStatus === 'partially-returned') { %>
                       <tr>
                         <td><%= orders[i].orderId %></td>
                         <td>

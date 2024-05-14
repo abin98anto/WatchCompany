@@ -271,19 +271,19 @@ const loadLandingPage = async (req, res) => {
 
 // to check login credentials.
 const verifyLogin = async (req, res) => {
+  const categories = await Category.find({
+    isUnlisted: false,
+    isDeleted: false,
+  });
+  const message = "Username or password is incorrect.";
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
-    const categories = await Category.find({
-      isUnlisted: false,
-      isDeleted: false,
-    });
-    const message = "Username or password is incorrect.";
 
     if (!user) {
       res.render("login", {
-        message: message,
-        categories: categories,
+        message,
+        categories,
         user: req.user.userData,
       });
     } else {
@@ -292,18 +292,22 @@ const verifyLogin = async (req, res) => {
         req.session.userData = user._id;
         res.redirect("/");
       } else {
-        req.session.message = message;
+        // req.session.message = message;
         res.render("login", {
-          message: message,
-          categories: categories,
+          message,
+          categories,
           user: req.user.userData,
         });
       }
     }
   } catch (error) {
     console.log(`Error Verifying User Login.`);
-    req.session.error = "An error occurred. Please try again later.";
-    res.redirect("/login");
+    // req.session.error = "An error occurred. Please try again later.";
+    res.render("login", {
+      message,
+      categories,
+      user: "",
+    });
   }
 };
 
@@ -322,9 +326,13 @@ const logoutUser = async (req, res) => {
 const loadProduct = async (req, res) => {
   try {
     const id = req.query.id;
+    console.log(`id : ${id}`);
     const user = await User.findById(req.session.userData);
     const product = await Product.findOne({ isUnlisted: false, _id: id });
     const categories = await Category.find({ isUnlisted: false });
+    // const relatedCat = product.category;
+    const relatedProd = await Product.find({ category: product.category });
+    // console.log(relatedProd);
     let google;
     req.user ? (google = true) : (google = false);
     res.render("product_page", {
@@ -332,6 +340,7 @@ const loadProduct = async (req, res) => {
       categories: categories,
       user: user,
       google,
+      relatedProd,
     });
   } catch (error) {
     console.log(`errr loading single product page.`);
@@ -347,14 +356,14 @@ const loadShop = async (req, res) => {
     const categories = await Category.find({ isUnlisted: false });
     let google;
     req.user ? (google = true) : (google = false);
+
+    const query = { isUnlisted: false, stock: { $gt: 0 } };
     if (req.query.category) {
-      products = await Product.find({
-        category: req.query.category,
-        isUnlisted: false,
-      });
+      products = await Product.find({ ...query, category: req.query.category });
     } else {
-      products = await Product.find({ isUnlisted: false });
+      products = await Product.find(query);
     }
+
     res.render("shopping_page", {
       products: products,
       categories: categories,
@@ -754,6 +763,51 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// Render Wishlist.
+const loadWishlist = async (req, res) => {
+  try {
+    // const id = req.session.userData || req.user.id;
+    // const user = await User.findById(id);
+    // const categories = await Category.find({
+    //   isUnlisted: false,
+    // });
+    // res.render("wishlist", { user, categories });
+    if (req.user) {
+      const user = await User.findById(req.user.id);
+      const cart = await Cart.findById(req.user.id);
+      const products = await Product.find({ isUnlisted: false });
+      const categories = await Category.find({
+        isUnlisted: false,
+      });
+      req.session.userData = user.id;
+      res.render("wishlist", {
+        categories: categories,
+        products: products,
+        user: user,
+        cart: cart,
+        google: true,
+      });
+    } else {
+      const user = await User.findById(req.session.userData);
+      const cart = await Cart.findById(req.session.userData);
+      const products = await Product.find({ isUnlisted: false });
+      const categories = await Category.find({
+        isUnlisted: false,
+        isDeleted: false,
+      });
+      res.render("wishlist", {
+        categories: categories,
+        products: products,
+        user: user,
+        cart: cart,
+        google: false,
+      });
+    }
+  } catch (error) {
+    console.log(`error loading the wishlist : ${error}`);
+  }
+};
+
 module.exports = {
   loadSignUp,
   loadLogin,
@@ -783,4 +837,5 @@ module.exports = {
   sortingProducts,
   searchProducts,
   getProducts,
+  loadWishlist,
 };

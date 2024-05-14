@@ -1,4 +1,5 @@
 const Category = require("../models/categoryModel");
+const Order = require("../models/orderModel");
 const Product = require("../models/productModel");
 const multer = require("multer");
 const sharp = require("sharp");
@@ -135,6 +136,17 @@ const toggleProductStatus = async (req, res) => {
   try {
     let id = req.query.id;
     const product = await Product.findById(id);
+
+    let orderExists = false;
+    const orders = await Order.find();
+    orders.forEach((order)=> {
+      if (order.products.productId == id) orderExists = true;
+    })
+
+    if (orderExists) {
+      res.status(404).send("Cannot unlist product. Order for the product exists.");
+    }
+
     if (!product) {
       res.status(404).send("Product not found");
       return;

@@ -57,8 +57,23 @@ const addOrder = async (req, res) => {
 // Load Order Management.
 const loadOrderManagement = async (req, res) => {
   try {
-    const orders = await Order.find().populate("user");
-    res.render("order_management", { orders });
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const skipIndex = (page - 1) * limit;
+
+    const totalOrders = await Order.countDocuments();
+
+    const orders = await Order.find()
+      .populate("user")
+      .skip(skipIndex)
+      .limit(limit);
+
+    res.render("order_management", {
+      orders,
+      currentPage: page,
+      limit,
+      totalOrders,
+    });
   } catch (error) {
     console.log(`error loading order management : ${error}`);
   }
@@ -72,7 +87,6 @@ const loadSingleOrder = async (req, res) => {
     const products = await Products.find({ isUnlisted: false });
     const categories = await Category.find({ isUnlisted: false });
     const orders = await Order.find({ _id: id }).sort({ createdOn: -1 });
-    // console.log(orders[0]);
 
     let google;
     req.user
@@ -94,47 +108,37 @@ const loadSingleOrder = async (req, res) => {
 
 // Cancel a Product
 const cancelProduct = async (req, res) => {
-  // console.log(`cancelling a product`);
   const { orderId, productId } = req.params;
   const { cancelReason } = req.body;
-  // console.log(
-  // `orderId : ${orderId}, productid : ${productId}, cancel reason : ${cancelReason}`
-  // );
   try {
     const order = await Order.findById(orderId);
-    // console.log(`order : ${order}`);
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
     const product = order.products.find(
       (p) => p.productId.toString() === productId
     );
-    // console.log(`product : ${product}`);
     if (!product) {
       return res.status(404).json({ error: "Product not found in order" });
     }
 
-    // const existingProduct = await product.findById(productId);
-    // console.log(`existing prod : ${existingProduct}`);
-    // if (!existingProduct) {
-    //   return res.status(404).json({ error: "Product not found" });
-    // }
-
-    // existingProduct.stock += product.quantity;
+    const existingProduct = await Products.findById(productId);
+    existingProduct.stock += product.quantity;
+    existingProduct.save();
 
     order.orderStatus = "partially-cancelled";
     order.billTotal -= product.price * product.quantity;
     product.cancelProduct = true;
     product.cancelReason = cancelReason;
+
     const allProductsCanceled = order.products.every((p) => p.cancelProduct);
 
     if (allProductsCanceled) {
       order.cancelAll = true;
+      order.orderStatus = "cancelled";
+      order.cancelReason = cancelReason;
     }
 
-    // console.log(`exisiting prod after : ${existingProduct}`);
-    // console.log(`order after : ${existingProduct}`);
-    // await existingProduct.save();
     await order.save();
 
     res.status(200).json({
@@ -150,15 +154,21 @@ const cancelProduct = async (req, res) => {
 // Cancel a Order
 const cancelOrder = async (req, res) => {
   try {
-    console.log(`in the server cancelling order.`);
     const id = req.query.id;
     const { cancelReason } = req.body;
-    console.log(`is : ${id} cancel reason : ${cancelReason}`);
     const order = await Order.findById(id);
-    console.log(`order : ${order}`);
+    console.log(`orders : ${order}`);
+
     if (!order) {
       return res.status(404).json({ error: "Order not found." });
     }
+
+    order.products.forEach(async function (product) {
+      const existingProduct = await Products.findById(product.productId);
+      existingProduct.stock += product.quantity;
+      console.log(`existing product : ${existingProduct}`);
+      await existingProduct.save();
+    });
 
     order.cancelAll = true;
     order.cancelReason = cancelReason;
@@ -168,7 +178,6 @@ const cancelOrder = async (req, res) => {
     });
 
     await order.save();
-    console.log(`order after save  : ${order}`);
     res.status(200).json({
       message: "Order product canceled successfully",
     });
@@ -185,7 +194,6 @@ const loadReturnSingleOrder = async (req, res) => {
     const products = await Products.find({ isUnlisted: false });
     const categories = await Category.find({ isUnlisted: false });
     const orders = await Order.find({ _id: id }).sort({ createdOn: -1 });
-    // console.log(orders[0]);
 
     let google;
     req.user

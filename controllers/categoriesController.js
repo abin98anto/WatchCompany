@@ -2,14 +2,41 @@ const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 
 // Render Category Management Page.
+// const loadCategoryManagement = async (req, res) => {
+//   try {
+//     const categories = await Category.find({ isDeleted: false }).sort({
+//       createdOn: -1,
+//     });
+//     res.render("category_management", {
+//       categories: categories,
+//       message: "",
+//     });
+//   } catch (error) {
+//     res.send(`Error Loading Category Mangement.`);
+//   }
+// };
+
 const loadCategoryManagement = async (req, res) => {
   try {
-    const categories = await Category.find({ isDeleted: false }).sort({
-      createdOn: -1,
-    });
+    const page = parseInt(req.query.page) || 1; // Default to page 1 if no page is provided
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page if no limit is provided
+    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+    const totalCategories = await Category.countDocuments({ isDeleted: false });
+    const totalPages = Math.ceil(totalCategories / limit);
+
+    const categories = await Category.find({ isDeleted: false })
+      .sort({ createdOn: -1 })
+      .skip(skip)
+      .limit(limit);
+
     res.render("category_management", {
-      categories: categories,
+      categories,
+      currentPage: page,
+      totalPages,
+      totalItems: totalCategories,
       message: "",
+      limit,
     });
   } catch (error) {
     res.send(`Error Loading Category Mangement.`);

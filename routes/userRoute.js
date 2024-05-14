@@ -85,4 +85,7 @@ user_route.get("/my_wallet", userAuth.isLogin, userController.loadMyWallet);
 // Single Product Page.
 user_route.get("/load_product", userController.loadProduct);
 
+// Wishlist.
+user_route.get("/wishlist", userAuth.isLogin, userController.loadWishlist);
+
 module.exports = user_route;

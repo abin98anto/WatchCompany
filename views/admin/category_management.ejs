@@ -229,6 +229,45 @@
       </div>
     </div>
   </section>
+
+  <!-- Pagination -->
+
+  <!-- Pagination links -->
+  <div style="flex-direction: column; align-items: center" class="d-flex">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+          <a
+            class="page-link"
+            href="/admin/category_management?page=<%= currentPage - 1 %>&limit=<%= limit %>"
+            tabindex="-1"
+            aria-disabled="<%= currentPage === 1 %>"
+            >Previous</a
+          >
+        </li>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+          <a
+            class="page-link"
+            href="/admin/category_management?page=<%= i %>&limit=<%= limit %>"
+            ><%= i %></a
+          >
+        </li>
+        <% } %>
+        <li
+          class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>"
+        >
+          <a
+            class="page-link"
+            href="/admin/category_management?page=<%= currentPage + 1 %>&limit=<%= limit %>"
+            tabindex="-1"
+            aria-disabled="<%= currentPage === totalPages %>"
+            >Next</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -460,7 +499,7 @@
 </script>
 
 <!-- Search Fucntionality -->
-<script>
+<!-- <script>
   document.addEventListener("DOMContentLoaded", () => {
     fetch("/admin/get_categories")
       .then((response) => response.json())
@@ -488,7 +527,6 @@
                   }" style="padding: 8px">${status}</span>
                 </td>
                 <td class="text-end">
-                  <!-- Action buttons -->
                   <ul style="display: flex; justify-content: space-evenly">
                     <li>
                       <form>
@@ -543,7 +581,7 @@
         console.error("Error fetching categories:", error);
       });
   });
-</script>
+</script> -->
 
 <!-- Create category from validation -->
 <script>

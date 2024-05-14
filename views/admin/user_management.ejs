@@ -148,210 +148,178 @@
       </div>
     </div>
   </section>
+
+  <div id="paginationContainer" class="pagination-area mt-30 pb-30 pagination justify-content-center"></div>
+
 </main>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    fetch("/admin/get_users")
-      .then((response) => {
+    const currentPage = 1; // Set the initial page
+    const limit = 10; // Number of users per page
+
+    const fetchUsers = async (page) => {
+      try {
+        const response = await fetch(`/admin/get_users?page=${page}`);
         if (!response.ok) {
           throw new Error("Failed to fetch users");
         }
-        return response.json();
-      })
-      .then((users) => {
-        console.log(users);
-
-        const searchInput = document.getElementById("searchInput");
-        const userTableBody = document.getElementById("userTableBody");
-        const formSelect = document.querySelector(".form-select");
-
-        const filterAndRenderUsers = (status, searchTerm) => {
-          const filteredUsers = users.filter((user) => {
-            const isMatch =
-              user.name.toLowerCase().includes(searchTerm) ||
-              user.email.toLowerCase().includes(searchTerm);
-
-            if (status === "Show all") {
-              return isMatch;
-            } else if (status === "Active") {
-              return !user.isBlocked && isMatch;
-            } else if (status === "Blocked") {
-              return user.isBlocked && isMatch;
-            }
-
-            return false;
-          });
-
-          renderUsers(filteredUsers);
-        };
-
-        const renderUsers = (users) => {
-          userTableBody.innerHTML = "";
-          users.forEach((user, index) => {
-            const statusBadgeClass = user.isBlocked
-              ? "alert-danger"
-              : "alert-success";
-            const statusText = user.isBlocked ? "Blocked" : "Active";
-
-            const row = `
-              <tr class="text-center">
-                <td class="text-center">${index + 1}</td>
-                <td class="text-center">${user.name}</td>
-                <td class="text-center">${user.email}</td>
-                <td class="text-center">
-                  <span class="rounded-pill ${statusBadgeClass}" style="padding: 8px">${statusText}</span>
-                </td>
-                <td>
-                  <button class="btn ${
-                    user.isBlocked ? "btn-success" : "btn-danger"
-                  } toggle-button" data-id="${user._id}">
-                    ${user.isBlocked ? "Unblock" : "Block"}
-                  </button>
-                </td>
-              </tr>
-            `;
-
-            userTableBody.innerHTML += row;
-          });
-        };
-
-        const toggleStatus = (userId, action) => {
-          const confirmationMessage =
-            action === "block"
-              ? "Are you sure you want to block this user?"
-              : "Are you sure you want to unblock this user?";
-
-          Swal.fire({
-            title: "Confirm",
-            text: confirmationMessage,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              fetch(`/admin/toggle_user_status?id=${userId}`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              })
-                .then(() => {
-                  location.reload(); // Refresh the page after successful toggle
-                })
-                .catch((error) => {
-                  console.error("Error toggling user status:", error);
-                  Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Failed to toggle user status. Please try again later.",
-                  });
-                });
-            }
-          });
-        };
-
-        searchInput.addEventListener("input", () => {
-          const searchTerm = searchInput.value.toLowerCase().trim();
-          const selectedOption = formSelect.value;
-          filterAndRenderUsers(selectedOption, searchTerm);
-        });
-
-        formSelect.addEventListener("change", (event) => {
-          const selectedOption = event.target.value;
-          const searchTerm = searchInput.value.toLowerCase().trim();
-          filterAndRenderUsers(selectedOption, searchTerm);
-        });
-
-        // Use event delegation to handle button click events
-        userTableBody.addEventListener("click", (event) => {
-          if (event.target.classList.contains("toggle-button")) {
-            const userId = event.target.dataset.id;
-            const action = event.target.textContent.toLowerCase().trim(); // Get button text
-            toggleStatus(userId, action);
-          }
-        });
-
-        // Initial rendering of all users
+        const { users, totalPages } = await response.json();
+        // Handle the users and pagination data
         renderUsers(users);
-      })
-      .catch((error) => {
+        renderPagination(totalPages, page);
+      } catch (error) {
         console.error("Error fetching users:", error);
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: "Failed to fetch users. Please try again later.",
         });
-      });
-  });
+      }
+    };
 
-  // Search fetch
-  function setupSearch() {
+    // Call fetchUsers with the initial page
+    fetchUsers(currentPage);
+
     const searchInput = document.getElementById("searchInput");
+    const userTableBody = document.getElementById("userTableBody");
+    const formSelect = document.querySelector(".form-select");
 
-    searchInput.addEventListener("input", async () => {
-      const query = searchInput.value.trim();
+    const filterAndRenderUsers = (status, searchTerm) => {
+      const filteredUsers = users.filter((user) => {
+        const isMatch =
+          user.name.toLowerCase().includes(searchTerm) ||
+          user.email.toLowerCase().includes(searchTerm);
 
-      try {
-        const response = await fetch(
-          `/products/search?query=${encodeURIComponent(query)}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch search results");
+        if (status === "Show all") {
+          return isMatch;
+        } else if (status === "Active") {
+          return !user.isBlocked && isMatch;
+        } else if (status === "Blocked") {
+          return user.isBlocked && isMatch;
         }
 
-        const searchResults = await response.json();
-        displayProducts(searchResults); // Display the search results on the page
-      } catch (error) {
-        console.error("Error searching products:", error.message);
+        return false;
+      });
+
+      renderUsers(filteredUsers);
+    };
+
+    const renderUsers = (users) => {
+      userTableBody.innerHTML = "";
+      users.forEach((user, index) => {
+        const statusBadgeClass = user.isBlocked
+          ? "alert-danger"
+          : "alert-success";
+        const statusText = user.isBlocked ? "Blocked" : "Active";
+
+        const row = `
+          <tr class="text-center">
+            <td class="text-center">${index + 1}</td>
+            <td class="text-center">${user.name}</td>
+            <td class="text-center">${user.email}</td>
+            <td class="text-center">
+              <span class="rounded-pill ${statusBadgeClass}" style="padding: 8px">${statusText}</span>
+            </td>
+            <td>
+              <button class="btn ${
+                user.isBlocked ? "btn-success" : "btn-danger"
+              } toggle-button" data-id="${user._id}">
+                ${user.isBlocked ? "Unblock" : "Block"}
+              </button>
+            </td>
+          </tr>
+        `;
+
+        userTableBody.innerHTML += row;
+      });
+    };
+
+    const toggleStatus = (userId, action) => {
+      const confirmationMessage =
+        action === "block"
+          ? "Are you sure you want to block this user?"
+          : "Are you sure you want to unblock this user?";
+
+      Swal.fire({
+        title: "Confirm",
+        text: confirmationMessage,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/admin/toggle_user_status?id=${userId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then(() => {
+              location.reload(); // Refresh the page after successful toggle
+            })
+            .catch((error) => {
+              console.error("Error toggling user status:", error);
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Failed to toggle user status. Please try again later.",
+              });
+            });
+        }
+      });
+    };
+
+    searchInput.addEventListener("input", () => {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      const selectedOption = formSelect.value;
+      filterAndRenderUsers(selectedOption, searchTerm);
+    });
+
+    formSelect.addEventListener("change", (event) => {
+      const selectedOption = event.target.value;
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      filterAndRenderUsers(selectedOption, searchTerm);
+    });
+
+    // Use event delegation to handle button click events
+    userTableBody.addEventListener("click", (event) => {
+      if (event.target.classList.contains("toggle-button")) {
+        const userId = event.target.dataset.id;
+        const action = event.target.textContent.toLowerCase().trim(); // Get button text
+        toggleStatus(userId, action);
       }
     });
-  }
 
-  // Call setupSearch() to initialize real-time search functionality
-  setupSearch();
+    // Add a function to render the pagination links
+    const renderPagination = (totalPages, currentPage) => {
+      const paginationContainer = document.getElementById(
+        "paginationContainer"
+      );
+      paginationContainer.innerHTML = "";
 
-  // Search Function
-  function displayProducts(products) {
-    const productGrid = document.querySelector(".product-grid-3");
-    productGrid.innerHTML = ""; // Clear existing products
+      for (let i = 1; i <= totalPages; i++) {
+        const pageLink = document.createElement("a");
+        pageLink.href = "#";
+        pageLink.textContent = i;
+        pageLink.classList.add("page-link");
+        if (i === currentPage) {
+          pageLink.classList.add("active");
+        }
+        pageLink.addEventListener("click", () => {
+          fetchUsers(i);
+        });
 
-    products.forEach((product) => {
-      const productHTML = `
-      <div class="col-lg-4 col-md-4 col-12 col-sm-6">
-        <div class="product-cart-wrap mb-30">
-          <!-- Product image and details -->
-          <a href="/load_product?id=${product._id}">
-            <img class="default-img" src="/uploads/${product.media[0]}" alt="${product.name}" />
-          </a>
-          <div class="product-content-wrap">
-            <div class="product-category">
-              <a href="#">${product.category}</a>
-            </div>
-            <h2 class="product-name">
-              <a href="/load_product?id=${product._id}">${product.name}</a>
-            </h2>
-            <div class="product-price">
-              <span>$${product.price}</span>
-            </div>
-            <div class="product-action-1 show">
-              <a aria-label="Add To Cart" class="action-btn hover-up" onclick="addToCart('${product._id}')">
-                <i class="fi-rs-shopping-bag-add"></i>
-              </a>
-              <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#">
-                <i class="fi-rs-heart"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
+        const pageItem = document.createElement("li");
+        pageItem.classList.add("page-item");
+        pageItem.appendChild(pageLink);
 
-      productGrid.insertAdjacentHTML("beforeend", productHTML);
-    });
-  }
+        paginationContainer.appendChild(pageItem);
+      }
+    };
+  });
 </script>
 
 <%- include('../partials/admin/admin_footer.ejs') %>

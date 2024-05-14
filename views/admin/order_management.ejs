@@ -136,6 +136,24 @@
       </div>
     </div>
   </section>
+
+  <div class="d-flex justify-content-center ">
+<nav class="float-end " >
+  <ul class="pagination justify-content-center" >
+    <li class="page-item " >
+      <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>" tabindex="-1">Previous</a>
+    </li>
+    <% for (let i = 1; i <= Math.ceil(totalOrders / limit); i++) { %>
+      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+        <a class="page-link" href="?page=<%= i %>&limit=<%= limit %>"><%= i %></a>
+      </li>
+    <% } %>
+    <li class="page-item">
+      <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">Next</a>
+    </li>
+  </ul>
+</nav>
+</div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
