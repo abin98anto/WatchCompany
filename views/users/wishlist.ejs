@@ -2,54 +2,186 @@
 include('../partials/page_header.ejs') %>
 
 <main class="main">
-        <div class="page-header breadcrumb-wrap">
-            <div class="container">
-                <div class="breadcrumb">
-                    <a href="/" rel="nofollow">Home</a>
-                    <span></span> Wishlist
-                </div>
-            </div>
+  <div class="page-header breadcrumb-wrap">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/" rel="nofollow">Home</a>
+        <span></span> Wishlist
+      </div>
+    </div>
+  </div>
+  <section class="mt-50 mb-50">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="table-responsive">
+            <table class="table shopping-summery text-center">
+              <thead>
+                <tr class="main-heading">
+                  <th scope="col" colspan="2">Product</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Stock Status</th>
+                  <th scope="col">Action</th>
+                  <th scope="col">Remove</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% products.forEach((product)=> { %>
+                <tr data-product-id="<%= product.id %>">
+                  <td class="image product-thumbnail">
+                    <img src="/uploads/<%= product.media[0] %>" />
+                  </td>
+                  <td class="product-des product-name">
+                    <h5 class="product-name">
+                      <a href="/load_product?id=<%= product.id %>"
+                        ><%= product.name %></a
+                      >
+                    </h5>
+                  </td>
+                  <td class="price" data-title="Price">
+                    <span> $ <%= product.price %> </span>
+                  </td>
+                  <td class="text-center" data-title="Stock">
+                    <% if (product.stock != 0) { %>
+                    <span class="color3 font-weight-bold">In Stock</span>
+                    <% } else { %>
+                    <span class="color2 font-weight-bold">Out of Stock</span>
+                    <% } %>
+                  </td>
+                  <td class="text-right" data-title="Cart">
+                    <button
+                      class="btn btn-sm"
+                      onclick="addToCart('<%= String(product._id) %>')"
+                    >
+                      <i class="fi-rs-shopping-bag mr-5"></i>Add to cart
+                    </button>
+                  </td>
+                  <td class="action" data-title="Remove">
+                    <a class="delete"><i class="fi-rs-trash"></i></a>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <section class="mt-50 mb-50">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-responsive">
-                            <table class="table shopping-summery text-center">
-                                <thead>
-                                    <tr class="main-heading">
-                                        <th scope="col" colspan="2">Product</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col">Stock Status</th>
-                                        <th scope="col">Action</th>
-                                        <th scope="col">Remove</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="image product-thumbnail"><img src="user_assets/imgs/shop/product-1-1.jpg" alt="#"></td>
-                                        <td class="product-des product-name">
-                                            <h5 class="product-name"><a href="shop-product-right.html">J.Crew Mercantile Women's Short-Sleeve</a></h5>
-                                            <p class="font-xs">Maboriosam in a tonto nesciung eget<br> distingy magndapibus.
-                                            </p>
-                                        </td>
-                                        <td class="price" data-title="Price"><span>$65.00 </span></td>
-                                        <td class="text-center" data-title="Stock">
-                                            <span class="color3 font-weight-bold">In Stock</span>
-                                        </td>
-                                        <td class="text-right" data-title="Cart">
-                                            <button class="btn btn-sm"><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</button>
-                                        </td>
-                                        <td class="action" data-title="Remove"><a href="#"><i class="fi-rs-trash"></i></a></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+  // add to cart.
+  async function addToCart(productId) {
+    try {
+      const response = await fetch("/check_product_in_cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: productId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to check product in cart");
+      }
+
+      const data = await response.json();
+
+      if (data.exists) {
+        Swal.fire({
+          title: "Product Already in Cart",
+          text: "This product is already in your cart.",
+          icon: "warning",
+          confirmButtonText: "Go to Cart",
+          showCancelButton: true,
+        }).then((value) => {
+          if (value.isConfirmed) {
+            window.location.href = "/cart";
+          }
+        });
+      } else {
+        const addToCartResponse = await fetch("/add_to_cart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productId: productId,
+          }),
+        });
+
+        if (!addToCartResponse.ok) {
+          throw new Error("Failed to add product to cart");
+        }
+
+        const cartData = await addToCartResponse.json();
+        console.log("Product added to cart successfully:", cartData);
+        window.location.href = "/cart";
+      }
+    } catch (error) {
+      console.error("Error adding product to cart:", error.message);
+      Swal.fire(
+        "Error",
+        "Failed to add product to cart. Please try again later.",
+        "error"
+      );
+    }
+  }
+
+  // Event listner for delete from wishlist
+  document.querySelectorAll(".delete").forEach((button) => {
+    console.log(`clicked delete button..`);
+    button.addEventListener("click", async (event) => {
+      const shouldRemove = await Swal.fire({
+        title: "Are you sure?",
+        text: "Are you sure you want remove this item from cart?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+      });
+
+      if (shouldRemove.isConfirmed) {
+        const productId = event.target
+          .closest("[data-product-id]")
+          .getAttribute("data-product-id");
+        console.log(productId);
+        removeFromWishlist(productId);
+      }
+    });
+  });
+
+  // Remove from Wishlist
+  const removeFromWishlist = async (productId) => {
+    try {
+        console.log(`removing from wishlist..`);
+      const response = await fetch(`/wishlistItem?productId=${productId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const { message, wishlist } = data;
+        const productRow = document.querySelector(
+          `tr[data-product-id="${productId}"]`
+        );
+        if (productRow) {
+          productRow.remove();
+        }
+        const rows = document.querySelectorAll(".product-name");
+        if (!rows.length) location.reload();
+      } else {
+        console.log(`Failed to remove item from cart : ${response.statusText}`);
+      }
+    } catch (error) {
+      console.log(`Erro removing product : ${error}`);
+    }
+  };
+</script>
 
 <%- include('../partials/page_footer.ejs') %> <%-
 include('../partials/footer.ejs')%>

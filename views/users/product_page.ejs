@@ -146,11 +146,12 @@ include('../partials/page_header.ejs') %>
         Buy Now
       </button>
     <% } %>
-    <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html">
+    <a aria-label="Add To Wishlist" class="action-btn hover-up" <% if (user) { %>
+                      onclick="addToWishlist('<%= product._id%>')"
+                      <% } else { %>
+                        onclick="goHome()"
+                        <% } %>>
       <i class="fi-rs-heart"></i>
-    </a>
-    <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html">
-      <i class="fi-rs-shuffle"></i>
     </a>
   </div>
                   </div>
@@ -462,14 +463,18 @@ include('../partials/page_header.ejs') %>
               <div class="product-action-1 show">
                 <a aria-label="Add To Cart" class="action-btn hover-up"
                   <% if (user) { %>
-                    onclick="addToCart('<%= products[i]._id %>')"
+                    onclick="addToCart('<%= product._id %>')"
                   <% } else { %>
                     onclick="goHome()"
                   <% } %>
                 >
                   <i class="fi-rs-shopping-bag-add"></i>
                 </a>
-                <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#">
+                <a aria-label="Add To Wishlist" class="action-btn hover-up" <% if (user) { %>
+                      onclick="addToWishlist('<%= product._id%>')"
+                      <% } else { %>
+                        onclick="goHome()"
+                        <% } %>>
                   <i class="fi-rs-heart"></i>
                 </a>
               </div>
@@ -630,6 +635,66 @@ async function addToCart(productId) {
   function goHome() {
     window.location.href = "/login";
   }
+
+  // Add to Wishlist Function
+async function addToWishlist(productId) {
+  console.log(`product id : ${productId}`);
+  try {
+    const response = await fetch('/wishlist_check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        productId: productId
+      })
+    });
+
+    console.log('response : ',response);
+
+    if (!response.ok) {
+      throw new Error('Failed to check product in wishlist.');
+    }
+
+    const data = await response.json();
+
+    if (data.exists) {
+      Swal.fire({
+        title: 'Product Already in Wishlist',
+        text: 'This product is already in your wishlist.',
+        icon: 'warning',
+        confirmButtonText: 'View Wishlist',
+        showCancelButton: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/wishlist';
+        }
+      });
+    } else {
+      const addToWishlistResponse = await fetch('/add_to_wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: productId
+        })
+      });
+
+      if (!addToWishlistResponse.ok) {
+        throw new Error('Failed to add product to wishlist.');
+      }
+
+      const wishlistData = await addToWishlistResponse.json();
+      console.log('Product added to wishlist successfully:', wishlistData);
+      window.location.href = '/wishlist';
+    }
+  } catch (error) {
+    console.error('Error adding product to wishlist:', error);
+    Swal.fire('Error', 'Failed to add product to wishlist. Please try again later.', 'error');
+  }
+}
+
 </script>
 
 <%- include('../partials/page_footer.ejs') %> <%-

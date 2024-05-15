@@ -5,6 +5,7 @@ const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
 const Category = require("../models/categoryModel");
+const Wishlist = require("../models/wishlistModel");
 
 // Render Cart.
 const loadCart = async (req, res) => {
@@ -37,7 +38,7 @@ const addToCart = async (req, res) => {
   const { productId } = req.body;
 
   try {
-    const userId = req.session.userData;
+    const userId = req.session.userData || req.user.id;
 
     if (!userId) {
       throw new Error("User ID not found in session");

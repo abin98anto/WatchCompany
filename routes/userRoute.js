@@ -87,5 +87,16 @@ user_route.get("/load_product", userController.loadProduct);
 
 // Wishlist.
 user_route.get("/wishlist", userAuth.isLogin, userController.loadWishlist);
+user_route.post(
+  "/wishlist_check",
+  userAuth.isLogin,
+  userController.checkProductInWishlist
+);
+user_route.post(
+  "/add_to_wishlist",
+  userAuth.isLogin,
+  userController.addToWishlist
+);
+user_route.delete("/wishlistItem", userAuth.isLogin, userController.removeFromWishlist);
 
 module.exports = user_route;
