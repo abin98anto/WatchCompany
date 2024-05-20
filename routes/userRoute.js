@@ -8,6 +8,7 @@ const cartController = require("../controllers/cartController");
 const productController = require("../controllers/productsController");
 const checkoutController = require("../controllers/checkoutController");
 const orderController = require("../controllers/orderController");
+const walletController = require("../controllers/walletController");
 
 // Loads Landing Page.
 user_route.get("/", userController.loadLandingPage);
@@ -53,6 +54,12 @@ user_route.post("/get_address", checkoutController.getAddress);
 user_route.post("/update_address", checkoutController.updateAddress);
 user_route.delete("/delete_address", userController.deleteAddress);
 user_route.post("/createOrder", orderController.addOrder);
+user_route.get("/checkWalletBalance", orderController.getWalletBalance);
+user_route.post("/createRazorpayOrder", orderController.createRazorpayOrder);
+user_route.post(
+  "/verifyRazorpayPayment",
+  orderController.verifyRazorpayPayment
+);
 
 // Profile page.
 user_route.get("/my_profile", userAuth.isLogin, userController.loadMyProfile);
@@ -78,9 +85,10 @@ user_route.get(
   orderController.loadReturnSingleOrder
 );
 user_route.put("/returnOrder", orderController.returnOrder);
+user_route.post("/razorPayAddOrder", orderController.razorpayAddOrder);
 
-// My Wallet Page.
-user_route.get("/my_wallet", userAuth.isLogin, userController.loadMyWallet);
+// My Wallet functionalities.
+user_route.get("/my_wallet", userAuth.isLogin, walletController.loadMyWallet);
 
 // Single Product Page.
 user_route.get("/load_product", userController.loadProduct);
@@ -97,6 +105,10 @@ user_route.post(
   userAuth.isLogin,
   userController.addToWishlist
 );
-user_route.delete("/wishlistItem", userAuth.isLogin, userController.removeFromWishlist);
+user_route.delete(
+  "/wishlistItem",
+  userAuth.isLogin,
+  userController.removeFromWishlist
+);
 
 module.exports = user_route;

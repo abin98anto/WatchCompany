@@ -10,6 +10,7 @@ const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
 const { google } = require("../config/keys");
 const Wishlist = require("../models/wishlistModel");
+const Wallet = require("../models/walletModel");
 
 // hash password function.
 const hashPassword = async (password) => {
@@ -633,26 +634,31 @@ const loadMyOrders = async (req, res) => {
 };
 
 // Render my_wallet
-const loadMyWallet = async (req, res) => {
-  try {
-    const user = await User.findById(req.session.userData);
-    const products = await Product.find({ isUnlisted: false });
-    const categories = await Category.find({ isUnlisted: false });
-    let google;
-    req.user
-      ? ((google = true), (logout = "/auth/logout"))
-      : ((google = false), (logout = "/logout"));
-    res.render("my_wallet", {
-      categories: categories,
-      products: products,
-      user: user,
-      google: google,
-      logout,
-    });
-  } catch (error) {
-    console.log(`Error loading my_wallet.`);
-  }
-};
+// const loadMyWallet = async (req, res) => {
+//   try {
+//     console.log(`loading my wallet...`);
+//     const userId = req.session.userId || req.user._id;
+//     const user = await User.findById(userId);
+//     const products = await Product.find({ isUnlisted: false });
+//     const categories = await Category.find({ isUnlisted: false });
+//     const wallet = await Wallet.find({ userId: userId });
+//     console.log(`transactions : ${transactions}`);
+//     let google;
+//     req.user
+//       ? ((google = true), (logout = "/auth/logout"))
+//       : ((google = false), (logout = "/logout"));
+//     res.render("my_wallet", {
+//       categories: categories,
+//       products: products,
+//       user: user,
+//       google: google,
+//       logout,
+//       wallet,
+//     });
+//   } catch (error) {
+//     console.log(`Error loading my_wallet.`);
+//   }
+// };
 
 // send otp to change password
 const passwordOTP = async (req, res) => {
@@ -881,7 +887,7 @@ module.exports = {
   loadShop,
   loadMyProfile,
   loadMyAddress,
-  loadMyWallet,
+  // loadMyWallet,
   loadMyOrders,
   updateProfile,
   addAddress,

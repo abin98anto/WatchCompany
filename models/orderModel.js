@@ -48,6 +48,10 @@ const orderSchema = new mongoose.Schema({
         type: String,
         default: "",
       },
+      productStatus: {
+        type: String,
+        default: "pending",
+      },
     },
   ],
   orderStatus: {

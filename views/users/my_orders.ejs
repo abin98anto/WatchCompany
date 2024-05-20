@@ -114,6 +114,11 @@ include('../partials/page_header.ejs') %>
                   <h5>Delivered Orders</h5>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="#failed" id="dashboard-tab" data-bs-toggle="tab" class="nav-link" role="tab" aria-controls="dashboard" aria-selected="false" >
+                  <h5>Failed Orders</h5>
+                </a>
+              </li>
             </ul>
           </div>
           <!-- Order Body -->
@@ -134,7 +139,7 @@ include('../partials/page_header.ejs') %>
                   </thead>
                   <tbody>
                     <% for(let i=0; i<orders.length; i++) { %>
-                      <% if (orders[i].orderStatus === 'pending' || orders[i].orderStatus === 'partially-cancelled') { %>
+                      <% if (orders[i].orderStatus === 'pending' && orders[i].paymentStatus == "Success" || orders[i].orderStatus === 'partially-cancelled' && orders[i].paymentStatus == "Success") { %>
                       <tr>
                         <td><%= orders[i].orderId %></td>
                         <td>
@@ -209,7 +214,7 @@ include('../partials/page_header.ejs') %>
                   </tbody>
                 </table> 
               <% } else { %>
-                <p>No orders</p>
+                <h1>No orders</h1>
                 <% } %>
             </div>
             <!-- Returned Orders -->
@@ -228,7 +233,7 @@ include('../partials/page_header.ejs') %>
                   </thead>
                   <tbody>
                     <% for(let i=0; i<orders.length; i++) { %>
-                      <% if (orders[i].orderStatus === 'returned') { %>
+                      <% if (orders[i].orderStatus === 'returned' || orders[i].orderStatus === 'partially-returned') { %>
                       <tr>
                         <td><%= orders[i].orderId %></td>
                         <td>
@@ -299,6 +304,54 @@ include('../partials/page_header.ejs') %>
                         <td><%= orders[i].showDate %></td>
                         <td><%= orders[i].orderStatus %></td>
                         <td><a href="/return_order?id=<%= orders[i]._id %>" class="btn">View Details</a></td>
+                      </tr>
+                      <% } %>
+                    <% } %>
+                  </tbody>
+                </table> 
+              <% } else { %>
+                <h1 class="text-center">Nothing ordered yet...</h1>
+              <% } %>
+            </div>
+            <!-- Failed Orders -->
+            <div class="table-responsive tab-pane fade" id="failed" role="tabpanel" aria-labelledby="dashboard-tab">
+              <% if(orders.length !== 0) { %>
+                <table class="table text-center">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Product Image</th>
+                      <th>Products</th>
+                      <th>Purchase Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for(let i=0; i<orders.length; i++) { %>
+                      <% if (orders[i].orderStatus === 'pending' && orders[i].paymentStatus != "Success" || orders[i].orderStatus === 'partially-cancelled' && orders[i].paymentStatus != "Success") { %>
+                      <tr>
+                        <td><%= orders[i].orderId %></td>
+                        <td>
+                          <% orders[i].products.forEach((product)=>{ %>
+                            <% if (product.cancelProduct === false){ %>
+                            <img style="height: 90px; width: 90px;" src="/uploads/<%= product.media %>" alt="">
+                            <% } %>
+                          <% }) %>
+                        </td>
+                        <td>
+                          <ul class="text-start">
+                            
+                            <% orders[i].products.forEach(element => { %>
+                              <% if (element.cancelProduct === false) { %>
+                              <li class="mt-15"><h5><%= element.productName %></h5></li>
+                              <% } %>
+                            <% }); %>
+                          </ul>
+                        </td>
+                        <td><%= orders[i].showDate %></td>
+                        <td><%= orders[i].orderStatus %></td>
+                        <td><a href="/order?id=<%= orders[i]._id %>" class="btn">View Details</a></td>
                       </tr>
                       <% } %>
                     <% } %>

@@ -133,13 +133,7 @@ include('../partials/page_header.ejs') %>
                 </div>
                 <!-- Buttons -->
                 <div class="d-flex justify-content-center p-10">
-                  <% if (orde.products.length != 1) { %>
-                    <% if (orde.orderStatus === "delivered" || orde.orderStatus === "partially-returned") { %>
-                      <button onclick="returnProduct('<%= orde._id %>', '<%= element.productId %>')" class="btn btn-warning">Return</button>
-                      <% } else { %>
-                        <button onclick="cancelProduct('<%= orde._id %>', '<%= element.productId %>')" class="btn btn-danger">Cancel</button>
-                    <% } %>
-                  <% } %>
+                  <button onclick="returnProduct('<%= orde._id %>', '<%= element.productId %>')" class="btn btn-warning">Return</button>
                 </div>
               </div>
             </div>

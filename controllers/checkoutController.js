@@ -1,6 +1,8 @@
 const Category = require("../models/categoryModel");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
+require("dotenv").config();
+
 
 const loadCheckout = async (req, res) => {
   try {
@@ -17,6 +19,7 @@ const loadCheckout = async (req, res) => {
       google,
       user,
       cart,
+      RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
     console.log(`error loading the checkout page.`);

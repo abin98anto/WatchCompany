@@ -161,10 +161,10 @@ include('../partials/page_header.ejs') %>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
   
-
   let addressIndex;
 
   // Address Click Functionality.
@@ -390,7 +390,7 @@ include('../partials/page_header.ejs') %>
 });
 
   // Function to check stock availability for a product
-async function checkStockAvailability(productId, quantity) {
+  async function checkStockAvailability(productId, quantity) {
   try {
     const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`, {
       method: 'GET',
@@ -433,480 +433,6 @@ async function checkStockAvailability(productId, quantity) {
   window.location.href = '/cart';
 }
 
-  // Place Order
-//   document.querySelector('#placeOrder').addEventListener('click', async function(event) {
-//   event.preventDefault();
-
-//   // Check if a payment method is selected
-//   const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-//   if (!selectedPaymentMethod) {
-//     Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
-//     return;
-//   }
-
-//   // Check if an address is selected
-//   if (addressIndex === undefined) {
-//     Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
-//     return;
-//   }
-
-//   const cartProducts = document.querySelectorAll(".product-qty");
-//   const cart = document.querySelectorAll(".qty-val");
-//   // if (cart) {
-//   console.log(`cart : ${cartProducts}`);
-//     let allProductsAvailable = true;
-//     for (const product of cart) {
-//       console.log('product : ', product);
-//       const productId = product.id.replace("qty-", "");
-//       const quantityElement = product.textContent.trim();
-//       if (quantityElement) {
-//         const quantity = parseInt(quantityElement);
-//         console.log('quantity : ', quantity);
-//         const response = await fetch(
-//           `/checkStock?productId=${productId}&quantity=${quantity}`
-//         );
-//         if (response.ok) {
-//           const data = await response.json();
-//           const { productName, available, stock } = data;
-//           if (quantity > stock) {
-//             allProductsAvailable = false;
-//             Swal.fire({
-//               icon: "error",
-//               title: "Not Enough Stock",
-//               text: `There are ${stock} stock left for ${productName}.`,
-//               confirmButtonText: "OK",
-//             });
-//             break;
-//           }
-//         } else {
-//           console.error("Failed to check stock:", response.statusText);
-//           allProductsAvailable = false;
-//           break;
-//         }
-//       } else {
-//         console.error(
-//           `Quantity element not found for product ID: ${productId}`
-//         );
-//         allProductsAvailable = false;
-//         break;
-//       }
-//     // } else {
-
-//   try {
-//     console.log(`trying...`);
-//     const productRows = document.querySelectorAll('.products');
-//     // const productsToCheck = [];
-
-//     // Collect product IDs and quantities for stock check
-//     // productRows.forEach(row => {
-//     //   const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
-//     //   const quantity = parseInt(row.querySelector('.product-qty').textContent.trim());
-//     //   productsToCheck.push({ productId, quantity });
-//     // });
-
-//     // Array to hold products with insufficient stock
-//     // const outOfStockProducts = [];
-
-//     // Check stock availability for each product
-//     // for (const product of productsToCheck) {
-//     //   const { productId, quantity } = product;
-//     //   const stockData = await checkStockAvailability(productId, quantity);
-
-//     //   if (!stockData.available) {
-//     //     outOfStockProducts.push({ productName: stockData.productName, availableStock: stockData.stock });
-//     //   }
-//     // }
-
-//     // if (outOfStockProducts.length > 0) {
-//     //   let message = "The following products do not have sufficient stock:<br><ul>";
-//     //   outOfStockProducts.forEach(product => {
-//     //     message += `<li>${product.productName} (Available Stock: ${product.availableStock})</li>`;
-//     //   });
-//     //   message += "</ul>";
-
-//     //   Swal.fire('Insufficient Stock', message, 'error');
-//     // } else {
-//       const userId = document.querySelector("#userId").textContent.trim();
-//       console.log(`userId : ${userId}`);
-//       const addressElement = document.getElementById(addressIndex);
-//       console.log('address element : ',addressElement)
-//       if (!addressElement) {
-//         Swal.fire('Error', 'Selected address not found.', 'error');
-//         return;
-//       }
-
-//       const addressType = addressElement.querySelector('.addressType').textContent.trim();
-//       const houseName = addressElement.querySelector('.houseName').textContent.trim();
-//       const street = addressElement.querySelector('.street').textContent.trim();
-//       const city = addressElement.querySelector('.city').textContent.trim();
-//       const state = addressElement.querySelector('.state').textContent.trim();
-//       const country = addressElement.querySelector('.country').textContent.trim();
-//       const pincode = addressElement.querySelector('.pincode').textContent.trim();
-//       const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
-
-//       const address = {
-//         addressType,
-//         houseName,
-//         street,
-//         city,
-//         state,
-//         country,
-//         pincode,
-//         phoneNumber
-//       };
-
-//       const products = [];
-
-//       // Gather order details from the page
-//       productRows.forEach(row => {
-//         const productName = row.querySelector('.productName').textContent.trim();
-//         const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
-//         const productPriceText = row.querySelector('.productPrice').textContent.trim();
-//         const productPrice = parseFloat(productPriceText.replace('$', ''));
-//         const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
-//         const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
-//         const subtotal = parseFloat(subtotalText.replace('$', ''));
-
-//         products.push({
-//           productName,
-//           media: productImage,
-//           price: productPrice,
-//           quantity: productQuantity,
-//           subtotal
-//         });
-//       });
-
-//       const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
-
-//       const orderDetails = {
-//         user: userId,
-//         products,
-//         orderId : "order number",
-//         orderStatus: 'pending',
-//         billTotal,
-//         address,
-//         paymentMethod: selectedPaymentMethod.id,
-//         paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
-//         createdOn: new Date().toISOString()
-//       };
-
-//       // Place the order
-//       const response = await fetch('/createOrder', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify(orderDetails)
-//       });
-
-//       if (!response.ok) {
-//         throw new Error('Failed to place order');
-//       }
-
-//       const savedOrder = await response.json();
-
-//       // Show success message and redirect
-//       Swal.fire({
-//         icon: 'success',
-//         title: 'Order Placed Successfully',
-//         text: 'You will now be redirected to your orders.',
-//         showConfirmButton: false,
-//         timer: 2000
-//       }).then(() => {
-//         window.location.href = '/my_orders';
-//       });
-//     // }
-
-//   } catch (error) {
-//     console.error('Error placing order:', error);
-//     Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
-//   }
-// }
-// });
-
-
-// Place Order
-// document.querySelector('#placeOrder').addEventListener('click', async function(event) {
-//   event.preventDefault();
-
-//   // Check if a payment method is selected
-//   const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-//   if (!selectedPaymentMethod) {
-//     Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
-//     return;
-//   }
-
-//   // Check if an address is selected
-//   if (addressIndex === undefined) {
-//     Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
-//     return;
-//   }
-
-//   try {
-//     // Fetch all product rows
-//     const productRows = document.querySelectorAll('.products');
-
-//     // Prepare an array to hold products for the order
-//     const products = [];
-
-//     // Iterate over each product row to gather order details
-//     productRows.forEach(row => {
-//       const productName = row.querySelector('.productName').textContent.trim();
-//       const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
-//       const productPriceText = row.querySelector('.productPrice').textContent.trim();
-//       const productPrice = parseFloat(productPriceText.replace('$', ''));
-//       const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
-//       const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
-//       const subtotal = parseFloat(subtotalText.replace('$', ''));
-
-//       // Construct product object
-//       const product = {
-//         productName,
-//         media: productImage,
-//         price: productPrice,
-//         quantity: productQuantity,
-//         subtotal
-//       };
-
-//       // Push product to the products array
-//       products.push(product);
-//     });
-
-//     // Calculate total bill amount
-//     const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
-
-//     // Fetch user ID from hidden span element
-//     const userId = document.querySelector("#userId").textContent.trim();
-
-//     // Fetch selected address details from the DOM
-//     const addressElement = document.getElementById(addressIndex);
-//     if (!addressElement) {
-//       throw new Error('Selected address not found.');
-//     }
-
-//     const addressType = addressElement.querySelector('.addressType').textContent.trim();
-//     const houseName = addressElement.querySelector('.houseName').textContent.trim();
-//     const street = addressElement.querySelector('.street').textContent.trim();
-//     const city = addressElement.querySelector('.city').textContent.trim();
-//     const state = addressElement.querySelector('.state').textContent.trim();
-//     const country = addressElement.querySelector('.country').textContent.trim();
-//     const pincode = addressElement.querySelector('.pincode').textContent.trim();
-//     const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
-
-//     // Construct address object
-//     const address = {
-//       addressType,
-//       houseName,
-//       street,
-//       city,
-//       state,
-//       country,
-//       pincode,
-//       phoneNumber
-//     };
-
-//     // Prepare order details object
-//     const orderDetails = {
-//       user: userId,
-//       products,
-//       orderId: "order number", // Replace with actual order ID logic
-//       orderStatus: 'pending',
-//       billTotal,
-//       address,
-//       paymentMethod: selectedPaymentMethod.id,
-//       paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
-//       createdOn: new Date().toISOString()
-//     };
-
-//     // Place the order via API call
-//     const response = await fetch('/createOrder', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(orderDetails)
-//     });
-
-//     // Check if order placement was successful
-//     if (!response.ok) {
-//       throw new Error('Failed to place order.');
-//     }
-
-//     // Retrieve the saved order data
-//     const savedOrder = await response.json();
-
-//     // Display success message and redirect to orders page
-//     Swal.fire({
-//       icon: 'success',
-//       title: 'Order Placed Successfully',
-//       text: 'You will now be redirected to your orders.',
-//       showConfirmButton: false,
-//       timer: 2000
-//     }).then(() => {
-//       window.location.href = '/my_orders';
-//     });
-
-//   } catch (error) {
-//     console.error('Error placing order:', error);
-//     Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
-//   }
-// });
-
-  
-// Place Order
-// document.querySelector('#placeOrder').addEventListener('click', async function(event) {
-//   event.preventDefault();
-
-//   // Check if a payment method is selected
-//   const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-//   if (!selectedPaymentMethod) {
-//     Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
-//     return;
-//   }
-
-//   // Check if an address is selected
-//   if (addressIndex === undefined) {
-//     Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
-//     return;
-//   }
-
-//   try {
-//     // Fetch all product rows
-//     const productRows = document.querySelectorAll('.products');
-
-//     // Array to hold out-of-stock products
-//     const outOfStockProducts = [];
-
-//     // Iterate over each product row to check stock availability
-//     for (const row of productRows) {
-//       const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
-//       const productName = row.querySelector('.productName').textContent.trim();
-//       const quantity = parseInt(row.querySelector('.product-qty').textContent.trim());
-
-//       // Check stock availability for the product
-//       const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`);
-//       if (response.ok) {
-//         const data = await response.json();
-//         const { available, stock } = data;
-
-//         if (!available) {
-//           // Product is out of stock or insufficient stock
-//           outOfStockProducts.push({ productName, availableStock: stock });
-//         }
-//       } else {
-//         throw new Error('Failed to check stock availability.');
-//       }
-//     }
-
-//     // If any products are out of stock, display a warning message
-//     if (outOfStockProducts.length > 0) {
-//       let message = "The following products do not have sufficient stock:<br>";
-//       outOfStockProducts.forEach(product => {
-//         message += `${product.productName} (Available Stock: ${product.availableStock})<br>`;
-//       });
-
-//       Swal.fire({
-//         icon: "error",
-//         title: "Insufficient Stock",
-//         html: message,
-//         confirmButtonText: "OK"
-//       });
-//       return;
-//     }
-
-//     // If all products have sufficient stock, proceed with order placement
-//     const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
-//     const userId = document.querySelector("#userId").textContent.trim();
-
-//     const addressElement = document.getElementById(addressIndex);
-//     if (!addressElement) {
-//       throw new Error('Selected address not found.');
-//     }
-
-//     const addressType = addressElement.querySelector('.addressType').textContent.trim();
-//     const houseName = addressElement.querySelector('.houseName').textContent.trim();
-//     const street = addressElement.querySelector('.street').textContent.trim();
-//     const city = addressElement.querySelector('.city').textContent.trim();
-//     const state = addressElement.querySelector('.state').textContent.trim();
-//     const country = addressElement.querySelector('.country').textContent.trim();
-//     const pincode = addressElement.querySelector('.pincode').textContent.trim();
-//     const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
-
-//     const address = {
-//       addressType,
-//       houseName,
-//       street,
-//       city,
-//       state,
-//       country,
-//       pincode,
-//       phoneNumber
-//     };
-
-//     const orderDetails = {
-//       user: userId,
-//       products: [], // This will be populated with detailed product info in next step
-//       orderId: "order number", // Replace with actual order ID logic
-//       orderStatus: 'pending',
-//       billTotal,
-//       address,
-//       paymentMethod: selectedPaymentMethod.id,
-//       paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
-//       createdOn: new Date().toISOString()
-//     };
-
-//     // Populate products array with detailed info for orderDetails
-//     productRows.forEach(row => {
-//       const productName = row.querySelector('.productName').textContent.trim();
-//       const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
-//       const productPriceText = row.querySelector('.productPrice').textContent.trim();
-//       const productPrice = parseFloat(productPriceText.replace('$', ''));
-//       const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
-//       const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
-//       const subtotal = parseFloat(subtotalText.replace('$', ''));
-
-//       const product = {
-//         productName,
-//         media: productImage,
-//         price: productPrice,
-//         quantity: productQuantity,
-//         subtotal
-//       };
-
-//       orderDetails.products.push(product);
-//     });
-
-//     // Place the order
-//     const response = await fetch('/createOrder', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(orderDetails)
-//     });
-
-//     if (!response.ok) {
-//       throw new Error('Failed to place order.');
-//     }
-
-//     // Order placement successful, display success message
-//     Swal.fire({
-//       icon: 'success',
-//       title: 'Order Placed Successfully',
-//       text: 'You will now be redirected to your orders.',
-//       showConfirmButton: false,
-//       timer: 2000
-//     }).then(() => {
-//       window.location.href = '/my_orders';
-//     });
-
-//   } catch (error) {
-//     console.error('Error placing order:', error);
-//     Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
-//   }
-// });
-
-
 // Place Order
 document.querySelector('#placeOrder').addEventListener('click', async function(event) {
   event.preventDefault();
@@ -925,17 +451,43 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
   }
 
   try {
-    // Fetch all product rows
+    const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
+    const userId = document.querySelector("#userId").textContent.trim();
+
+    // Check if the payment method is "wallet" and if the wallet balance is sufficient
+    if (selectedPaymentMethod.id === "wallet") {
+      const walletResponse = await fetch(`/checkWalletBalance?userId=${userId}`, {
+        method: "GET"
+      });
+      const walletData = await walletResponse.json();
+
+      if (!walletResponse.ok) {
+        throw new Error('Failed to fetch wallet balance.');
+      }
+
+      if (walletData.walletBalance < billTotal) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Payment Error',
+          text: `Not enough balance in wallet.Only $${walletData.walletBalance} left in the wallet. Please choose another payment method.`,
+          showConfirmButton: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/checkout';
+          }
+        });
+        return;
+      }
+    }
+
     const productRows = document.querySelectorAll('.products');
     const outOfStockProducts = [];
 
-    // Iterate over each product row to check stock availability
     for (const row of productRows) {
       const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
       const productName = row.querySelector('.productName').textContent.trim();
       const quantity = parseInt(row.querySelector('.product-qty').textContent.trim());
 
-      // Check stock availability for the product
       const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`);
       const data = await response.json();
       if (!response.ok) {
@@ -949,7 +501,6 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
       }
     }
 
-    // If any products are out of stock, display a warning message
     if (outOfStockProducts.length > 0) {
       let message = "The following products do not have sufficient stock:<br>";
       outOfStockProducts.forEach(product => {
@@ -964,10 +515,6 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
       });
       return;
     }
-
-    // If all products have sufficient stock, proceed with order placement
-    const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
-    const userId = document.querySelector("#userId").textContent.trim();
 
     const addressElement = document.getElementById(addressIndex);
     if (!addressElement) {
@@ -998,15 +545,14 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
     const orderId = `ord${randomNumber}`;
 
     const myDate = new Date();
-
-      const options = {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      };
+    const options = {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    };
 
     const formatter = new Intl.DateTimeFormat('en-US', options);
     const formattedDate = formatter.format(myDate);
@@ -1024,7 +570,6 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
       showDate: formattedDate
     };
 
-    // Populate products array with detailed info for orderDetails
     productRows.forEach(row => {
       const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
       const productName = row.querySelector('.productName').textContent.trim();
@@ -1048,6 +593,7 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
     });
 
     // Place the order
+    if (selectedPaymentMethod.id == "cod") {
     const response = await fetch('/createOrder', {
       method: 'POST',
       headers: {
@@ -1057,7 +603,23 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
     });
 
     if (!response.ok) {
-      throw new Error('Failed to place order.');
+      const errorData = await response.json();
+
+      // Check for specific error messages from the server
+      if (errorData.message === 'Not enough balance in wallet. Please choose another payment method.') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Payment Error',
+          text: 'Not enough balance in wallet. Please choose another payment method.',
+          showConfirmButton: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/checkout';
+          }
+        });
+      } else {
+        throw new Error(errorData.message || 'Failed to place order.');
+      }
     }
 
     // Order placement successful, display success message
@@ -1070,15 +632,277 @@ document.querySelector('#placeOrder').addEventListener('click', async function(e
     }).then(() => {
       window.location.href = '/my_orders';
     });
+    } else if (selectedPaymentMethod.id == "razorpay") {
+      const response = await fetch('/createOrder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderDetails)
+    }).then(response => {
+      return response.json();
+    }).then (data => {
+      if (data.success) {
+        const options = {
+          key: data.key_id,
+          amount: data.amount,
+          currency: "INR",
+          name: "Watch Company",
+          description: data.description,
+          image:"/user_assets/imgs/theme/watchcompany_logo.svg",
+          order_id: data.order_id,
+          handler: function (response) {
+            orderAfterPayment(addressIndex, data.newOrder.billTotal, selectedPaymentMethod.id, "Success");
+          },
+          prefill: {
+            contact: data.contact,
+            name: data.name,
+            email: data.email
+          },
+          notes: {
+            description: data.description
+          },
+          theme: {
+            color: '#000000'
+          }
+        }
 
+        const razorpayObject = new Razorpay(options);
+        razorpayObject.open();
+        razorpayObject.on('payment.failed', function (response) {
+          orderAfterPayment(addressIndex,data.newOrder.billTotal, selectedPaymentMethod.id,"Failed");
+        });
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Order Placement Failed',
+          text: data.msg
+        });
+      }
+    }).catch(error => {
+      console.log(`error placing an order : ${error}`);
+    })
+    }
   } catch (error) {
     console.error('Error placing order:', error);
     Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
   }
 });
 
+function orderAfterPayment(addressIndex,totalAmount, paymentMethod, status) {
+  fetch(`/razorPayAddOrder?addressIndex=${addressIndex}&status=${status}&totalAmount=${totalAmount}&paymentMethod=${paymentMethod}`,{
+    method: 'POST'
+  }).then(response => response.json())
+  .then( data => {
+    if (data.success) {
+      if (data.message === "Order placed successfully") {
+        Swal.fire({
+          icon: "success",
+          title: 'Order Confirmed',
+          text: 'Your payment was successful and the order has been placed.',
+          confirmButtonText: 'OK'
+        }).then(result => {
+          if(result.isConfirmed) window.location.href = '/my_orders';
+        })
+      } else {
+        Swal.fire({
+          icon:'Warning',
+          title: 'Order Placement Failed',
+          text: data.message
+        })
+      }
+    }
+  })
+  .catch(error => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Order Placement Failed',
+      text: 'There was an erro confirming your order. Please try again.'
+    });
+  })
+}
 
-  document.addEventListener("DOMContentLoaded", () => {
+// document.querySelector('#placeOrder').addEventListener('click', async function(event) {
+//   event.preventDefault();
+
+//   // Check if a payment method is selected
+//   const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+//   if (!selectedPaymentMethod) {
+//     Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
+//     return;
+//   }
+
+//   // Check if an address is selected
+//   if (addressIndex === undefined) {
+//     Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
+//     return;
+//   }
+
+//   console.log(`payment method : ${selectedPaymentMethod}`);
+
+//   try {
+//     const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
+//     const userId = document.querySelector("#userId").textContent.trim();
+
+//     const productRows = document.querySelectorAll('.products');
+//     const outOfStockProducts = [];
+
+//     for (const row of productRows) {
+//       const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
+//       const productName = row.querySelector('.productName').textContent.trim();
+//       const quantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+
+//       const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`);
+//       const data = await response.json();
+//       if (!response.ok) {
+//         throw new Error('Failed to fetch stock availability.');
+//       }
+
+//       const { available, stock } = data;
+
+//       if (available || quantity > stock) {
+//         outOfStockProducts.push({ productName, availableStock: stock });
+//       }
+//     }
+
+//     if (outOfStockProducts.length > 0) {
+//       let message = "The following products do not have sufficient stock:<br>";
+//       outOfStockProducts.forEach(product => {
+//         message += `${product.productName} (Available Stock: ${product.availableStock})<br>`;
+//       });
+
+//       Swal.fire({
+//         icon: "error",
+//         title: "Insufficient Stock",
+//         html: message,
+//         confirmButtonText: "OK"
+//       });
+//       return;
+//     }
+
+//     const addressElement = document.getElementById(addressIndex);
+//     if (!addressElement) {
+//       throw new Error('Selected address not found.');
+//     }
+
+//     const addressType = addressElement.querySelector('.addressType').textContent.trim();
+//     const houseName = addressElement.querySelector('.houseName').textContent.trim();
+//     const street = addressElement.querySelector('.street').textContent.trim();
+//     const city = addressElement.querySelector('.city').textContent.trim();
+//     const state = addressElement.querySelector('.state').textContent.trim();
+//     const country = addressElement.querySelector('.country').textContent.trim();
+//     const pincode = addressElement.querySelector('.pincode').textContent.trim();
+//     const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
+
+//     const address = {
+//       addressType,
+//       houseName,
+//       street,
+//       city,
+//       state,
+//       country,
+//       pincode,
+//       phoneNumber
+//     };
+
+//     const randomNumber = Math.floor(1000 + Math.random() * 9000);
+//     const orderId = `ord${randomNumber}`;
+
+//     const myDate = new Date();
+//     const options = {
+//       hour: 'numeric',
+//       minute: '2-digit',
+//       hour12: true,
+//       day: 'numeric',
+//       month: 'short',
+//       year: 'numeric'
+//     };
+
+//     const formatter = new Intl.DateTimeFormat('en-US', options);
+//     const formattedDate = formatter.format(myDate);
+
+//     const orderDetails = {
+//       user: userId,
+//       products: [],
+//       orderId,
+//       orderStatus: 'pending',
+//       billTotal,
+//       address,
+//       paymentMethod: selectedPaymentMethod.id,
+//       paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
+//       createdOn: new Date().toISOString(),
+//       showDate: formattedDate
+//     };
+
+//     productRows.forEach(row => {
+//       const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
+//       const productName = row.querySelector('.productName').textContent.trim();
+//       const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
+//       const productPriceText = row.querySelector('.productPrice').textContent.trim();
+//       const productPrice = parseFloat(productPriceText.replace('$', ''));
+//       const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+//       const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
+//       const subtotal = parseFloat(subtotalText.replace('$', ''));
+
+//       const product = {
+//         productId,
+//         productName,
+//         media: productImage,
+//         price: productPrice,
+//         quantity: productQuantity,
+//         subtotal
+//       };
+
+//       orderDetails.products.push(product);
+//     });
+
+//     // Place the order for other payment methods
+//     const response = await fetch('/createOrder', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify(orderDetails)
+//     });
+
+//     if (!response.ok) {
+//       const errorData = await response.json();
+
+//       if (errorData.message === 'Not enough balance in wallet. Please choose another payment method.') {
+//         Swal.fire({
+//           icon: 'error',
+//           title: 'Payment Error',
+//           text: 'Not enough balance in wallet. Please choose another payment method.',
+//           showConfirmButton: true
+//         }).then((result) => {
+//           if (result.isConfirmed) {
+//             window.location.href = '/checkout';
+//           }
+//         });
+//       } else {
+//         throw new Error(errorData.message || 'Failed to place order.');
+//       }
+//     }
+
+//     // Order placement successful, display success message
+//     Swal.fire({
+//       icon: 'success',
+//       title: 'Order Placed Successfully',
+//       text: 'You will now be redirected to your orders.',
+//       showConfirmButton: false,
+//       timer: 2000
+//     }).then(() => {
+//       window.location.href = '/my_orders';
+//     });
+//   } catch (error) {
+//     console.error('Error placing order:', error);
+//     Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
+//   }
+// });
+
+
+// to check if there is anything in the cart.
+document.addEventListener("DOMContentLoaded", () => {
   updateCartTotals();
 
   // Check if cart is empty and redirect if needed

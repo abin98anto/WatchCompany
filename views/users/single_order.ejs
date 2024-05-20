@@ -221,6 +221,18 @@ include('../partials/page_header.ejs') %>
                         <td class="cart_total_amount"><%= order.orderStatus %></td>
                       </tr>
                       <tr>
+                        <td class="cart_total_label">Payment Method</td>
+                        <td class="cart_total_amount">
+                          <% if (order.paymentMethod === 'razorpay') { %>
+                            Razor Pay
+                          <% } else if (order.paymentMethod === 'cod') { %>
+                            Cash on Delivery
+                          <% } else { %>
+                            Wallet
+                          <% } %>
+                        </td>
+                      </tr>
+                      <tr>
                         <td class="cart_total_label">Payment Status</td>
                         <td class="cart_total_amount"><%= order.paymentStatus %></td>
                       </tr>

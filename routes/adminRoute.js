@@ -11,7 +11,7 @@ const orderController = require("../controllers/orderController");
 
 const adminAuth = require("../middleware/adminAuth");
 
-const upload = multer({ dest: "uploads/" });
+// const upload = multer({ dest: "uploads/" });
 
 // Render Admin Login Page, Verification, load Admin Dashboard.
 admin_route.get("/", adminAuth.adminLogout, adminController.loadAdminLogin);

@@ -122,11 +122,13 @@
                 <td><%= orders[i].billTotal %></td>
                 <td><%= orders[i].paymentMethod %></td>
                 <td>
-                  <span id="orderStatus-<%= orders[i]._id %>"><%= orders[i].orderStatus %></span>
+                        <span id="orderStatus-<%= orders[i]._id %>"><%= orders[i].orderStatus %></span>
                 </td>
                 <td><%= orders[i].showDate %></td>
                 <td class="text-end">
-                  <a class="btn btn-md rounded btn-change-status" data-order-id="<%= orders[i]._id %>">Change Order Status</a>
+                    <ul>
+                      <li><a class="btn btn-md rounded btn-change-status" data-order-id="<%= orders[i]._id %>">Change Order Status</a></li>
+                    </ul>
                 </td>
               </tr>
               <% } %>
@@ -167,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
     button.addEventListener("click", (event) => {
       event.preventDefault();
 
+      const productId = button.getAttribute("data-product-id");
       const orderId = button.getAttribute("data-order-id");
 
       Swal.fire({
@@ -181,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
         confirmButtonText: 'Confirm',
         preConfirm: () => {
           const newStatus = document.getElementById('orderStatus').value;
-          return fetch(`/admin/order_status?id=${orderId}&status=${newStatus}`, {
+          return fetch(`/admin/order_status?orderId=${orderId}&status=${newStatus}&productId=${productId}`, {
             method: 'POST'
           })
           .then(response => {
