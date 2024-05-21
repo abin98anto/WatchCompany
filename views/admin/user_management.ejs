@@ -85,6 +85,9 @@
             <input type="text" placeholder="Search..." id="searchInput" />
           </div>
           <div class="col-lg-2 col-md-3 col-6">
+            <button class="btn" style="background-color: black; color: white;" id="editButton">Edit Referral Bonus</button>
+          </div>
+          <div class="col-lg-2 col-md-3 col-6">
             <select class="form-select">
               <option>Show all</option>
               <option>Active</option>
@@ -149,8 +152,10 @@
     </div>
   </section>
 
-  <div id="paginationContainer" class="pagination-area mt-30 pb-30 pagination justify-content-center"></div>
-
+  <div
+    id="paginationContainer"
+    class="pagination-area mt-30 pb-30 pagination justify-content-center"
+  ></div>
 </main>
 
 <script>
@@ -258,7 +263,7 @@
             },
           })
             .then(() => {
-              location.reload(); // Refresh the page after successful toggle
+              location.reload();
             })
             .catch((error) => {
               console.error("Error toggling user status:", error);
@@ -317,6 +322,60 @@
         pageItem.appendChild(pageLink);
 
         paginationContainer.appendChild(pageItem);
+      }
+    };
+
+    // Referral bonus button
+    const editReferralButton = document.querySelector("#editButton");
+
+    editReferralButton.addEventListener("click", () => {
+      Swal.fire({
+        title: 'Edit Referral Bonus',
+        input: 'number',
+        inputLabel: 'Enter new referral bonus amount',
+        inputPlaceholder: 'Enter amount',
+        showCancelButton: true,
+        confirmButtonText: 'Save',
+        preConfirm: (amount) => {
+          if (!amount) {
+            Swal.showValidationMessage('Please enter a valid amount');
+          }
+          return amount;
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const offerAmount = result.value;
+          saveReferralBonus(offerAmount);
+        }
+      });
+    });
+
+    const saveReferralBonus = async (offerAmount) => {
+      try {
+        const response = await fetch('/admin/edit_referral_bonus', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ offerAmount }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save referral bonus');
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Saved!',
+          text: 'Referral bonus updated successfully',
+        });
+      } catch (error) {
+        console.error('Error saving referral bonus:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Failed to save referral bonus. Please try again later.',
+        });
       }
     };
   });

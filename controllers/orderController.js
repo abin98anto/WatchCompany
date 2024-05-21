@@ -14,69 +14,6 @@ const razorpayInstance = new Razorpay({
   key_secret: RAZORPAY_SECRET_KEY,
 });
 
-const createRazorpayOrder = async (req, res) => {
-  try {
-    const { amount, currency, receipt } = req.body;
-    const options = {
-      amount: amount * 100,
-      currency,
-      receipt,
-    };
-
-    const order = await razorpayInstance.orders.create(options);
-    res.status(201).json(order);
-  } catch (error) {
-    console.error("Error creating Razorpay order:", error);
-    res.status(500).json({ message: "Failed to create Razorpay order." });
-  }
-};
-const verifyRazorpayPayment = async (req, res) => {
-  console.log("Request body:", req.body);
-
-  const {
-    razorpayOrderId,
-    razorpayPaymentId,
-    razorpaySignature,
-    orderDetails,
-  } = req.body;
-
-  if (
-    !razorpayOrderId ||
-    !razorpayPaymentId ||
-    !razorpaySignature ||
-    !orderDetails
-  ) {
-    console.error("Missing required fields:", req.body);
-    return res.status(400).json({ message: "Missing required fields." });
-  }
-
-  console.log("Razorpay Secret Key:", process.env.RAZORPAY_SECRET_KEY);
-
-  const generatedSignature = crypto
-    .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY)
-    .update(`${razorpayOrderId}|${razorpayPaymentId}`)
-    .digest("hex");
-
-  console.log("Generated Signature:", generatedSignature);
-
-  if (generatedSignature === razorpaySignature) {
-    try {
-      await saveOrderToDatabase(orderDetails);
-      res
-        .status(200)
-        .json({ message: "Payment verified and order placed successfully." });
-    } catch (error) {
-      console.error("Error saving order to database:", error);
-      res.status(500).json({ message: "Failed to place order." });
-    }
-  } else {
-    console.error("Invalid signature:", generatedSignature, razorpaySignature);
-    res
-      .status(400)
-      .json({ message: "Invalid signature. Payment verification failed." });
-  }
-};
-
 // Add order.
 const addOrder = async (req, res) => {
   try {
@@ -149,9 +86,8 @@ const addOrder = async (req, res) => {
       await Cart.deleteOne({ userID: id });
       const savedOrder = await newOrder.save();
       return res.status(201).json(savedOrder);
-    } else if (newOrder.paymentMethod === "razorpay") {
-      // to hande razor pay.
-      console.log(`paying using razor pay...`);
+    } 
+    else if (newOrder.paymentMethod === "razorpay") {
       let options = {
         amount: parseFloat(newOrder.billTotal) * 100,
         currency: "INR",
@@ -190,9 +126,7 @@ const addOrder = async (req, res) => {
 // Razor Pay add Order
 const razorpayAddOrder = async (req, res) => {
   try {
-    // console.log(`in the backend of the razor pay...`);
     const id = req.user?.id || req.session.userData;
-    // console.log(`user id : ${id}`);
 
     const cart = await Cart.findOne({ userID: id }).populate(
       "products.productID"
@@ -202,7 +136,6 @@ const razorpayAddOrder = async (req, res) => {
     }
 
     let cartProducts = [];
-    // console.log(`cart : ${cart}`);
     for (const prod of cart.products) {
       let product = await Products.findById(prod.productID);
       product.stock = product.stock - prod.quantity;
@@ -212,20 +145,14 @@ const razorpayAddOrder = async (req, res) => {
     }
 
     const user = await User.findById(id);
-    // console.log(`user : ${user}`);
     if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found." });
     }
-    // console.log(`req body : ${JSON.stringify(req.query)}`);
+
     const { addressIndex, totalAmount, paymentMethod, status } = req.query;
-    // console.log(
-    //   `address index : ${addressIndex}, total amount : ${totalAmount}, payment method : ${paymentMethod}, status: ${status}`
-    // );
     const selectedAddress = user.address[addressIndex];
-    // console.log(`selected address : ${selectedAddress}`);
-    // console.log(`cart products : ${cartProducts[0].name}`);
 
     const randomNumber = Math.floor(1000 + Math.random() * 9000);
     const orderId = `ord${randomNumber}`;
@@ -271,12 +198,16 @@ const razorpayAddOrder = async (req, res) => {
       createdOn: Date.now(),
       showDate: formattedDate,
     });
-    // console.log(`new order : ${newOrder}`);
+
     await newOrder.save();
     await Cart.findOneAndDelete({ userID: id });
     res
       .status(201)
-      .json({ success: true, message: "Order placed successfully" });
+      .json({
+        success: true,
+        message: "Order placed successfully",
+        paymentStatus: status,
+      });
   } catch (error) {
     console.log(
       `Error placing order using razor pay after going through /place order : ${error}`
@@ -711,7 +642,5 @@ module.exports = {
   loadOrderDetails,
   changeStatus,
   getWalletBalance,
-  createRazorpayOrder,
-  verifyRazorpayPayment,
   razorpayAddOrder,
 };

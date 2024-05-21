@@ -30,6 +30,11 @@ admin_route.get(
 );
 admin_route.post("/toggle_user_status", usersController.toggleUserStatus);
 admin_route.get("/get_users", adminAuth.adminLogin, usersController.getUsers);
+admin_route.post(
+  "/edit_referral_bonus",
+  adminAuth.adminLogin,
+  usersController.editReferralBonus
+);
 
 // Catergory Management.
 admin_route.get(

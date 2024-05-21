@@ -12,7 +12,6 @@ const userSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    // required: true,
   },
   isAdmin: {
     type: String,
@@ -53,6 +52,9 @@ const userSchema = mongoose.Schema({
       },
     },
   ],
+  referralCode: {
+    type: String,
+  },
 });
 
 const User = mongoose.model("User", userSchema);

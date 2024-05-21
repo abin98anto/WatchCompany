@@ -11,6 +11,7 @@ const Cart = require("../models/cartModel");
 const { google } = require("../config/keys");
 const Wishlist = require("../models/wishlistModel");
 const Wallet = require("../models/walletModel");
+const Referral = require("../models/referralModel");
 
 // hash password function.
 const hashPassword = async (password) => {
@@ -42,6 +43,19 @@ const generateOTP = (length) => {
   }
   return OTP;
 };
+// Generate referral code.
+function generateReferralCode(length = 8) {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let referralCode = "";
+  const charactersLength = characters.length;
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charactersLength);
+    referralCode += characters[randomIndex];
+  }
+
+  return referralCode;
+}
 
 // to load sign up page.
 const loadSignUp = async (req, res) => {
@@ -62,8 +76,15 @@ const loadSignUp = async (req, res) => {
 // to send OTP.
 const sendOTP = async (req, res) => {
   try {
-    let { username, email, password, confirm_password } = req.body;
-    req.session.formData = { username, email, password, confirm_password };
+    let { username, email, password, confirm_password, referralCode } =
+      req.body;
+    req.session.formData = {
+      username,
+      email,
+      password,
+      confirm_password,
+      referralCode,
+    };
 
     let newOTP = generateOTP(6);
     console.log(`the OTP is ${newOTP}`);
@@ -119,8 +140,29 @@ const sendOTP = async (req, res) => {
 // to verify OTP.
 const verifyOTP = async (req, res) => {
   try {
+    const referral = await Referral.findOne();
+    console.log(`referral : ${referral}`)
+    const { offerAmount } = referral;
+    console.log(`offer amount : ${offerAmount}`);
     const enteredOTP = req.body.otp;
     const generatedOTP = req.session.newOTP;
+    let { referralCode } = req.session.formData;
+    if (referralCode) {
+      const user = await User.findOne({ referralCode });
+      if (user) {
+        let referredUserWallet = await Wallet.findOne({ userId: user.id });
+        if (!referredUserWallet) {
+          referredUserWallet = new Wallet({
+            userId: user.id,
+            walletBalance: 0,
+            transactions: [],
+          });
+        }
+        referredUserWallet.walletBalance += offerAmount;
+        await referredUserWallet.save();
+        referralCode = true;
+      }
+    }
 
     if (enteredOTP === generatedOTP) {
       const { username, email, password } = req.session.formData;
@@ -130,14 +172,24 @@ const verifyOTP = async (req, res) => {
         email: email,
         password: sPassword,
         createdOn: Date.now(),
+        referralCode: generateReferralCode(),
       });
       await newUser.save();
+      if (referralCode === true) {
+        const user = await User.find({ email });
+        const wallet = new Wallet({
+          userId: user.id,
+          walletBalance: offerAmount,
+          transactions: [],
+        });
+        await wallet.save();
+      }
       res.json({ success: true });
     } else {
       res.json({ success: false });
     }
   } catch (error) {
-    res.send(`Error Verifying OTP.`);
+    res.send(`Error Verifying OTP. ${error}`);
   }
 };
 
@@ -632,33 +684,6 @@ const loadMyOrders = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
-// Render my_wallet
-// const loadMyWallet = async (req, res) => {
-//   try {
-//     console.log(`loading my wallet...`);
-//     const userId = req.session.userId || req.user._id;
-//     const user = await User.findById(userId);
-//     const products = await Product.find({ isUnlisted: false });
-//     const categories = await Category.find({ isUnlisted: false });
-//     const wallet = await Wallet.find({ userId: userId });
-//     console.log(`transactions : ${transactions}`);
-//     let google;
-//     req.user
-//       ? ((google = true), (logout = "/auth/logout"))
-//       : ((google = false), (logout = "/logout"));
-//     res.render("my_wallet", {
-//       categories: categories,
-//       products: products,
-//       user: user,
-//       google: google,
-//       logout,
-//       wallet,
-//     });
-//   } catch (error) {
-//     console.log(`Error loading my_wallet.`);
-//   }
-// };
 
 // send otp to change password
 const passwordOTP = async (req, res) => {

@@ -139,7 +139,7 @@ include('../partials/page_header.ejs') %>
                   </thead>
                   <tbody>
                     <% for(let i=0; i<orders.length; i++) { %>
-                      <% if (orders[i].orderStatus === 'pending' && orders[i].paymentStatus == "Success" || orders[i].orderStatus === 'partially-cancelled' && orders[i].paymentStatus == "Success") { %>
+                      <% if (((orders[i].orderStatus === 'pending' && orders[i].paymentStatus == "Success") || (orders[i].orderStatus === 'partially-cancelled' && orders[i].paymentStatus == "Success")) || (orders[i].paymentMethod == "cod")) { %>
                       <tr>
                         <td><%= orders[i].orderId %></td>
                         <td>
@@ -330,6 +330,7 @@ include('../partials/page_header.ejs') %>
                   <tbody>
                     <% for(let i=0; i<orders.length; i++) { %>
                       <% if (orders[i].orderStatus === 'pending' && orders[i].paymentStatus != "Success" || orders[i].orderStatus === 'partially-cancelled' && orders[i].paymentStatus != "Success") { %>
+                        <% if (orders[i].paymentMethod !== "cod") { %>
                       <tr>
                         <td><%= orders[i].orderId %></td>
                         <td>
@@ -353,6 +354,7 @@ include('../partials/page_header.ejs') %>
                         <td><%= orders[i].orderStatus %></td>
                         <td><a href="/order?id=<%= orders[i]._id %>" class="btn">View Details</a></td>
                       </tr>
+                      <% } %>
                       <% } %>
                     <% } %>
                   </tbody>

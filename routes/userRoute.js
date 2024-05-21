@@ -55,11 +55,11 @@ user_route.post("/update_address", checkoutController.updateAddress);
 user_route.delete("/delete_address", userController.deleteAddress);
 user_route.post("/createOrder", orderController.addOrder);
 user_route.get("/checkWalletBalance", orderController.getWalletBalance);
-user_route.post("/createRazorpayOrder", orderController.createRazorpayOrder);
-user_route.post(
-  "/verifyRazorpayPayment",
-  orderController.verifyRazorpayPayment
-);
+// user_route.post("/createRazorpayOrder", orderController.createRazorpayOrder);
+// user_route.post(
+//   "/verifyRazorpayPayment",
+//   orderController.verifyRazorpayPayment
+// );
 
 // Profile page.
 user_route.get("/my_profile", userAuth.isLogin, userController.loadMyProfile);

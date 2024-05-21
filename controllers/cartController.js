@@ -73,7 +73,6 @@ const checkProductInCart = async (req, res) => {
     const cart = await Cart.findOne({ userID: userId });
 
     if (!cart) {
-      console.log(`no cart found for the user.`);
       res.status(200).json({ exists: false });
       return;
     }

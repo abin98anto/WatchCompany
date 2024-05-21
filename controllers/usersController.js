@@ -1,10 +1,11 @@
 const User = require("../models/userModel");
+const Referral = require("../models/referralModel");
 
 // Render User Management page.
 const loadUserManagement = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; 
-    const limit = 10; 
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
     const skip = (page - 1) * limit;
 
     const totalUsers = await User.countDocuments({ isAdmin: 0 });
@@ -46,12 +47,12 @@ const toggleUserStatus = async (req, res) => {
 // Get users
 const getUsers = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; // get the current page from the query parameter
-    const limit = 10; // number of users per page
-    const skip = (page - 1) * limit; // calculate the number of documents to skip
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
 
-    const totalUsers = await User.countDocuments({ isAdmin: 0 }); // get the total number of users
-    const totalPages = Math.ceil(totalUsers / limit); // calculate the total number of pages
+    const totalUsers = await User.countDocuments({ isAdmin: 0 });
+    const totalPages = Math.ceil(totalUsers / limit);
 
     const users = await User.find({ isAdmin: 0 })
       .sort({ createdOn: -1 })
@@ -64,8 +65,28 @@ const getUsers = async (req, res) => {
   }
 };
 
+// Edit referral bonus
+const editReferralBonus = async (req, res) => {
+  const { offerAmount } = req.body;
+
+  try {
+    let referral = await Referral.findOne();
+    if (!referral) {
+      referral = new Referral();
+    }
+    referral.offerAmount = offerAmount;
+    await referral.save();
+
+    res.status(200).send({ message: "Referral bonus updated successfully" });
+  } catch (error) {
+    console.error("Error updating referral bonus:", error);
+    res.status(500).send({ message: "Failed to update referral bonus" });
+  }
+};
+
 module.exports = {
   loadUserManagement,
   toggleUserStatus,
   getUsers,
+  editReferralBonus,
 };
