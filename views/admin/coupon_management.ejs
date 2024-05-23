@@ -1,0 +1,404 @@
+<%- include('../partials/admin/admin_header.ejs') %>
+
+<!-- Sidebar -->
+<aside class="navbar-aside" id="offcanvas_aside">
+  <div class="aside-top">
+    <a href="index.html" class="brand-wrap">
+      <img
+        src="/admin_assets/imgs/theme/watchcompany_logo.webp"
+        class="logo"
+        alt="Watch Company Dashboard"
+      />
+    </a>
+    <div>
+      <button class="btn btn-icon btn-aside-minimize">
+        <i class="text-muted material-icons md-menu_open"></i>
+      </button>
+    </div>
+  </div>
+  <nav>
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/dashboard">
+          <i class="icon material-icons md-home"></i>
+          <span class="text">Dashboard</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/product_management">
+          <i class="icon material-icons md-shopping_bag"></i>
+          <span class="text">Product Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/user_management">
+          <i class="icon material-icons md-person"></i>
+          <span class="text">User Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/category_management">
+          <i class="icon material-icons md-stars"></i>
+          <span class="text">Category Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/order_management">
+          <i class="icon material-icons md-shopping_cart"></i>
+          <span class="text">Order Management</span>
+        </a>
+      </li>
+      <li class="menu-item active">
+        <a class="menu-link" href="/admin/coupon_management">
+          <img src="/fimg/voucher.png" />
+          <span class="text ml-10">Coupon Management</span>
+        </a>
+      </li>
+    </ul>
+    <hr />
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/settings">
+          <i class="icon material-icons md-settings"></i>
+          <span class="text">Settings</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/logout">
+          <i class="icon material-icons md-local_offer"></i>
+          <span class="text"> Logout </span>
+        </a>
+      </li>
+    </ul>
+    <br />
+    <br />
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-wrap">
+  <section class="content-main">
+    <div class="content-header">
+      <div>
+        <h2 class="content-title card-title">Coupon Management</h2>
+      </div>
+      <div>
+        <button class="btn" style="background-color: black; color: white">
+          Add Coupon
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <!-- Coupon Table -->
+          <div class="col-md-12">
+            <% if (coupons.length) { %>
+            <div class="table-responsive">
+              <table class="table table-hover" id="categoryTable">
+                <thead>
+                  <tr class="text-center">
+                    <th>No.</th>
+                    <th>Coupon Code</th>
+                    <th>Discount %</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Minimum Purchase</th>
+                    <th>Maximum Discount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="categoryTableBody">
+                  <% for (let i=0; i<coupons.length; i++) { %>
+                  <tr class="text-center">
+                    <td><%= i+1 %></td>
+                    <td><b> <%= coupons[i].couponCode %> </b></td>
+                    <td> <%= coupons[i].discountPercentage %> </td>
+                    <td> <%= coupons[i].startDate.toDateString() %> </td>
+                    <td> <%= coupons[i].endDate.toDateString() %> </td>
+                    <td> <%= coupons[i].minPurchase %> </td>
+                    <td> <%= coupons[i].maxDiscount %> </td>
+                    <td>
+                      <% if (coupons[i].isUnlisted == false) { %>
+                      <span
+                        class="rounded-pill alert-success"
+                        style="padding: 8px"
+                        >Active</span
+                      >
+                      <% } else { %>
+                        <span
+                        class="rounded-pill alert-danger"
+                        style="padding: 8px"
+                        >Inactive</span
+                      >
+                      <% } %>
+                    </td>
+                    <td class="text-end">
+                      <ul style="display: flex; justify-content: space-evenly">
+                        <li>
+                          <input type="hidden" name="<%= coupons[i].id %>" value="<%= coupons[i].id %>" />
+                          <button
+                            type="submit"
+                            class="btn border border-secondary edit-button"
+                            style="width: 80px; font-size: small"
+                          >
+                            <i class="material-icons md-edit"></i>
+                            Edit
+                          </button>
+                        </li>
+                        <li>
+                          <% if (coupons[i].isUnlisted == false) { %>
+                            <input type="hidden" name="<%= coupons[i].id %>" value="<%= coupons[i].id %>" />
+                            <button
+                              type="submit"
+                              class="btn btn-danger unlist-button"
+                              style="width: 80px; font-size: smaller"
+                            >
+                              <i
+                                class="material-icons md-playlist_add_check"
+                              ></i>
+                              Unlist
+                            </button>
+                          <% } else { %>
+                            <input type="hidden" name="<%= coupons[i].id %>" value="<%= coupons[i].id %>" />
+                            <button
+                              type="submit"
+                              class="btn btn-success list-button"
+                              style="width: 80px; font-size: small"
+                            >
+                              <i class="material-icons md-playlist_add"></i>
+                              List
+                            </button>
+                          <% } %>
+                        </li>
+                        <li>
+                          <form>
+                            <input type="hidden" name="<%= coupons[i].id %>" value="<%= coupons[i].id %>" />
+                            <button
+                              type="submit"
+                              class="btn delete-button"
+                              style="color: white; background-color: black"
+                            >
+                              <i class="material-icons md-delete-forever"></i>
+                              Delete
+                            </button>
+                          </form>
+                        </li>
+                      </ul>
+                    </td>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+            <% } else { %>
+              <h1>No coupons added.</h1>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<!-- <script>
+  document.querySelector('.btn[style*="background-color: black"]').addEventListener('click', function() {
+    const today = new Date().toISOString().split('T')[0];
+
+    Swal.fire({
+        title: "Add Coupon",
+        width: "800px",
+        html: `
+        <input id="couponCode" class="swal2-input" placeholder="Coupon Code" style="width: 80%;">
+        <label for="startDate" style="display: block; margin-top: 10px;">Start Date</label>
+        <input id="startDate" type="date" class="swal2-input" style="width: 80%;" min="${today}">
+        <label for="endDate" style="display: block; margin-top: 10px;">End Date</label>
+        <input id="endDate" type="date" class="swal2-input" style="width: 80%;" placeholder="End Date">
+        <input id="minPurchase" type="number" class="swal2-input" placeholder="Minimum Purchase" style="width: 80%;">
+        <input id="discountPercentage" type="number" class="swal2-input" placeholder="Discount Percentage" style="width: 80%;">
+        <input id="maxDiscount" type="number" class="swal2-input" placeholder="Max Discount" style="width: 80%;">
+      `,
+      focusConfirm: false,
+      confirmButtonText: "Create Coupon",
+      showCancelButton: true,
+      preConfirm: () => {
+        const couponCode = document.getElementById('couponCode').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const minPurchase = parseFloat(document.getElementById('minPurchase').value);
+        const discountPercentage = parseFloat(document.getElementById('discountPercentage').value);
+        const maxDiscount = parseFloat(document.getElementById('maxDiscount').value);
+
+        if (!couponCode || !startDate || !endDate || !minPurchase || !discountPercentage || !maxDiscount) {
+          Swal.showValidationMessage('Please fill all fields');
+          return;
+        }
+
+        if (new Date(startDate) >= new Date(endDate)) {
+          Swal.showValidationMessage('Start date should be less than end date');
+          return;
+        }
+
+        if (discountPercentage <= 0 || discountPercentage >= 99) {
+          Swal.showValidationMessage('Discount percentage should be a positive number and less than 99');
+          return;
+        }
+
+        if (minPurchase <= 0 || maxDiscount <= 0) {
+          Swal.showValidationMessage('Minimum purchase and maximum discount should be positive numbers');
+          return;
+        }
+
+        if (minPurchase >= maxDiscount) {
+          Swal.showValidationMessage('Minimum purchase should be less than maximum discount');
+          return;
+        }
+
+        return {
+          couponCode: couponCode,
+          startDate: startDate,
+          endDate: endDate,
+          minPurchase: minPurchase,
+          discountPercentage: discountPercentage,
+          maxDiscount: maxDiscount,
+        };
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const couponData = result.value;
+        fetch('/admin/add_coupon', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(couponData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire('Success', 'Coupon added successfully', 'success');
+          } else {
+            Swal.fire('Error', 'Failed to add coupon', 'error');
+          }
+        })
+        .catch(error => {
+          Swal.fire('Error', 'An error occurred', 'error');
+        });
+      }
+    });
+  });
+</script> -->
+
+<script>
+  document.querySelector('.btn[style*="background-color: black"]').addEventListener('click', function() {
+    const today = new Date().toISOString().split('T')[0];
+
+    Swal.fire({
+        title: "Add Coupon",
+        width: "800px",
+        html: `
+        <input id="couponCode" class="swal2-input" placeholder="Coupon Code" style="width: 80%;">
+        <label for="startDate" style="display: block; margin-top: 10px;">Start Date</label>
+        <input id="startDate" type="date" class="swal2-input" style="width: 80%;" min="${today}">
+        <label for="endDate" style="display: block; margin-top: 10px;">End Date</label>
+        <input id="endDate" type="date" class="swal2-input" style="width: 80%;" placeholder="End Date">
+        <input id="minPurchase" type="number" class="swal2-input" placeholder="Minimum Purchase" style="width: 80%;">
+        <input id="discountPercentage" type="number" class="swal2-input" placeholder="Discount Percentage" style="width: 80%;">
+        <input id="maxDiscount" type="number" class="swal2-input" placeholder="Max Discount" style="width: 80%;">
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      preConfirm: async () => {
+        const couponCode = document.getElementById('couponCode').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const minPurchase = parseFloat(document.getElementById('minPurchase').value);
+        const discountPercentage = parseFloat(document.getElementById('discountPercentage').value);
+        const maxDiscount = parseFloat(document.getElementById('maxDiscount').value);
+
+        if (!couponCode || !startDate || !endDate || !minPurchase || !discountPercentage || !maxDiscount) {
+          Swal.showValidationMessage('Please fill all fields');
+          return;
+        }
+
+        if (new Date(startDate) >= new Date(endDate)) {
+          Swal.showValidationMessage('Start date should be less than end date');
+          return;
+        }
+
+        if (discountPercentage <= 0 || discountPercentage >= 99) {
+          Swal.showValidationMessage('Discount percentage should be a positive number and less than 99');
+          return;
+        }
+
+        if (minPurchase <= 0 || maxDiscount <= 0) {
+          Swal.showValidationMessage('Minimum purchase and maximum discount should be positive numbers');
+          return;
+        }
+
+        if (minPurchase >= maxDiscount) {
+          Swal.showValidationMessage('Minimum purchase should be less than maximum discount');
+          return;
+        }
+
+        // Check if the coupon code already exists
+        const response = await fetch('/admin/check_coupon', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ couponCode: couponCode })
+        });
+
+        const result = await response.json();
+
+        if (result.exists) {
+          Swal.showValidationMessage('A coupon with the same name already exists');
+          return;
+        }
+
+        return {
+          couponCode: couponCode,
+          startDate: startDate,
+          endDate: endDate,
+          minPurchase: minPurchase,
+          discountPercentage: discountPercentage,
+          maxDiscount: maxDiscount
+        };
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const couponData = result.value;
+        fetch('/admin/add_coupon', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(couponData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+              Swal.fire({
+              icon: 'success',
+              title: 'New Coupon Added!',
+              showConfirmButton: true,
+            }).then(() => {
+              window.location.href = '/admin/coupon_management';
+            });
+          } else {
+            Swal.fire('Error', 'Failed to add coupon', 'error');
+          }
+        })
+        .catch(error => {
+          Swal.fire('Error', 'An error occurred', 'error');
+        });
+      }
+    });
+  });
+</script>
+
+
+<%- include('../partials/admin/admin_footer.ejs') %>

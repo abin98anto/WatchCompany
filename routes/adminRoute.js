@@ -8,10 +8,9 @@ const productController = require("../controllers/productsController");
 const usersController = require("../controllers/usersController");
 const categoriesController = require("../controllers/categoriesController");
 const orderController = require("../controllers/orderController");
+const couponController = require("../controllers/couponController");
 
 const adminAuth = require("../middleware/adminAuth");
-
-// const upload = multer({ dest: "uploads/" });
 
 // Render Admin Login Page, Verification, load Admin Dashboard.
 admin_route.get("/", adminAuth.adminLogout, adminController.loadAdminLogin);
@@ -93,6 +92,15 @@ admin_route.get(
 admin_route.get("/order_management", orderController.loadOrderManagement);
 // admin_route.get("/order_details", orderController.loadOrderDetails);
 admin_route.post("/order_status", orderController.changeStatus);
+
+// Coupon Management.
+admin_route.get(
+  "/coupon_management",
+  adminAuth.adminLogin,
+  couponController.loadCouponManangement
+);
+admin_route.post("/add_coupon", couponController.addCoupon);
+admin_route.post('/check_coupon', couponController.duplicateCheck);
 
 // Admin logout.
 admin_route.get("/logout", adminAuth.adminLogin, adminController.logout);

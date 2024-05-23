@@ -60,6 +60,12 @@ const orderSchema = new mongoose.Schema({
   billTotal: {
     type: Number,
   },
+  discount: {
+    type: Number,
+  },
+  subTotal: {
+    type: Number,
+  },
   address: {
     type: Object,
   },

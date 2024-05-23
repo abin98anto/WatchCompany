@@ -23,6 +23,8 @@ const addOrder = async (req, res) => {
       products,
       orderStatus,
       billTotal,
+      discount,
+      subTotal,
       address,
       paymentMethod,
       paymentStatus,
@@ -36,6 +38,8 @@ const addOrder = async (req, res) => {
       products,
       orderStatus,
       billTotal,
+      discount,
+      subTotal,
       address,
       paymentMethod,
       paymentStatus,
@@ -86,8 +90,7 @@ const addOrder = async (req, res) => {
       await Cart.deleteOne({ userID: id });
       const savedOrder = await newOrder.save();
       return res.status(201).json(savedOrder);
-    } 
-    else if (newOrder.paymentMethod === "razorpay") {
+    } else if (newOrder.paymentMethod === "razorpay") {
       let options = {
         amount: parseFloat(newOrder.billTotal) * 100,
         currency: "INR",
@@ -201,13 +204,11 @@ const razorpayAddOrder = async (req, res) => {
 
     await newOrder.save();
     await Cart.findOneAndDelete({ userID: id });
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Order placed successfully",
-        paymentStatus: status,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Order placed successfully",
+      paymentStatus: status,
+    });
   } catch (error) {
     console.log(
       `Error placing order using razor pay after going through /place order : ${error}`

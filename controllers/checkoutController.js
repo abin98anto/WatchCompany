@@ -1,8 +1,8 @@
 const Category = require("../models/categoryModel");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
+const Coupon = require("../models/couponModel");
 require("dotenv").config();
-
 
 const loadCheckout = async (req, res) => {
   try {
@@ -14,11 +14,13 @@ const loadCheckout = async (req, res) => {
     const cart = await Cart.findOne({ userID: req.session.userData }).populate(
       "products.productID"
     );
+    const coupons = await Coupon.find({ isUnlisted: false });
     res.render("checkout", {
       categories: Categories,
       google,
       user,
       cart,
+      coupons,
       RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {

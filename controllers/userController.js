@@ -827,7 +827,6 @@ const loadWishlist = async (req, res) => {
 // Add to Wishlist.
 const addToWishlist = async (req, res) => {
   try {
-    console.log(`adding to wishlist...`);
     const { productId } = req.body;
     const userId = req.session.userData || req.user.id;
 
@@ -854,7 +853,6 @@ const addToWishlist = async (req, res) => {
 // Check if a product is already in the Wishlist.
 const checkProductInWishlist = async (req, res) => {
   try {
-    console.log(`checking if the product is already in the wishlist...`);
     const { productId } = req.query;
     const userId = req.session.userData || req.user.id;
     const wishlist = await Wishlist.findOne({ userId: userId });
@@ -912,7 +910,6 @@ module.exports = {
   loadShop,
   loadMyProfile,
   loadMyAddress,
-  // loadMyWallet,
   loadMyOrders,
   updateProfile,
   addAddress,

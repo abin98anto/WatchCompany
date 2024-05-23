@@ -1,6 +1,8 @@
 <%- include('../partials/header.ejs') %> <%-
 include('../partials/page_header.ejs') %>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 <style>
   .swal2-input,
   .swal2-select {
@@ -28,7 +30,219 @@ include('../partials/page_header.ejs') %>
   .address:hover, .address.clicked {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
+
+  .dotted-border {
+    border-style: dotted;
+    border-width: 2px;
+    border-color: black;
+  }
+
+  #coupon {
+    transition: transform 0.3s ease;
+  }
+  #coupon:hover {
+    transform: scale(0.98);
+    cursor: pointer;
+    background-color: whitesmoke;
+  }
+
+.custom-modal-width {
+  width: 200%;
+  max-width: 1000px;
+}
+
+@media (min-width: 576px) {
+  .custom-modal-width {
+    max-width: 1000px;
+  }
+}
+
+@media (min-width: 768px) {
+  .custom-modal-width {
+    max-width: 1200px;
+  }
+}
+
+@media (min-width: 992px) {
+  .custom-modal-width {
+    max-width: 1400px;
+  }
+}
+
+#remove-coupon {
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(255, 102, 102);
+  transition: transform 0.5s ease; /* Add smooth transition */
+}
+
+#remove-coupon:hover {
+  transform: scale(0.98);
+  cursor: pointer;
+}
+
+
 </style>
+
+<!-- Coupon Design -->
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
+  .container2 {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    background-color: black;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .container2:hover {
+  transform: scale(1.03);
+  cursor: pointer;
+}
+
+  .card2 {
+    width: 400px;
+    height: 180px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+    padding: 10px 10px;
+    position: relative;
+  }
+
+  .main2,
+  .copy-button {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    align-items: center;
+  }
+  .card2::after {
+    position: absolute;
+    content: "";
+    height: 40px;
+    right: -20px;
+    border-radius: 40px;
+    z-index: 1;
+    top: 70px;
+    background-color: black;
+    width: 40px;
+  }
+
+  .card2::before {
+    position: absolute;
+    content: "";
+    height: 40px;
+    left: -20px;
+    border-radius: 40px;
+    z-index: 1;
+    top: 70px;
+    background-color: black;
+    width: 40px;
+  }
+
+  .co-img img {
+    width: 100px;
+    height: 100px;
+  }
+  .vertical {
+    border-left: 5px dotted black;
+    height: 100px;
+    position: absolute;
+    left: 40%;
+  }
+
+  .content2 h1 {
+    font-size: 35px;
+    margin-left: -20px;
+    color: #565656;
+  }
+
+  .content2 h1 span {
+    font-size: 18px;
+  }
+  .content2 h2 {
+    font-size: 18px;
+    margin-left: -20px;
+    color: #565656;
+    text-transform: uppercase;
+  }
+
+  .content2 p {
+    font-size: 16px;
+    color: #696969;
+    margin-left: -20px;
+  }
+
+  .copy-button {
+    margin: 12px 0 -5px 0;
+    height: 45px;
+    border-radius: 4px;
+    padding: 0 5px;
+  }
+
+  .buy {
+    position: absolute;
+    content: "";
+    bottom: 20px;
+    left: 20px;
+    background-color: black;
+  }
+
+  .copy-button .barcode {
+  width: 1300px;
+  height: 110px;
+  }
+
+  .coupons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+</style>
+
+<!-- Coupon Modal -->
+<div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered custom-modal-width">
+    <div class="modal-content">
+      <div class="modal-header" style="justify-content: center;">
+        <h5 class="modal-title" id="couponModalLabel">Available Coupons</h5>
+      </div>
+      <div class="modal-body" style="background-color: black; overflow-y: auto;">
+        <div class="coupons-grid">
+          <% for (let i=0; i<coupons.length; i++) { %>
+          <div class="container2 d-flex mb-20 mt-20" data-coupon-id="<%= coupons[i].id %>" data-disc-pecentage="<%= coupons[i].discountPercentage %>" data-min-purchase="<%= coupons[i].minPurchase %>" data-max-discount="<%= coupons[i].maxDiscount %>">
+            <div class="card2">
+                  <div class="main2">
+                      <div class="co-img ml-20">
+                          <img
+                          src="/user_assets/imgs/theme/watchcompany_logo.svg"
+                          alt=""
+                          />
+                      </div>
+                      <div class="vertical"></div>
+                      <div class="content2">
+                          <h2 class="pb-10"><%= coupons[i].couponCode %></h2>
+                          <h1><%= coupons[i].discountPercentage %>% <span>Coupon</span></h1>
+                          <p>Valid till <%= coupons[i].endDate.toDateString() %></p>
+                      </div>
+                  </div>
+                  <div class="copy-button">
+                  <img class="barcode" src="/fimg/barcode.png" alt="Barcode" />
+                  </div>
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </div>
+      <div class="modal-footer align-items-center" style="justify-content: center;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <main class="main">
   <!-- Breadcrumbs -->
@@ -71,7 +285,7 @@ include('../partials/page_header.ejs') %>
                   </td>
                   <td>
                     <h5>
-                      <a class="productName" href="shop-product-full.html"><%= prod.productID.name %></a>
+                      <a class="productName" href="/load_product?id=<%= prod.productID._id %>"><%= prod.productID.name %></a>
                     </h5>
                   </td>
                   <td class="productPrice"><%= prod.productID.price %></td>
@@ -79,9 +293,13 @@ include('../partials/page_header.ejs') %>
                   <td class="subtotal-value">$<%= prod.quantity * prod.productID.price %></td>
                 </tr>
                 <% }); %>
-                <tr>
+                <tr id="sub-total">
                   <th colspan="2" >SubTotal</th>
                   <td class="product-subtotal" colspan="3" id="cart-total"></td>
+                </tr>
+                <tr class="hidden" id="discount">
+                  <th colspan="2" >Discount</th>
+                  <td class="product-subtotal" colspan="3" id="discount-amount"></td>
                 </tr>
                 <tr>
                   <th colspan="2">Shipping</th>
@@ -96,7 +314,14 @@ include('../partials/page_header.ejs') %>
               </tbody>
             </table>
           </div>
-          <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+          <div id="coupon" style="justify-content: center; align-items: center;" class="bt-1 d-flex border-color-1 pt-10 pb-10 mb-20 dotted-border" data-bs-toggle="modal" data-bs-target="#couponModal">
+            <img src="/fimg/discount-checkout.png" class="pr-15" />
+            <h4>Apply Coupon</h4>
+          </div>
+          <div id="remove-coupon" style="justify-content: center; align-items: center; background-color: rgb(255, 102, 102);" class="hidden" >
+            <img src="/fimg/discount-checkout.png" class="pr-15" style="visibility: hidden;" />
+            <h4>Remove Coupon</h4>
+          </div>
           <div class="payment_method">
             <div class="mb-25">
               <h5>Payment</h5>
@@ -162,6 +387,7 @@ include('../partials/page_header.ejs') %>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
   
@@ -375,12 +601,14 @@ include('../partials/page_header.ejs') %>
   });
 
   const cartTotalElement = document.getElementById("cart-total");
+  const discount = document.getElementById("discount-amount")
+  const discountAmount = parseFloat(discount.textContent.trim().replace("$", "")) ? parseFloat(discount.textContent.trim().replace("$", "")) : 0;
   const grandTotalElement = document.getElementById("grand-total");
 
   if (cartTotalElement && grandTotalElement) {
-    const formattedTotal = `$${newCartTotal.toFixed(2)}`;
+    const formattedTotal = `$${newCartTotal}`;
     cartTotalElement.textContent = formattedTotal;
-    grandTotalElement.textContent = formattedTotal;
+    grandTotalElement.textContent = newCartTotal - discountAmount;
   }
 }
 
@@ -433,313 +661,398 @@ include('../partials/page_header.ejs') %>
   window.location.href = '/cart';
 }
 
-// Place Order
-document.querySelector('#placeOrder').addEventListener('click', async function(event) {
-  event.preventDefault();
+  // Place Order
+  document.querySelector('#placeOrder').addEventListener('click', async function(event) {
+    event.preventDefault();
 
-  // Check if a payment method is selected
-  const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-  if (!selectedPaymentMethod) {
-    Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
-    return;
-  }
-
-  // Check if an address is selected
-  if (addressIndex === undefined) {
-    Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
-    return;
-  }
-
-  try {
-    const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
-    const userId = document.querySelector("#userId").textContent.trim();
-
-    const productRows = document.querySelectorAll('.products');
-    const outOfStockProducts = [];
-
-    for (const row of productRows) {
-      const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
-      const productName = row.querySelector('.productName').textContent.trim();
-      const quantity = parseInt(row.querySelector('.product-qty').textContent.trim());
-
-      const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`);
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error('Failed to fetch stock availability.');
-      }
-
-      const { available, stock } = data;
-
-      if (available || quantity > stock) {
-        outOfStockProducts.push({ productName, availableStock: stock });
-      }
-    }
-
-    if (outOfStockProducts.length > 0) {
-      let message = "The following products do not have sufficient stock:<br>";
-      outOfStockProducts.forEach(product => {
-        message += `${product.productName} (Available Stock: ${product.availableStock})<br>`;
-      });
-
-      Swal.fire({
-        icon: "error",
-        title: "Insufficient Stock",
-        html: message,
-        confirmButtonText: "OK"
-      });
+    // Check if a payment method is selected
+    const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+    if (!selectedPaymentMethod) {
+      Swal.fire('Select a Payment Method', 'Please choose a payment method to proceed.', 'warning');
       return;
     }
 
-    const addressElement = document.getElementById(addressIndex);
-    if (!addressElement) {
-      throw new Error('Selected address not found.');
+    // Check if an address is selected
+    if (addressIndex === undefined) {
+      Swal.fire('Select an Address', 'Please select an address to proceed.', 'warning');
+      return;
     }
 
-    const addressType = addressElement.querySelector('.addressType').textContent.trim();
-    const houseName = addressElement.querySelector('.houseName').textContent.trim();
-    const street = addressElement.querySelector('.street').textContent.trim();
-    const city = addressElement.querySelector('.city').textContent.trim();
-    const state = addressElement.querySelector('.state').textContent.trim();
-    const country = addressElement.querySelector('.country').textContent.trim();
-    const pincode = addressElement.querySelector('.pincode').textContent.trim();
-    const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
+    try {
+      const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
+      const discount = parseFloat(document.getElementById("discount-amount").textContent.replace('$', ''));
+      const subTotal = parseFloat(document.getElementById("cart-total").textContent.replace('$', ''));
+      const userId = document.querySelector("#userId").textContent.trim();
 
-    const address = {
-      addressType,
-      houseName,
-      street,
-      city,
-      state,
-      country,
-      pincode,
-      phoneNumber
-    };
+      const productRows = document.querySelectorAll('.products');
+      const outOfStockProducts = [];
 
-    const randomNumber = Math.floor(1000 + Math.random() * 9000);
-    const orderId = `ord${randomNumber}`;
+      for (const row of productRows) {
+        const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
+        const productName = row.querySelector('.productName').textContent.trim();
+        const quantity = parseInt(row.querySelector('.product-qty').textContent.trim());
 
-    const myDate = new Date();
-    const options = {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    };
+        const response = await fetch(`/checkStock?productId=${productId}&quantity=${quantity}`);
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error('Failed to fetch stock availability.');
+        }
 
-    const formatter = new Intl.DateTimeFormat('en-US', options);
-    const formattedDate = formatter.format(myDate);
+        const { available, stock } = data;
 
-    const orderDetails = {
-      user: userId,
-      products: [],
-      orderId,
-      orderStatus: 'pending',
-      billTotal,
-      address,
-      paymentMethod: selectedPaymentMethod.id,
-      paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
-      createdOn: new Date().toISOString(),
-      showDate: formattedDate
-    };
-
-    productRows.forEach(row => {
-      const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
-      const productName = row.querySelector('.productName').textContent.trim();
-      const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
-      const productPriceText = row.querySelector('.productPrice').textContent.trim();
-      const productPrice = parseFloat(productPriceText.replace('$', ''));
-      const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
-      const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
-      const subtotal = parseFloat(subtotalText.replace('$', ''));
-
-      const product = {
-        productId,
-        productName,
-        media: productImage,
-        price: productPrice,
-        quantity: productQuantity,
-        subtotal
-      };
-
-      orderDetails.products.push(product);
-    });
-
-    // Check if the payment method is "wallet" and if the wallet balance is sufficient
-    if (selectedPaymentMethod.id === "wallet") {
-      const walletResponse = await fetch(`/checkWalletBalance?userId=${userId}`, {
-        method: "GET"
-      });
-      const walletData = await walletResponse.json();
-      if (!walletResponse.ok) {
-        throw new Error('Failed to fetch wallet balance.');
+        if (available || quantity > stock) {
+          outOfStockProducts.push({ productName, availableStock: stock });
+        }
       }
 
-      if (walletData.walletBalance < billTotal) {
+      if (outOfStockProducts.length > 0) {
+        let message = "The following products do not have sufficient stock:<br>";
+        outOfStockProducts.forEach(product => {
+          message += `${product.productName} (Available Stock: ${product.availableStock})<br>`;
+        });
+
         Swal.fire({
-          icon: 'error',
-          title: 'Payment Error',
-          text: `Not enough balance in wallet.Only $${walletData.walletBalance} left in the wallet. Please choose another payment method.`,
-          showConfirmButton: true
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = '/checkout';
-          }
+          icon: "error",
+          title: "Insufficient Stock",
+          html: message,
+          confirmButtonText: "OK"
         });
         return;
-      } else {
-        const response = await fetch('/createOrder', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-      body: JSON.stringify(orderDetails)
-    }).then(()=> {
-      Swal.fire({
-      icon: 'success',
-      title: 'Order Placed Successfully',
-      text: 'You will now be redirected to your orders.',
-      showConfirmButton: true,
-    }).then(() => {
-      window.location.href = '/my_orders';
-    });
-    })
       }
-    }
 
-    // Place the order
-    if (selectedPaymentMethod.id == "cod") {
-      const response = await fetch('/createOrder', {
+      const addressElement = document.getElementById(addressIndex);
+      if (!addressElement) {
+        throw new Error('Selected address not found.');
+      }
+
+      const addressType = addressElement.querySelector('.addressType').textContent.trim();
+      const houseName = addressElement.querySelector('.houseName').textContent.trim();
+      const street = addressElement.querySelector('.street').textContent.trim();
+      const city = addressElement.querySelector('.city').textContent.trim();
+      const state = addressElement.querySelector('.state').textContent.trim();
+      const country = addressElement.querySelector('.country').textContent.trim();
+      const pincode = addressElement.querySelector('.pincode').textContent.trim();
+      const phoneNumber = addressElement.querySelector('.phoneNumber').textContent.trim();
+
+      const address = {
+        addressType,
+        houseName,
+        street,
+        city,
+        state,
+        country,
+        pincode,
+        phoneNumber
+      };
+
+      const randomNumber = Math.floor(1000 + Math.random() * 9000);
+      const orderId = `ord${randomNumber}`;
+
+      const myDate = new Date();
+      const options = {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      };
+
+      const formatter = new Intl.DateTimeFormat('en-US', options);
+      const formattedDate = formatter.format(myDate);
+
+      const orderDetails = {
+        user: userId,
+        products: [],
+        orderId,
+        orderStatus: 'pending',
+        billTotal,
+        discount,
+        subTotal,
+        address,
+        paymentMethod: selectedPaymentMethod.id,
+        paymentStatus: selectedPaymentMethod.id === "cod" ? "pending" : "success",
+        createdOn: new Date().toISOString(),
+        showDate: formattedDate
+      };
+
+      productRows.forEach(row => {
+        const productId = row.querySelector('.product-qty').getAttribute('data-product-id');
+        const productName = row.querySelector('.productName').textContent.trim();
+        const productImage = row.querySelector('.image').getAttribute('src').split('/').pop();
+        const productPriceText = row.querySelector('.productPrice').textContent.trim();
+        const productPrice = parseFloat(productPriceText.replace('$', ''));
+        const productQuantity = parseInt(row.querySelector('.product-qty').textContent.trim());
+        const subtotalText = row.querySelector('.subtotal-value').textContent.trim();
+        const subtotal = parseFloat(subtotalText.replace('$', ''));
+
+        const product = {
+          productId,
+          productName,
+          media: productImage,
+          price: productPrice,
+          quantity: productQuantity,
+          subtotal
+        };
+
+        orderDetails.products.push(product);
+      });
+
+      // Check if the payment method is "wallet" and if the wallet balance is sufficient
+      if (selectedPaymentMethod.id === "wallet") {
+        const walletResponse = await fetch(`/checkWalletBalance?userId=${userId}`, {
+          method: "GET"
+        });
+        const walletData = await walletResponse.json();
+        if (!walletResponse.ok) {
+          throw new Error('Failed to fetch wallet balance.');
+        }
+
+        if (walletData.walletBalance < billTotal) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Payment Error',
+            text: `Not enough balance in wallet.Only $${walletData.walletBalance} left in the wallet. Please choose another payment method.`,
+            showConfirmButton: true
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = '/checkout';
+            }
+          });
+          return;
+        } else {
+          const response = await fetch('/createOrder', {
+          method: 'POST',
+          headers: {
+          'Content-Type': 'application/json'
+          },
+        body: JSON.stringify(orderDetails)
+      }).then(()=> {
+        Swal.fire({
+        icon: 'success',
+        title: 'Order Placed Successfully',
+        text: 'You will now be redirected to your orders.',
+        showConfirmButton: true,
+      }).then(() => {
+        window.location.href = '/my_orders';
+      });
+      })
+        }
+      }
+
+      // Place the order
+      if (selectedPaymentMethod.id == "cod") {
+        const response = await fetch('/createOrder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderDetails)
+        });
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Order Placed Successfully',
+          text: 'You will now be redirected to your orders.',
+          showConfirmButton: false,
+          timer: 2000
+        }).then(() => {
+          window.location.href = '/my_orders';
+        });
+      } else if (selectedPaymentMethod.id == "razorpay") {
+        const response = await fetch('/createOrder', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(orderDetails)
-      });
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Order Placed Successfully',
-        text: 'You will now be redirected to your orders.',
-        showConfirmButton: false,
-        timer: 2000
-      }).then(() => {
-        window.location.href = '/my_orders';
-      });
-    } else if (selectedPaymentMethod.id == "razorpay") {
-      const response = await fetch('/createOrder', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(orderDetails)})
-      .then(response => {
-        return response.json()
-      })
-      .then (data => {
-        if (data.success) {
-          const options = {
-            key: data.key_id,
-            amount: data.amount,
-            currency: "INR",
-            name: "Watch Company",
-            description: data.description,
-            image:"/user_assets/imgs/theme/watchcompany_logo.svg",
-            order_id: data.order_id,
-            handler: function (response) {
-              orderAfterPayment(addressIndex, data.newOrder.billTotal, selectedPaymentMethod.id, "Success");
-            },
-            prefill: {
-              contact: data.contact,
-              name: data.name,
-              email: data.email
-            },
-            notes: {
-              description: data.description
-            },
-            theme: {
-              color: '#000000'
+        body: JSON.stringify(orderDetails)})
+        .then(response => {
+          return response.json()
+        })
+        .then (data => {
+          if (data.success) {
+            const options = {
+              key: data.key_id,
+              amount: data.amount,
+              currency: "INR",
+              name: "Watch Company",
+              description: data.description,
+              image:"/user_assets/imgs/theme/watchcompany_logo.svg",
+              order_id: data.order_id,
+              handler: function (response) {
+                orderAfterPayment(addressIndex, data.newOrder.billTotal, selectedPaymentMethod.id, "Success");
+              },
+              prefill: {
+                contact: data.contact,
+                name: data.name,
+                email: data.email
+              },
+              notes: {
+                description: data.description
+              },
+              theme: {
+                color: '#000000'
+              }
             }
+
+            const razorpayObject = new Razorpay(options);
+            razorpayObject.open();
+            razorpayObject.on('payment.failed', function (response) {
+              orderAfterPayment(addressIndex,data.newOrder.billTotal, selectedPaymentMethod.id,"Failed");
+            });
+          } else {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Order Placement Failed',
+              text: data.msg
+            });
           }
-
-          const razorpayObject = new Razorpay(options);
-          razorpayObject.open();
-          razorpayObject.on('payment.failed', function (response) {
-            orderAfterPayment(addressIndex,data.newOrder.billTotal, selectedPaymentMethod.id,"Failed");
-          });
-        } else {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Order Placement Failed',
-            text: data.msg
-          });
-        }
-      }).catch(error => {
-        console.log(`error placing an order : ${error}`);
-      })
-    }
-  } catch (error) {
-    console.error('Error placing order:', error);
-    Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
-  }
-});
-
-function orderAfterPayment(addressIndex,totalAmount, paymentMethod, status) {
-  fetch(`/razorPayAddOrder?addressIndex=${addressIndex}&status=${status}&totalAmount=${totalAmount}&paymentMethod=${paymentMethod}`,{
-    method: 'POST'
-  }).then(response => response.json())
-  .then( data => {
-        console.log(`data : ${data.paymentStatus}`);
-    if (data.success) {
-      if(data.paymentStatus == 'Success') {
-        if (data.message === "Order placed successfully") {
-          Swal.fire({
-            icon: "success",
-            title: 'Order Confirmed',
-            text: 'Your payment was successful and the order has been placed.',
-            confirmButtonText: 'OK'
-          }).then(result => {
-            if(result.isConfirmed) window.location.href = '/my_orders';
-          })
-        } else {
-          Swal.fire({
-            icon:'Warning',
-            title: 'Order Placement Failed',
-            text: data.message
-          })
-        }
-      } else {
-        Swal.fire({
-            icon: "error",
-            title: 'Order Confirmed',
-            text: 'Your payment was umsuccessful please try again.',
-            confirmButtonText: 'OK'
-          }).then(result => {
-            if(result.isConfirmed) window.location.href = '/my_orders?tab=failed';
-          })
+        }).catch(error => {
+          console.log(`error placing an order : ${error}`);
+        })
       }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      Swal.fire('Error', 'Failed to place order. Please try again.', 'error');
     }
-  })
-  .catch(error => {
-    Swal.fire({
-      icon: 'error',
-      title: 'Order Placement Failed',
-      text: 'There was an erro confirming your order. Please try again.'
-    });
-  })
-}
+  });
 
-// to check if there is anything in the cart.
-document.addEventListener("DOMContentLoaded", () => {
-  updateCartTotals();
-
-  // Check if cart is empty and redirect if needed
-  const cartProducts = document.querySelectorAll(".product-qty");
-  if (cartProducts.length === 0) {
-    window.location.href = '/shop';
+  function orderAfterPayment(addressIndex,totalAmount, paymentMethod, status) {
+    fetch(`/razorPayAddOrder?addressIndex=${addressIndex}&status=${status}&totalAmount=${totalAmount}&paymentMethod=${paymentMethod}`,{
+      method: 'POST'
+    }).then(response => response.json())
+    .then( data => {
+          console.log(`data : ${data.paymentStatus}`);
+      if (data.success) {
+        if(data.paymentStatus == 'Success') {
+          if (data.message === "Order placed successfully") {
+            Swal.fire({
+              icon: "success",
+              title: 'Order Confirmed',
+              text: 'Your payment was successful and the order has been placed.',
+              confirmButtonText: 'OK'
+            }).then(result => {
+              if(result.isConfirmed) window.location.href = '/my_orders';
+            })
+          } else {
+            Swal.fire({
+              icon:'Warning',
+              title: 'Order Placement Failed',
+              text: data.message
+            })
+          }
+        } else {
+          Swal.fire({
+              icon: "error",
+              title: 'Order Confirmed',
+              text: 'Your payment was umsuccessful please try again.',
+              confirmButtonText: 'OK'
+            }).then(result => {
+              if(result.isConfirmed) window.location.href = '/my_orders?tab=failed';
+            })
+        }
+      }
+    })
+    .catch(error => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Order Placement Failed',
+        text: 'There was an erro confirming your order. Please try again.'
+      });
+    })
   }
-});
+
+  // to check if there is anything in the cart.
+  document.addEventListener("DOMContentLoaded", () => {
+    updateCartTotals();
+
+    // Check if cart is empty and redirect if needed
+    const cartProducts = document.querySelectorAll(".product-qty");
+    if (cartProducts.length === 0) {
+      window.location.href = '/shop';
+    }
+  });
+
+  // Add coupon
+  const containerDivs = document.querySelectorAll('.container2');
+  containerDivs.forEach(containerDiv => {
+    containerDiv.addEventListener('click', function() {
+      const couponId = this.getAttribute('data-coupon-id');
+      const discountPercentage = parseFloat(this.getAttribute('data-disc-pecentage'));
+      const minPurchase = parseFloat(this.getAttribute('data-min-purchase'));
+      const maxDiscount = parseFloat(this.getAttribute('data-max-discount'));
+
+      const subtotal = parseFloat(document.getElementById('cart-total').textContent.replace('$', ''));
+
+      // Check if the minimum purchase amount is met
+      if (subtotal < minPurchase) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Minimum Purchase Not Met',
+          text: `You need to spend at least $${minPurchase} to use this coupon.`,
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
+
+      const discountAmount = Math.min(subtotal * (discountPercentage / 100), maxDiscount);
+
+      const discountRow = document.getElementById("discount");
+      discountRow.classList.remove("hidden");
+
+      const discTh = document.getElementById("discount-amount");
+      discTh.textContent = `$${discountAmount}`;
+
+      updateCartTotals();
+
+      const couponDiv = document.getElementById("coupon");
+      couponDiv.className = '';
+      couponDiv.classList.add("hidden");
+
+      const removeCouponDiv = document.getElementById("remove-coupon");
+      removeCouponDiv.className = "bt-1 d-flex border-color-1 pt-10 pb-10 mb-20 dotted-border";
+    });
+  });
+
+  // Remove Coupon
+  document.getElementById('remove-coupon').addEventListener('click', function() {
+    Swal.fire({
+      title: 'Remove Coupon',
+      text: 'Are you sure you want to remove this coupon?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, remove it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const couponDiv = document.getElementById("coupon");
+        couponDiv.className = "bt-1 d-flex border-color-1 pt-10 pb-10 mb-20 dotted-border";
+
+        const removeCouponDiv = document.getElementById("remove-coupon");
+        removeCouponDiv.className = "hidden";
+
+        const discountDiv = document.getElementById("discount");
+        discountDiv.classList.add("hidden");
+        const discTh = document.getElementById("discount-amount");
+        discTh.textContent = 0;
+
+        updateCartTotals();
+      }
+    });
+  });
+
+  // Hide modal.
+  document.addEventListener("DOMContentLoaded", () => {
+      updateCartTotals();
+
+      const containerElements = document.querySelectorAll('.container2');
+      containerElements.forEach(container => {
+          container.addEventListener('click', () => {
+              $('#couponModal').modal('hide');
+          });
+      });
+  });
 
 </script>
 

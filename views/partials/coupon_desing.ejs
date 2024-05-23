@@ -1,0 +1,144 @@
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
+  .container2 {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    background-color: black;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .container2:hover {
+  transform: scale(1.03);
+  cursor: pointer;
+}
+
+  .card2 {
+    width: 400px;
+    height: 180px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+    padding: 10px 10px;
+    position: relative;
+  }
+
+  .main2,
+  .copy-button {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    align-items: center;
+  }
+  .card2::after {
+    position: absolute;
+    content: "";
+    height: 40px;
+    right: -20px;
+    border-radius: 40px;
+    z-index: 1;
+    top: 70px;
+    background-color: black;
+    width: 40px;
+  }
+
+  .card2::before {
+    position: absolute;
+    content: "";
+    height: 40px;
+    left: -20px;
+    border-radius: 40px;
+    z-index: 1;
+    top: 70px;
+    background-color: black;
+    width: 40px;
+  }
+
+  .co-img img {
+    width: 100px;
+    height: 100px;
+  }
+  .vertical {
+    border-left: 5px dotted black;
+    height: 100px;
+    position: absolute;
+    left: 40%;
+  }
+
+  .content2 h1 {
+    font-size: 35px;
+    margin-left: -20px;
+    color: #565656;
+  }
+
+  .content2 h1 span {
+    font-size: 18px;
+  }
+  .content2 h2 {
+    font-size: 18px;
+    margin-left: -20px;
+    color: #565656;
+    text-transform: uppercase;
+  }
+
+  .content2 p {
+    font-size: 16px;
+    color: #696969;
+    margin-left: -20px;
+  }
+
+  .copy-button {
+    margin: 12px 0 -5px 0;
+    height: 45px;
+    border-radius: 4px;
+    padding: 0 5px;
+  }
+
+  .buy {
+    position: absolute;
+    content: "";
+    bottom: 20px;
+    left: 20px;
+    background-color: black;
+  }
+
+  .copy-button .barcode {
+  width: 1300px;
+  height: 110px;
+  }
+
+  .coupons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+</style>
+
+
+<div class="coupons-grid">
+<% for (let i=0; i<coupons.length; i++) { %>
+<div class="container2 d-flex mb-20 mt-20">
+  <div class="card2">
+        <div class="main2" data-coupon-id="<%= coupons[i].id %>">
+            <div class="co-img ml-20">
+                <img
+                src="/user_assets/imgs/theme/watchcompany_logo.svg"
+                alt=""
+                />
+            </div>
+            <div class="vertical"></div>
+            <div class="content2">
+                <h2 class="pb-10"><%= coupons[i].couponCode %></h2>
+                <h1><%= coupons[i].discountPercentage %>% <span>Coupon</span></h1>
+                <p>Valid till <%= coupons[i].endDate.toDateString() %></p>
+            </div>
+        </div>
+        <div class="copy-button">
+        <img class="barcode" src="/fimg/barcode.png" alt="Barcode" />
+        </div>
+  </div>
+</div>
+<% } %>
+</div>

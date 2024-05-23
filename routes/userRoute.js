@@ -9,6 +9,7 @@ const productController = require("../controllers/productsController");
 const checkoutController = require("../controllers/checkoutController");
 const orderController = require("../controllers/orderController");
 const walletController = require("../controllers/walletController");
+const couponController = require("../controllers/couponController");
 
 // Loads Landing Page.
 user_route.get("/", userController.loadLandingPage);
@@ -55,11 +56,7 @@ user_route.post("/update_address", checkoutController.updateAddress);
 user_route.delete("/delete_address", userController.deleteAddress);
 user_route.post("/createOrder", orderController.addOrder);
 user_route.get("/checkWalletBalance", orderController.getWalletBalance);
-// user_route.post("/createRazorpayOrder", orderController.createRazorpayOrder);
-// user_route.post(
-//   "/verifyRazorpayPayment",
-//   orderController.verifyRazorpayPayment
-// );
+user_route.get("/getCoupons", couponController.getCoupons);
 
 // Profile page.
 user_route.get("/my_profile", userAuth.isLogin, userController.loadMyProfile);
