@@ -141,28 +141,12 @@ const sendOTP = async (req, res) => {
 const verifyOTP = async (req, res) => {
   try {
     const referral = await Referral.findOne();
-    console.log(`referral : ${referral}`)
+    // console.log(`referral : ${referral}`)
     const { offerAmount } = referral;
-    console.log(`offer amount : ${offerAmount}`);
+    // console.log(`offer amount : ${offerAmount}`);
     const enteredOTP = req.body.otp;
     const generatedOTP = req.session.newOTP;
     let { referralCode } = req.session.formData;
-    if (referralCode) {
-      const user = await User.findOne({ referralCode });
-      if (user) {
-        let referredUserWallet = await Wallet.findOne({ userId: user.id });
-        if (!referredUserWallet) {
-          referredUserWallet = new Wallet({
-            userId: user.id,
-            walletBalance: 0,
-            transactions: [],
-          });
-        }
-        referredUserWallet.walletBalance += offerAmount;
-        await referredUserWallet.save();
-        referralCode = true;
-      }
-    }
 
     if (enteredOTP === generatedOTP) {
       const { username, email, password } = req.session.formData;
@@ -175,6 +159,24 @@ const verifyOTP = async (req, res) => {
         referralCode: generateReferralCode(),
       });
       await newUser.save();
+
+      if (referralCode) {
+        const user = await User.findOne({ referralCode });
+        if (user) {
+          let referredUserWallet = await Wallet.findOne({ userId: user.id });
+          if (!referredUserWallet) {
+            referredUserWallet = new Wallet({
+              userId: user.id,
+              walletBalance: 0,
+              transactions: [],
+            });
+          }
+          referredUserWallet.walletBalance += offerAmount;
+          await referredUserWallet.save();
+          referralCode = true;
+        }
+      }
+
       if (referralCode === true) {
         const user = await User.find({ email });
         const wallet = new Wallet({
@@ -356,7 +358,6 @@ const verifyLogin = async (req, res) => {
     }
   } catch (error) {
     console.log(`Error Verifying User Login.`);
-    // req.session.error = "An error occurred. Please try again later.";
     res.render("login", {
       message,
       categories,
@@ -380,13 +381,10 @@ const logoutUser = async (req, res) => {
 const loadProduct = async (req, res) => {
   try {
     const id = req.query.id;
-    console.log(`id : ${id}`);
     const user = await User.findById(req.session.userData);
     const product = await Product.findOne({ isUnlisted: false, _id: id });
     const categories = await Category.find({ isUnlisted: false });
-    // const relatedCat = product.category;
     const relatedProd = await Product.find({ category: product.category });
-    // console.log(relatedProd);
     let google;
     req.user ? (google = true) : (google = false);
     res.render("product_page", {
@@ -405,27 +403,122 @@ const loadProduct = async (req, res) => {
 // load shop.
 const loadShop = async (req, res) => {
   try {
-    const user = await User.findById(req.session.userData);
-    let products;
-    const categories = await Category.find({ isUnlisted: false });
-    let google;
-    req.user ? (google = true) : (google = false);
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 10;
 
-    const query = { isUnlisted: false, stock: { $gt: 0 } };
-    if (req.query.category) {
-      products = await Product.find({ ...query, category: req.query.category });
-    } else {
-      products = await Product.find(query);
-    }
+    const Products = await Product.find({
+      isUnlisted: false,
+      stock: { $gt: 0 },
+    })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .sort({ createdOn: -1 });
+
+    const totalProducts = await Product.countDocuments({
+      isUnlisted: false,
+      stock: { $gt: 0 },
+    });
+    const totalPages = Math.ceil(totalProducts / pageSize);
+
+    const user = await User.findById(req.session.userData);
+    const categories = await Category.find({ isUnlisted: false });
+    let google = req.user ? true : false;
 
     res.render("shopping_page", {
-      products: products,
+      products: Products,
       categories: categories,
       user: user,
       google,
+      currentPage: page,
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: page < totalPages,
     });
   } catch (error) {
-    console.log(`error rendering shop page.`);
+    console.log(`error rendering shop page: ${error.message}`);
+  }
+};
+
+// Search & Filter with Pagination
+// const searchFilter = async (req, res) => {
+//   const query = req.query.query || "";
+//   const category = req.query.category || "";
+//   const page = parseInt(req.query.page) || 1;
+//   const limit = 6; // Items per page
+
+//   let filter = {};
+
+//   if (query) {
+//     filter.name = { $regex: query, $options: "i" };
+//   }
+
+//   if (category) {
+//     filter.category = category;
+//   }
+
+//   const skip = (page - 1) * limit;
+
+//   const totalProducts = await Product.countDocuments(filter);
+//   const products = await Product.find(filter).skip(skip).limit(limit);
+
+//   res.json({
+//     products,
+//     totalPages: Math.ceil(totalProducts / limit),
+//     currentPage: page,
+//   });
+// };
+
+const searchFilter = async (req, res) => {
+  const query = req.query.query || "";
+  const category = req.query.category || "";
+  const sort = req.query.sort || "";
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+
+  let filter = { isUnlisted: false, stock: { $gt: 0 } };
+
+  if (query) {
+    filter = [
+      { name: { $regex: query, $options: "i" } },
+    ];
+  }
+  console.log('req query ', req.query);
+  if (category && category !== "Show all") {
+    filter.category = category;
+  }
+
+  const skip = (page - 1) * limit;
+
+  let sortOption = {};
+  if (sort === "price-asc") {
+    sortOption = { price: 1 };
+  } else if (sort === "price-desc") {
+    sortOption = { price: -1 };
+  } else if (sort === "name-asc") {
+    sortOption = { name: 1 };
+  } else if (sort === "name-desc") {
+    sortOption = { name: -1 };
+  }
+
+  console.log("Applied Filter:", filter);
+
+  try {
+    const totalProducts = await Product.countDocuments(filter);
+    const products = await Product.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
+
+    console.log("Fetched Products:", products); // Debugging log
+
+    res.json({
+      products,
+      totalPages: Math.ceil(totalProducts / limit),
+      currentPage: page,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -806,12 +899,18 @@ const loadWishlist = async (req, res) => {
 
     const wishlist = await Wishlist.findOne({ userId: userId });
 
-    const wishProducts = await Promise.all(
-      wishlist.products.map(async (product) => {
-        const prod = await Product.findById(product.productId);
-        return prod;
-      })
-    );
+    let wishProducts;
+    if (wishlist) {
+      wishProducts = await Promise.all(
+        wishlist.products.map(async (product) => {
+          const prod = await Product.findById(product.productId);
+          return prod;
+        })
+      );
+    } else {
+      wishProducts = [];
+    }
+    console.log("wish products : ", wishProducts);
 
     res.render("wishlist", {
       categories,
@@ -928,4 +1027,5 @@ module.exports = {
   addToWishlist,
   checkProductInWishlist,
   removeFromWishlist,
+  searchFilter,
 };

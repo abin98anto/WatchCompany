@@ -1,26 +1,12 @@
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 
-// Render Category Management Page.
-// const loadCategoryManagement = async (req, res) => {
-//   try {
-//     const categories = await Category.find({ isDeleted: false }).sort({
-//       createdOn: -1,
-//     });
-//     res.render("category_management", {
-//       categories: categories,
-//       message: "",
-//     });
-//   } catch (error) {
-//     res.send(`Error Loading Category Mangement.`);
-//   }
-// };
-
+// Load category management.
 const loadCategoryManagement = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; // Default to page 1 if no page is provided
-    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page if no limit is provided
-    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
     const totalCategories = await Category.countDocuments({ isDeleted: false });
     const totalPages = Math.ceil(totalCategories / limit);
@@ -68,11 +54,6 @@ const categoryCheck = async (req, res) => {
       isDeleted: false,
     });
 
-    // const catFound = await Category.findOne({
-    //   name: categoryName,
-    //   isDeleted: false,
-    // });
-
     res.json({ exists: catFound !== null });
   } catch (error) {
     console.error("Error checking category existence:", error);
@@ -83,7 +64,7 @@ const categoryCheck = async (req, res) => {
 // Add Category to Database.
 const addCategory = async (req, res) => {
   try {
-    const { category_name } = req.body;
+    const { category_name, categoryDiscount } = req.body;
     const cat_name =
       category_name.charAt(0).toUpperCase() +
       category_name.slice(1).toLowerCase();
@@ -94,6 +75,7 @@ const addCategory = async (req, res) => {
     if (!catFound) {
       const newCategory = new Category({
         name: cat_name,
+        categoryDiscount,
         createdOn: Date.now(),
       });
       await newCategory.save();
@@ -144,16 +126,32 @@ const toggleCategoryStatus = async (req, res) => {
 
 // Edit Categories.
 const editCategory = async (req, res) => {
+  const { id } = req.query;
+  const { new_name, new_discount } = req.body;
+
   try {
-    const { id } = req.query;
-    const { new_name } = req.body;
-    console.log("new name :", new_name);
-    await Category.updateOne({ _id: id }, { $set: { name: new_name } });
+    const category = await Category.findById(id);
+    if (!category) {
+      return res.status(404).send("Category not found");
+    }
+
+    category.name = new_name;
+    category.categoryDiscount = new_discount;
+
+    await category.save();
+
+    const products = await Product.find({ category: category.name });
+
+    for (const product of products) {
+      const newCategoryDiscountPrice = product.price - (product.price * new_discount) / 100;
+      product.categoryDiscountPrice = newCategoryDiscountPrice;
+      await product.save();
+    }
 
     res.status(200).send("Category updated successfully");
   } catch (error) {
-    console.log(`Error Making Changes To A Category: ${error}`);
-    res.status(500).send("Internal server error");
+    console.error("Error updating category:", error);
+    res.status(500).send("Failed to update category");
   }
 };
 

@@ -4,6 +4,7 @@ const Products = require("../models/productModel");
 const User = require("../models/userModel");
 const Category = require("../models/categoryModel");
 const Wallet = require("../models/walletModel");
+const Coupon = require("../models/couponModel");
 require("dotenv").config();
 const crypto = require("crypto");
 
@@ -30,6 +31,7 @@ const addOrder = async (req, res) => {
       paymentStatus,
       createdOn,
       showDate,
+      coupon,
     } = req.body;
 
     const newOrder = new Order({
@@ -48,6 +50,12 @@ const addOrder = async (req, res) => {
     });
 
     const id = req.user || req.session.userData;
+
+    if (coupon) {
+      const cpn = await Coupon.findById(coupon);
+      cpn.usedList.push(id);
+      await cpn.save();
+    }
 
     const cart = await Cart.find({ userID: id });
     cart.forEach(async (prod) => {
@@ -533,16 +541,10 @@ const returnOrder = async (req, res) => {
 
     if (order.paymentMethod != "cod") {
       const userId = req.session.userData;
-      // console.log(`refunding the user...`);
-      // const existingProduct = await Products.findById(productId);
       let wallet = await Wallet.findOne({ userId: userId });
       if (!wallet) {
-        // console.log(
-        //   `no wallet found for the user, creating new wallet for the user..`
-        // );
         wallet = new Wallet({ userId: userId, transactions: [] });
       }
-      // console.log(`user wallet : ${wallet}`);
 
       const transaction = {
         transactionType: "Credit",
@@ -553,7 +555,6 @@ const returnOrder = async (req, res) => {
 
       wallet.walletBalance += order.billTotal;
       wallet.transactions.push(transaction);
-      // console.log(`user wallet after entering the transaction : ${wallet}`);
 
       wallet.save();
     }
@@ -594,16 +595,11 @@ const changeStatus = async (req, res) => {
 
   try {
     const order = await Order.findById(orderId);
-    // let product = order.products.find(
-    //   (product) => product.productId === productId
-    // );
-    // product.productStatus = status;
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
     order.orderStatus = status;
-    // order.orderStatus = `partially-${status}`;
     await order.save();
     res.status(200).json({
       message: "Order status updated successfully",

@@ -68,7 +68,15 @@ include('../partials/page_header.ejs') %>
                     </h5>
                   </td>
                   <td data-title="Price">
-                    <span class="price"> $ <%= prod.productID.price %> </span>
+                    <% if (prod.productID.offerPrice != 0 || prod.productID.categoryDiscountPrice != 0) { %>
+                      <% if (prod.productID.offerPrice < prod.productID.categoryDiscountPrice && prod.productID.offerPrice != 0) { %>
+                          <span class="price">$<%= prod.productID.offerPrice %></span>
+                      <% } else { %>
+                          <span class="price">$<%= prod.productID.categoryDiscountPrice %></span>
+                      <% } %>
+                    <% } else {%>
+                      <span class="price">$<%= prod.productID.price %></span>
+                    <% }  %>
                   </td>
                   <td class="text-center" data-title="Stock">
                     <div class="detail-qty border radius m-auto">
@@ -90,9 +98,15 @@ include('../partials/page_header.ejs') %>
                     </div>
                   </td>
                   <td class="text-right subtotal" data-title="Cart">
-                    <span class="subtotal-value">
-                      $ <%= prod.quantity * prod.productID.price %>
-                    </span>
+                  <% if (prod.productID.offerPrice != 0 || prod.productID.categoryDiscountPrice != 0) { %>
+                      <% if (prod.productID.offerPrice < prod.productID.categoryDiscountPrice && prod.productID.offerPrice != 0) { %>
+                          <span class="subtotal-value">$ <%= prod.quantity * prod.productID.offerPrice %></span>
+                      <% } else { %>
+                          <span class="subtotal-value">$ <%= prod.quantity * prod.productID.categoryDiscountPrice %></span>
+                      <% } %>
+                    <% } else {%>
+                      <span class="subtotal-value">$ <%= prod.quantity * prod.productID.price %></span>
+                    <% }  %>
                   </td>
                   <td class="action" data-title="Remove">
                     <a

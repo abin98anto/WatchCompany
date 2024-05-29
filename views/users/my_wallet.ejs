@@ -86,7 +86,7 @@ include('../partials/page_header.ejs') %>
                                   <td><%= wallet.transactions.length - i %></td>
                                   <td><%= wallet.transactions[i].orderId %></td>
                                   <td><%= wallet.transactions[i].description %></td>
-                                  <td><%= wallet.transactions[i].createdOn %></td>
+                                  <td><%= wallet.transactions[i].createdOn.toDateString() %></td>
                                   <td><%= wallet.transactions[i].transactionType %></td>
                                   <td><%= wallet.transactions[i].amount %></td>
                                 </tr>

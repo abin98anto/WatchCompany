@@ -103,11 +103,24 @@ const addProduct = async (req, res) => {
           }
         }
 
-        const { name, description, price, category, stock, media } = req.body;
+        let { name, description, price, offerPrice, category, media, stock } =
+          req.body;
+
+        if (!offerPrice) offerPrice = 0;
+
+        let categoryData = await Category.findOne({ name: category });
+        let categoryDiscountPrice = 0;
+        if (categoryData && categoryData.categoryDiscount) {
+          categoryDiscountPrice =
+            price - (price * categoryData.categoryDiscount) / 100;
+        }
+
         const newProduct = new Product({
           name,
           description,
           price,
+          offerPrice,
+          categoryDiscountPrice,
           category,
           stock,
           media: processedImages,
@@ -139,12 +152,14 @@ const toggleProductStatus = async (req, res) => {
 
     let orderExists = false;
     const orders = await Order.find();
-    orders.forEach((order)=> {
+    orders.forEach((order) => {
       if (order.products.productId == id) orderExists = true;
-    })
+    });
 
     if (orderExists) {
-      res.status(404).send("Cannot unlist product. Order for the product exists.");
+      res
+        .status(404)
+        .send("Cannot unlist product. Order for the product exists.");
     }
 
     if (!product) {
@@ -212,16 +227,18 @@ const editProduct = async (req, res) => {
           } catch (error) {
             console.log(`Error occurred while processing the image: ${error}`);
             res.status(500).send("Error processing the image");
-            return; // Stop further execution
+            return;
           }
         }
 
-        const { name, description, price, category, stock, media } = req.body;
+        const { name, description, price, category, stock, media, offerPrice } =
+          req.body;
         const updateProduct = await Product.findByIdAndUpdate(id, {
           $push: { media: { $each: processedImages } },
           name: name,
           description: description,
           price: price,
+          offerPrice,
           category: category,
           stock: stock,
         });

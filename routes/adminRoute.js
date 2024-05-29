@@ -9,6 +9,7 @@ const usersController = require("../controllers/usersController");
 const categoriesController = require("../controllers/categoriesController");
 const orderController = require("../controllers/orderController");
 const couponController = require("../controllers/couponController");
+const salesController = require("../controllers/salesController");
 
 const adminAuth = require("../middleware/adminAuth");
 
@@ -90,7 +91,6 @@ admin_route.get(
 
 // Order Management.
 admin_route.get("/order_management", orderController.loadOrderManagement);
-// admin_route.get("/order_details", orderController.loadOrderDetails);
 admin_route.post("/order_status", orderController.changeStatus);
 
 // Coupon Management.
@@ -100,7 +100,14 @@ admin_route.get(
   couponController.loadCouponManangement
 );
 admin_route.post("/add_coupon", couponController.addCoupon);
-admin_route.post('/check_coupon', couponController.duplicateCheck);
+admin_route.post("/check_coupon", couponController.duplicateCheck);
+admin_route.post("/update_coupon_status", couponController.updateCouponStatus);
+admin_route.delete("/delete_coupon", couponController.deleteCoupon);
+admin_route.put("/update_coupon", couponController.updateCoupon);
+
+// Sales Report
+admin_route.get("/sales_report", salesController.loadSalesReport);
+admin_route.get('/sales_report/download', salesController.downloadReport);
 
 // Admin logout.
 admin_route.get("/logout", adminAuth.adminLogin, adminController.logout);

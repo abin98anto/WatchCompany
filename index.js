@@ -49,7 +49,7 @@ app.use("/", user_route);
 
 app.use("/admin", admin_route);
 
-// Middleware to handle undefined routes
+// // Middleware to handle undefined routes
 // app.use((req, res, next) => {
 //   const error = new Error("Not Found");
 //   error.status = 404;

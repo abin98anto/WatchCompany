@@ -1,0 +1,354 @@
+<%- include('../partials/admin/admin_header.ejs') %>
+
+<style>
+  .thick-border-table {
+    border-width: 4px !important;
+    color: black !important;
+  }
+
+  .thick-border-table th,
+  .thick-border-table td {
+    border-width: 4px !important;
+    color: black !important;
+  }
+
+  #download-button {
+  position: relative;
+  }
+
+  #download-button :hover {
+    cursor: pointer;
+  }
+
+  #download-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  #download-menu .dropdown-item {
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+
+  #download-menu .dropdown-item:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+  }
+
+</style>
+
+<!-- Sidebar -->
+<aside class="navbar-aside" id="offcanvas_aside">
+  <div class="aside-top">
+    <a href="index.html" class="brand-wrap">
+      <img
+        src="/admin_assets/imgs/theme/watchcompany_logo.webp"
+        class="logo"
+        alt="Watch Company Dashboard"
+      />
+    </a>
+    <div>
+      <button class="btn btn-icon btn-aside-minimize">
+        <i class="text-muted material-icons md-menu_open"></i>
+      </button>
+    </div>
+  </div>
+  <nav>
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/dashboard">
+          <i class="icon material-icons md-home"></i>
+          <span class="text">Dashboard</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/product_management">
+          <i class="icon material-icons md-shopping_bag"></i>
+          <span class="text">Product Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/user_management">
+          <i class="icon material-icons md-person"></i>
+          <span class="text">User Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/category_management">
+          <i class="icon material-icons md-stars"></i>
+          <span class="text">Category Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/order_management">
+          <i class="icon material-icons md-shopping_cart"></i>
+          <span class="text">Order Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/coupon_management">
+          <img src="/fimg/voucher.png">
+          <span class="text ml-10">Coupon Management</span>
+        </a>
+      </li>
+      <li class="menu-item active">
+        <a class="menu-link" href="/admin/sales_report">
+          <img src="/fimg/salesreport.png">
+          <span class="text ml-10">Sales Report</span>
+        </a>
+      </li>
+    </ul>
+    <hr />
+    <ul class="menu-aside">
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/settings">
+          <i class="icon material-icons md-settings"></i>
+          <span class="text">Settings</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/logout">
+          <i class="icon material-icons md-local_offer"></i>
+          <span class="text"> Logout </span>
+        </a>
+      </li>
+    </ul>
+    <br />
+    <br />
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-wrap">
+  <section class="content-main">
+    <div class="content-header">
+      <h2 class="content-title">Sales Report</h2>
+    </div>
+    <div class="card mb-4" style="height: 630px;">
+      <header class="card-header">
+        <div class="row gx-3" style='align-items: center; justify-content: space-between;'>
+          <div class="col-lg-8 col-md-10 d-flex align-items-center">
+            <form class="row g-3 w-100" method="GET" action="/admin/sales_report">
+              <div class="col-md-3">
+                <label for="fromDate" class="form-label">From Date:</label>
+                <input type="date" class="form-control" id="fromDate" name="fromDate" value="<%= fromDate %>" max="<%= new Date().toISOString().split('T')[0] %>"/>
+              </div>
+              <div class="col-md-3">
+                <label for="toDate" class="form-label">To Date:</label>
+                <input type="date" class="form-control" id="toDate" name="toDate" value="<%= toDate %>" max="<%= new Date().toISOString().split('T')[0] %>"/>
+              </div>
+              <div class="col-md-5 d-flex align-items-end">
+                <button type="submit" id="generateReportBtn" class="btn btn-primary">Generate Report</button>
+                <div id="download-button" class="col-lg-2 col-md-3 ml-40">
+                  <img src="/fimg/download.png" id="download-icon" />
+                  <div id="download-menu" class="dropdown-menu">
+                    <a class="dropdown-item" id="download-pdf"> <img src="/fimg/pdf-download.png" id="download-icon" /> Download as PDF</a>
+                    <a class="dropdown-item" id="download-excel"> <img src="/fimg/excel-download.png" id="download-icon" /> Download as Excel</a>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="col-lg-2 col-md-3 col-6">
+            <label for="filterSelect" class="form-label">Filter:</label>
+            <select id="filterSelect" class="form-select">
+              <option value="all" <%= filter === 'all' ? 'selected' : '' %>>Show All</option>
+              <option value="month" <%= filter === 'month' ? 'selected' : '' %>>Month</option>
+              <option value="week" <%= filter === 'week' ? 'selected' : '' %>>Week</option>
+              <option value="day" <%= filter === 'day' ? 'selected' : '' %>>Day</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th class="text-center">No.</th>
+                <th class="text-center">User Name</th>
+                <th class="text-center">Order ID</th>
+                <th class="text-center">Products</th>
+                <th class="text-center">Payment Method</th>
+                <th class="text-center">Quantity</th>
+                <th class="text-center">Product Price</th>
+                <th class="text-center">Sub Total</th>
+                <th class="text-center">Discount</th>
+                <th class="text-center">Grand Total</th>
+                <th class="text-center">Purchase Date</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <% for (let i=0; i<sales.length; i++) { %>
+              <tr class="text-center">
+                <td><%= i+1 %></td>
+                <td><%= sales[i].user.name %></td>
+                <td><%= sales[i].orderId %></td>
+                <td>
+                  <ul>
+                  <% sales[i].products.forEach((product)=>{ %>
+                    <li><%= product.productName %></li>
+                  <% }); %>
+                  </ul>
+                </td>
+                <td><%= sales[i].paymentMethod %></td>
+                <td>
+                  <ul>
+                  <% sales[i].products.forEach((product)=>{ %>
+                    <li class="quantity"><%= product.quantity %></li>
+                  <% }); %>
+                  </ul>
+                </td>
+                <td>
+                  <ul>
+                  <% sales[i].products.forEach((product)=>{ %>
+                    <li><%= product.price %></li>
+                  <% }); %>
+                  </ul>
+                </td>
+                <td><%= sales[i].products.reduce((acc, cur) => acc + (cur.quantity * cur.price), 0) %></td>
+                <td class="discounts"><%= sales[i].products.reduce((acc, cur) => acc + (cur.quantity * cur.price), 0) - sales[i].billTotal %></td>
+                <td class="total"><%= sales[i].billTotal %></td>
+                <td><%= sales[i].createdOn.toDateString() %></td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sales Summary -->
+      <div class="d-flex justify-content-center">
+        <table class="table table-bordered text-center thick-border-table" style="width: 20%;">
+          <tbody>
+            <tr>
+              <td><b>Total Discount</b></td>
+              <td style="width: 100px;" id="discountPrice">000</td>
+            </tr>
+            <tr>
+              <td><b>Total Sales</b></td>
+              <td style="width: 100px;" id="totalSales">000</td>
+            </tr>
+            <tr>
+              <td><b>Total Sales Count</b></td>
+              <td style="width: 100px;" id="totalSalesCount">00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+      
+    <div style="flex-direction: column; align-items: center" class="d-flex">
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item <%= !hasPreviousPage ? 'disabled' : '' %>">
+            <a class="page-link" href="/admin/sales_report?page=<%= currentPage - 1 %>&filter=<%= filter %>&fromDate=<%= fromDate %>&toDate=<%= toDate %>" tabindex="-1" aria-disabled="true">Previous</a>
+          </li>
+          <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= currentPage === i ? 'active' : '' %>"><a class="page-link" href="/admin/sales_report?page=<%= i %>&filter=<%= filter %>&fromDate=<%= fromDate %>&toDate=<%= toDate %>"><%= i %></a></li>
+          <% } %>
+          <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
+            <a class="page-link" href="/admin/sales_report?page=<%= currentPage + 1 %>&filter=<%= filter %>&fromDate=<%= fromDate %>&toDate=<%= toDate %>">Next</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
+    const filterSelect = document.getElementById('filterSelect');
+    const currentPage = '<%= currentPage %>';
+    const today = new Date().toISOString().split('T')[0];
+
+    fromDate.max = today;
+    toDate.max = today;
+
+    fromDate.addEventListener('change', () => {
+      toDate.min = fromDate.value;
+      filterSelect.value = 'all';
+    });
+
+    toDate.addEventListener('change', () => {
+      fromDate.max = toDate.value;
+      filterSelect.value = 'all';
+    });
+
+    filterSelect.addEventListener('change', () => {
+      if (filterSelect.value !== 'all') {
+        fromDate.value = '';
+        toDate.value = '';
+      }
+      window.location.href = `/admin/sales_report?filter=${filterSelect.value}`;
+    });
+
+    document.getElementById('generateReportBtn').addEventListener('click', (event) => {
+      if (fromDate.value > toDate.value) {
+        event.preventDefault();
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date Range',
+          text: 'End date cannot be before start date.',
+        });
+      }
+    });
+
+    // Calculate the totals
+    const discountCells = document.querySelectorAll('.discounts');
+    const totalCells = document.querySelectorAll('.total');
+    const quantityCells = document.querySelectorAll('.quantity');
+
+    const discountPrice = Array.from(discountCells).reduce((acc, cell) => acc + parseFloat(cell.textContent), 0);
+    const totalSales = Array.from(totalCells).reduce((acc, cell) => acc + parseFloat(cell.textContent), 0);
+    const totalQuantity = Array.from(quantityCells).reduce((acc, cell) => acc + parseInt(cell.textContent), 0);
+
+    document.getElementById('discountPrice').textContent = discountPrice.toFixed(2);
+    document.getElementById('totalSales').textContent = totalSales.toFixed(2);
+    document.getElementById('totalSalesCount').textContent = totalQuantity;
+
+    // Download button
+    const downloadButton = document.getElementById('download-icon');
+    const downloadMenu = document.getElementById('download-menu');
+    const downloadPdf = document.getElementById('download-pdf');
+    const downloadExcel = document.getElementById('download-excel');
+
+    downloadButton.addEventListener('click', () => {
+      downloadMenu.style.display = downloadMenu.style.display === 'none' ? 'block' : 'none';
+    });
+
+    downloadPdf.addEventListener('click', () => {
+      const fromDateVal = fromDate.value;
+      const toDateVal = toDate.value;
+      const filterVal = filterSelect.value;
+      window.location.href = `/admin/sales_report/download?format=pdf&fromDate=${fromDateVal}&toDate=${toDateVal}&filter=${filterVal}&page=${currentPage}`;
+    });
+
+    downloadExcel.addEventListener('click', () => {
+      const fromDateVal = fromDate.value;
+      const toDateVal = toDate.value;
+      const filterVal = filterSelect.value;
+      window.location.href = `/admin/sales_report/download?format=excel&fromDate=${fromDateVal}&toDate=${toDateVal}&filter=${filterVal}&page=${currentPage}`;
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!downloadButton.contains(event.target)) {
+        downloadMenu.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+
+<%- include('../partials/admin/admin_footer.ejs') %>

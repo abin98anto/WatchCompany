@@ -99,9 +99,14 @@
               <div class="rating-result" title="90%">
                 <span><span>90%</span></span>
               </div>
-              <div class="product-price">
-                <span>$ <%= products[i].price %> </span>
-              </div>
+              <div class="product-price" style="font-family: sans-serif;">
+                    <% if (products[i].offerPrice) { %>
+                      <span>$<%= products[i].offerPrice %></span>
+                      <span class="old-price">$<%= products[i].price %></span>
+                    <% } else { %>
+                      <span>$<%= products[i].price %></span>
+                    <% } %>
+                  </div>
               <div class="product-action-1 show">
                 <a aria-label="Add To Cart" class="action-btn hover-up"
                   <% if (user) { %>
@@ -169,9 +174,14 @@
               <div class="rating-result" title="90%">
                 <span><span>90%</span></span>
               </div>
-              <div class="product-price">
-                <span>$ <%= products[i].price %> </span>
-              </div>
+              <div class="product-price" style="font-family: sans-serif;">
+                    <% if (products[i].offerPrice) { %>
+                      <span>$<%= products[i].offerPrice %></span>
+                      <span class="old-price">$<%= products[i].price %></span>
+                    <% } else { %>
+                      <span>$<%= products[i].price %></span>
+                    <% } %>
+                  </div>
               <div class="product-action-1 show">
                 <a aria-label="Add To Cart" class="action-btn hover-up"
                   <% if (user) { %>

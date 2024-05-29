@@ -54,6 +54,12 @@
           <span class="text ml-10">Coupon Management</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/sales_report">
+          <img src="/fimg/salesreport.png">
+          <span class="text ml-10">Sales Report</span>
+        </a>
+      </li>
     </ul>
     <hr />
     <ul class="menu-aside">
@@ -98,12 +104,19 @@
           <div class="col-md-3">
             <form method="post" action="/admin/addCategory">
               <div class="mb-4">
-                <label for="product_name" class="form-label">Name</label>
                 <input
                   type="text"
                   placeholder="Enter category name"
                   class="form-control"
                   name="category_name"
+                />
+              </div>
+              <div class="mb-4">
+                <input
+                  type="text"
+                  placeholder="Enter category discount percentage"
+                  class="form-control"
+                  name="categoryDiscount"
                 />
               </div>
               <div class="d-grid">
@@ -126,6 +139,7 @@
                   <tr class="text-center">
                     <th>No.</th>
                     <th>Name</th>
+                    <th>Discount %</th>
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
@@ -135,6 +149,7 @@
                   <tr class="text-center">
                     <td><%= i %></td>
                     <td><b><%= category.name %> </b></td>
+                    <td><%= category.categoryDiscount %></td>
                     <td>
                       <% if (category.isUnlisted) { %>
                       <span
@@ -412,182 +427,79 @@
 
 <!-- Edit Category -->
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const editButtons = document.querySelectorAll(".edit-button");
+document.addEventListener("DOMContentLoaded", () => {
+  const editButtons = document.querySelectorAll(".edit-button");
 
-    editButtons.forEach((button) => {
-      button.addEventListener("click", async (event) => {
-        event.preventDefault();
+  editButtons.forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      event.preventDefault();
 
-        const categoryName = event.target
-          .closest("tr")
-          .querySelector("td:nth-child(2)").innerText;
-        const categoryId = event.target
-          .closest("tr")
-          .querySelector('input[name="id"]').value;
+      const categoryName = event.target
+        .closest("tr")
+        .querySelector("td:nth-child(2)").innerText;
+      const categoryDiscount = event.target
+        .closest("tr")
+        .querySelector("td:nth-child(3)").innerText;
+      const categoryId = event.target
+        .closest("tr")
+        .querySelector('input[name="id"]').value;
 
-        const { value: newCategoryName } = await Swal.fire({
-          title: "Edit Category",
-          input: "text",
-          inputValue: categoryName,
-          inputPlaceholder: "Enter new category name",
-          showCancelButton: true,
-          confirmButtonText: "Save changes",
-          showLoaderOnConfirm: true,
-          preConfirm: async (newName) => {
-            if (!newName) {
-              Swal.showValidationMessage("Category name cannot be empty");
-            }
+      const { value: formValues } = await Swal.fire({
+        title: "Edit Category",
+        html:
+          `<input id="swal-input1" class="swal2-input" value="${categoryName}" placeholder="Enter new category name">` +
+          `<input id="swal-input2" class="swal2-input" value="${categoryDiscount}" placeholder="Enter new category discount">`,
+        focusConfirm: false,
+        preConfirm: () => {
+          return [
+            document.getElementById('swal-input1').value,
+            document.getElementById('swal-input2').value
+          ]
+        },
+        showCancelButton: true,
+        confirmButtonText: "Save changes",
+        showLoaderOnConfirm: true,
+      });
 
-            try {
-              const response = await fetch("/admin/check_category", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ categoryName: newName }),
-              });
+      const newCategoryName = formValues[0].trim();
+      const newCategoryDiscount = formValues[1].trim();
 
-              const data = await response.json();
+      if (!newCategoryName) {
+        Swal.fire("Error!", "Category name cannot be empty.", "error");
+        return;
+      }
 
-              if (data.exists) {
-                Swal.showValidationMessage("Category name already exists");
-              }
+      if (isNaN(newCategoryDiscount) || newCategoryDiscount < 0 || newCategoryDiscount > 100) {
+        Swal.fire("Error!", "Discount must be a number between 0 and 100.", "error");
+        return;
+      }
 
-              return newName;
-            } catch (error) {
-              console.error("Error checking category:", error);
-              Swal.fire(
-                "Error!",
-                "Failed to check category existence.",
-                "error"
-              );
-            }
+      const catName = newCategoryName.charAt(0).toUpperCase() + newCategoryName.slice(1).toLowerCase();
+
+      try {
+        const response = await fetch(`/admin/edit_category?id=${categoryId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({ new_name: catName, new_discount: newCategoryDiscount }),
         });
 
-        const catName =
-          newCategoryName.charAt(0).toUpperCase() +
-          newCategoryName.slice(1).toLowerCase();
-
-        if (catName) {
-          try {
-            const response = await fetch(
-              `/admin/edit_category?id=${categoryId}`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ new_name: catName }),
-              }
-            );
-
-            if (response.ok) {
-              Swal.fire(
-                "Success!",
-                "Category updated successfully.",
-                "success"
-              ).then(() => {
-                window.location.reload();
-              });
-            } else {
-              throw new Error("Failed to edit category");
-            }
-          } catch (error) {
-            console.error("Error:", error);
-            Swal.fire("Error!", "Failed to update category.", "error");
-          }
+        if (response.ok) {
+          Swal.fire("Success!", "Category updated successfully.", "success").then(() => {
+            window.location.reload();
+          });
+        } else {
+          throw new Error("Failed to edit category");
         }
-      });
+      } catch (error) {
+        console.error("Error:", error);
+        Swal.fire("Error!", "Failed to update category.", "error");
+      }
     });
   });
+});
 </script>
-
-<!-- Search Fucntionality -->
-<!-- <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    fetch("/admin/get_categories")
-      .then((response) => response.json())
-      .then((categories) => {
-        const searchInput = document.getElementById("searchInput");
-        const categoryTableBody = document.getElementById("categoryTableBody");
-
-        searchInput.addEventListener("input", () => {
-          const searchTerm = searchInput.value.toLowerCase().trim();
-          const filteredCategories = categories.filter((category) =>
-            category.name.toLowerCase().includes(searchTerm)
-          );
-
-          categoryTableBody.innerHTML = "";
-
-          filteredCategories.forEach((category, index) => {
-            const status = category.isUnlisted ? "Unlisted" : "Active";
-            const row = `
-              <tr class="text-center">
-                <td>${index + 1}</td>
-                <td><b>${category.name}</b></td>
-                <td>
-                  <span class="rounded-pill alert-${
-                    category.isUnlisted ? "danger" : "success"
-                  }" style="padding: 8px">${status}</span>
-                </td>
-                <td class="text-end">
-                  <ul style="display: flex; justify-content: space-evenly">
-                    <li>
-                      <form>
-                        <input type="hidden" name="id" value="${
-                          category._id
-                        }" />
-                        <button type="submit" class="btn border border-secondary edit-button" style="width: 80px; font-size: small">
-                          <i class="material-icons md-edit"></i>
-                          Edit
-                        </button>
-                      </form>
-                    </li>
-                    <li>
-                      ${
-                        category.isUnlisted
-                          ? `<form>
-                              <input type="hidden" name="id" value="${category._id}" />
-                              <button type="submit" class="btn btn-success list-button" style="width: 80px; font-size: small">
-                                <i class="material-icons md-playlist_add"></i>
-                                List
-                              </button>
-                            </form>`
-                          : `<form>
-                              <input type="hidden" name="id" value="${category._id}" />
-                              <button type="submit" class="btn btn-danger unlist-button" style="width: 80px; font-size: smaller">
-                                <i class="material-icons md-playlist_add_check"></i>
-                                Unlist
-                              </button>
-                            </form>`
-                      }
-                    </li>
-                    <li>
-                      <form>
-                        <input type="hidden" name="id" value="${
-                          category._id
-                        }" />
-                        <button type="submit" class="btn delete-button" style="color: white; background-color: black">
-                          <i class="material-icons md-delete-forever"></i>
-                          Delete
-                        </button>
-                      </form>
-                    </li>
-                  </ul>
-                </td>
-              </tr>
-            `;
-            categoryTableBody.insertAdjacentHTML("beforeend", row);
-          });
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching categories:", error);
-      });
-  });
-</script> -->
 
 <!-- Create category from validation -->
 <script>

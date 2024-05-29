@@ -5,7 +5,6 @@ const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
 const Category = require("../models/categoryModel");
-const Wishlist = require("../models/wishlistModel");
 
 // Render Cart.
 const loadCart = async (req, res) => {

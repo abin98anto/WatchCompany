@@ -19,7 +19,11 @@
 <aside class="navbar-aside" id="offcanvas_aside">
   <div class="aside-top">
     <a href="index.html" class="brand-wrap">
-      <img src="/admin_assets/imgs/theme/watchcompany_logo.webp" class="logo" alt="Watch Company Dashboard" />
+      <img
+        src="/admin_assets/imgs/theme/watchcompany_logo.webp"
+        class="logo"
+        alt="Watch Company Dashboard"
+      />
     </a>
     <div>
       <button class="btn btn-icon btn-aside-minimize">
@@ -57,6 +61,18 @@
         <a class="menu-link" href="/admin/order_management">
           <i class="icon material-icons md-shopping_cart"></i>
           <span class="text">Order Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/coupon_management">
+          <img src="/fimg/voucher.png">
+          <span class="text ml-10">Coupon Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/sales_report">
+          <img src="/fimg/salesreport.png">
+          <span class="text ml-10">Sales Report</span>
         </a>
       </li>
     </ul>
@@ -110,6 +126,19 @@
                     <label class="form-label"> Price</label>
                     <div class="row gx-2">
                       <input type="text" class="form-control" name="price" value="<%= product.price %>" required />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4">
+                  <div class="mb-4">
+                    <label class="form-label">Offer Price</label>
+                    <div class="row gx-2">
+                      <input
+                        value="<%= product.offerPrice %>"
+                        type="text"
+                        class="form-control"
+                        name="offerPrice"
+                      />
                     </div>
                   </div>
                 </div>
@@ -259,6 +288,7 @@
     const productName = document.getElementById("product_name").value.trim();
     const description = document.getElementById("descriptionid").value.trim();
     const price = document.querySelector('input[name="price"]').value.trim();
+    const offerPrice = document.querySelector('input[name="offerPrice"]').value.trim();
     const stock = document.querySelector('input[name="stock"]').value.trim();
     const mediaFiles = document.getElementById("uploads").files;
 
@@ -276,6 +306,16 @@
         icon: 'error',
         title: 'Invalid input',
         text: 'Price and stock must be non-negative numbers!',
+      });
+      return;
+    }
+
+    // Validate offer price
+    if (offerPrice && (!isNaN(offerPrice) && parseFloat(offerPrice) > parseFloat(price))) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Offer Price",
+        text: "The Offer price cannot be more than the original price!",
       });
       return;
     }

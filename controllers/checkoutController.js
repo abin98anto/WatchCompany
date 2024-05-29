@@ -14,7 +14,8 @@ const loadCheckout = async (req, res) => {
     const cart = await Cart.findOne({ userID: req.session.userData }).populate(
       "products.productID"
     );
-    const coupons = await Coupon.find({ isUnlisted: false });
+    let coupons = await Coupon.find({ isUnlisted: false });
+    coupons = coupons.filter((coupon) => !coupon.usedList.includes(id));
     res.render("checkout", {
       categories: Categories,
       google,
@@ -24,7 +25,7 @@ const loadCheckout = async (req, res) => {
       RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
-    console.log(`error loading the checkout page.`);
+    console.log(`error loading the checkout page: ${error}`);
   }
 };
 

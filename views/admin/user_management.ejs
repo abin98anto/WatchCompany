@@ -1,8 +1,5 @@
 <%- include('../partials/admin/admin_header.ejs') %>
 
-<!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-
 <!-- Sidebar -->
 <aside class="navbar-aside" id="offcanvas_aside">
   <div class="aside-top">
@@ -55,6 +52,12 @@
         <a class="menu-link" href="/admin/coupon_management">
           <img src="/fimg/voucher.png">
           <span class="text ml-10">Coupon Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/sales_report">
+          <img src="/fimg/salesreport.png">
+          <span class="text ml-10">Sales Report</span>
         </a>
       </li>
     </ul>
@@ -164,10 +167,13 @@
   ></div>
 </main>
 
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const currentPage = 1; // Set the initial page
-    const limit = 10; // Number of users per page
+    const currentPage = 1;
+    const limit = 10;
 
     const fetchUsers = async (page) => {
       try {
@@ -176,7 +182,6 @@
           throw new Error("Failed to fetch users");
         }
         const { users, totalPages } = await response.json();
-        // Handle the users and pagination data
         renderUsers(users);
         renderPagination(totalPages, page);
       } catch (error) {
@@ -189,7 +194,6 @@
       }
     };
 
-    // Call fetchUsers with the initial page
     fetchUsers(currentPage);
 
     const searchInput = document.getElementById("searchInput");
@@ -299,7 +303,7 @@
     userTableBody.addEventListener("click", (event) => {
       if (event.target.classList.contains("toggle-button")) {
         const userId = event.target.dataset.id;
-        const action = event.target.textContent.toLowerCase().trim(); // Get button text
+        const action = event.target.textContent.toLowerCase().trim();
         toggleStatus(userId, action);
       }
     });

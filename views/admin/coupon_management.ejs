@@ -50,8 +50,14 @@
       </li>
       <li class="menu-item active">
         <a class="menu-link" href="/admin/coupon_management">
-          <img src="/fimg/voucher.png" />
+          <img src="/fimg/voucher.png">
           <span class="text ml-10">Coupon Management</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="/admin/sales_report">
+          <img src="/fimg/salesreport.png">
+          <span class="text ml-10">Sales Report</span>
         </a>
       </li>
     </ul>
@@ -203,95 +209,9 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-<!-- <script>
-  document.querySelector('.btn[style*="background-color: black"]').addEventListener('click', function() {
-    const today = new Date().toISOString().split('T')[0];
-
-    Swal.fire({
-        title: "Add Coupon",
-        width: "800px",
-        html: `
-        <input id="couponCode" class="swal2-input" placeholder="Coupon Code" style="width: 80%;">
-        <label for="startDate" style="display: block; margin-top: 10px;">Start Date</label>
-        <input id="startDate" type="date" class="swal2-input" style="width: 80%;" min="${today}">
-        <label for="endDate" style="display: block; margin-top: 10px;">End Date</label>
-        <input id="endDate" type="date" class="swal2-input" style="width: 80%;" placeholder="End Date">
-        <input id="minPurchase" type="number" class="swal2-input" placeholder="Minimum Purchase" style="width: 80%;">
-        <input id="discountPercentage" type="number" class="swal2-input" placeholder="Discount Percentage" style="width: 80%;">
-        <input id="maxDiscount" type="number" class="swal2-input" placeholder="Max Discount" style="width: 80%;">
-      `,
-      focusConfirm: false,
-      confirmButtonText: "Create Coupon",
-      showCancelButton: true,
-      preConfirm: () => {
-        const couponCode = document.getElementById('couponCode').value;
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        const minPurchase = parseFloat(document.getElementById('minPurchase').value);
-        const discountPercentage = parseFloat(document.getElementById('discountPercentage').value);
-        const maxDiscount = parseFloat(document.getElementById('maxDiscount').value);
-
-        if (!couponCode || !startDate || !endDate || !minPurchase || !discountPercentage || !maxDiscount) {
-          Swal.showValidationMessage('Please fill all fields');
-          return;
-        }
-
-        if (new Date(startDate) >= new Date(endDate)) {
-          Swal.showValidationMessage('Start date should be less than end date');
-          return;
-        }
-
-        if (discountPercentage <= 0 || discountPercentage >= 99) {
-          Swal.showValidationMessage('Discount percentage should be a positive number and less than 99');
-          return;
-        }
-
-        if (minPurchase <= 0 || maxDiscount <= 0) {
-          Swal.showValidationMessage('Minimum purchase and maximum discount should be positive numbers');
-          return;
-        }
-
-        if (minPurchase >= maxDiscount) {
-          Swal.showValidationMessage('Minimum purchase should be less than maximum discount');
-          return;
-        }
-
-        return {
-          couponCode: couponCode,
-          startDate: startDate,
-          endDate: endDate,
-          minPurchase: minPurchase,
-          discountPercentage: discountPercentage,
-          maxDiscount: maxDiscount,
-        };
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const couponData = result.value;
-        fetch('/admin/add_coupon', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(couponData)
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire('Success', 'Coupon added successfully', 'success');
-          } else {
-            Swal.fire('Error', 'Failed to add coupon', 'error');
-          }
-        })
-        .catch(error => {
-          Swal.fire('Error', 'An error occurred', 'error');
-        });
-      }
-    });
-  });
-</script> -->
 
 <script>
+  // Create coupon functionality.
   document.querySelector('.btn[style*="background-color: black"]').addEventListener('click', function() {
     const today = new Date().toISOString().split('T')[0];
 
@@ -398,6 +318,233 @@
       }
     });
   });
+
+  // Unlist/list Coupons
+  document.querySelectorAll('.unlist-button').forEach(button => {
+    button.addEventListener('click', function() {
+      const couponId = this.previousElementSibling.value;
+      Swal.fire({
+        title: 'Are you sure you want to unlist this coupon?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, unlist it!',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/admin/update_coupon_status?couponId=${couponId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ isUnlisted: true })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Unlisted!', 'The coupon has been unlisted.', 'success').then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire('Error', 'Failed to unlist the coupon', 'error');
+            }
+          })
+          .catch(error => {
+            Swal.fire('Error', 'An error occurred', 'error');
+          });
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll('.list-button').forEach(button => {
+    button.addEventListener('click', function() {
+      const couponId = this.previousElementSibling.value;
+      Swal.fire({
+        title: 'Are you sure you want to list this coupon?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, list it!',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/admin/update_coupon_status?couponId=${couponId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ isUnlisted: false })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Listed!', 'The coupon has been listed.', 'success').then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire('Error', 'Failed to list the coupon', 'error');
+            }
+          })
+          .catch(error => {
+            Swal.fire('Error', 'An error occurred', 'error');
+          });
+        }
+      });
+    });
+  });
+
+  // Function to handle coupon deletion
+  function deleteCoupon(couponId) {
+    Swal.fire({
+      title: 'Are you sure you want to delete this coupon?',
+      text: 'This action cannot be undone!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/admin/delete_coupon?couponId=${couponId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire('Deleted!', 'The coupon has been deleted.', 'success').then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire('Error', 'Failed to delete the coupon', 'error');
+          }
+        })
+        .catch(error => {
+          Swal.fire('Error', 'An error occurred', 'error');
+        });
+      }
+    });
+  }
+
+  // Add event listeners to delete buttons
+  document.querySelectorAll('.delete-button').forEach(button => {
+    button.addEventListener('click', function(event) {
+      event.preventDefault();
+      const couponId = this.previousElementSibling.value;
+      deleteCoupon(couponId);
+    });
+  });
+
+  // Edit coupon
+  document.querySelectorAll('.edit-button').forEach(button => {
+  button.addEventListener('click', function() {
+    const couponId = this.previousElementSibling.value;
+
+    fetch(`/getCoupons?couponId=${couponId}`,{
+      method: "GET"
+    })
+      .then(response => response.json())
+      .then(coupon => {
+        console.log('coupon',coupon.couponCode);
+        const today = new Date().toISOString().split('T')[0];
+
+        Swal.fire({
+          title: "Edit Coupon",
+          width: "800px",
+          html: `
+            <input id="couponCode" class="swal2-input" placeholder="Coupon Code" style="width: 80%;" value="${coupon.couponCode}">
+            <label for="startDate" style="display: block; margin-top: 10px;">Start Date</label>
+            <input id="startDate" type="date" class="swal2-input" style="width: 80%;" min="${today}" value="${new Date(coupon.startDate).toISOString().split('T')[0]}">
+            <label for="endDate" style="display: block; margin-top: 10px;">End Date</label>
+            <input id="endDate" type="date" class="swal2-input" style="width: 80%;" value="${new Date(coupon.endDate).toISOString().split('T')[0]}">
+            <input id="minPurchase" type="number" class="swal2-input" placeholder="Minimum Purchase" style="width: 80%;" value="${coupon.minPurchase}">
+            <input id="discountPercentage" type="number" class="swal2-input" placeholder="Discount Percentage" style="width: 80%;" value="${coupon.discountPercentage}">
+            <input id="maxDiscount" type="number" class="swal2-input" placeholder="Max Discount" style="width: 80%;" value="${coupon.maxDiscount}">
+          `,
+          focusConfirm: false,
+          showCancelButton: true,
+          preConfirm: async () => {
+            const couponCode = document.getElementById('couponCode').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const minPurchase = parseFloat(document.getElementById('minPurchase').value);
+            const discountPercentage = parseFloat(document.getElementById('discountPercentage').value);
+            const maxDiscount = parseFloat(document.getElementById('maxDiscount').value);
+
+            if (!couponCode || !startDate || !endDate || !minPurchase || !discountPercentage || !maxDiscount) {
+              Swal.showValidationMessage('Please fill all fields');
+              return;
+            }
+
+            if (new Date(startDate) >= new Date(endDate)) {
+              Swal.showValidationMessage('Start date should be less than end date');
+              return;
+            }
+
+            if (discountPercentage <= 0 || discountPercentage >= 99) {
+              Swal.showValidationMessage('Discount percentage should be a positive number and less than 99');
+              return;
+            }
+
+            if (minPurchase <= 0 || maxDiscount <= 0) {
+              Swal.showValidationMessage('Minimum purchase and maximum discount should be positive numbers');
+              return;
+            }
+
+            if (minPurchase >= maxDiscount) {
+              Swal.showValidationMessage('Minimum purchase should be less than maximum discount');
+              return;
+            }
+
+            return {
+              couponId: couponId,
+              couponCode: couponCode,
+              startDate: startDate,
+              endDate: endDate,
+              minPurchase: minPurchase,
+              discountPercentage: discountPercentage,
+              maxDiscount: maxDiscount
+            };
+          }
+        }).then((result) => {
+          if (result.isConfirmed) {
+            const couponData = result.value;
+            fetch('/admin/update_coupon', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(couponData)
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Coupon Updated!',
+                  showConfirmButton: true,
+                }).then(() => {
+                  window.location.href = '/admin/coupon_management';
+                });
+              } else {
+                Swal.fire('Error', 'Failed to update coupon', 'error');
+              }
+            })
+            .catch(error => {
+              Swal.fire('Error', 'An error occurred', 'error');
+            });
+          }
+        });
+      })
+      .catch(error => {
+        console.log(`the error: ${error}`);
+        Swal.fire('Error', 'Failed to fetch coupon details', 'error');
+      });
+  });
+});
+
 </script>
 
 
