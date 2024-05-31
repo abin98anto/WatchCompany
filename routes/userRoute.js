@@ -84,6 +84,9 @@ user_route.get(
 );
 user_route.put("/returnOrder", orderController.returnOrder);
 user_route.post("/razorPayAddOrder", orderController.razorpayAddOrder);
+user_route.post('/retryPayment', orderController.retryPayment);
+user_route.post('/updatePaymentStatus', orderController.updatePayment);
+user_route.get('/download-invoice', orderController.downloadInvoice);
 
 // My Wallet functionalities.
 user_route.get("/my_wallet", userAuth.isLogin, walletController.loadMyWallet);

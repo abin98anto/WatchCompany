@@ -144,6 +144,12 @@ include('../partials/page_header.ejs') %>
     </div>
   </section>
 
+  <% if (orders[0].orderStatus == 'Delivered' || orders[0].orderStatus == 'pending' && orders[0].paymentStatus == 'Success') { %>
+    <section class="d-flex justify-content-center">
+      <button class="btn" style="width: 200px;" data-order-id="<%= orders[0]._id %>">Download Invoice</button>
+    </section>
+  <% } %>
+
   <!-- Totals Section -->
   <section>
     <div class="container">

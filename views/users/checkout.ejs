@@ -342,7 +342,7 @@ include('../partials/page_header.ejs') %>
             <div class="mb-25">
               <h5>Payment</h5>
             </div>
-            <div class="form-check">
+            <div class="form-check" id="radio-cod">
               <input class="form-check-input" type="radio" name="paymentMethod" id="cod" >
               <label class="form-check-label" for="cod">
                 Cash on Delivery
@@ -1073,6 +1073,23 @@ include('../partials/page_header.ejs') %>
       });
     })
   }
+
+  // $1000 Check.
+  function checkGrandTotalAndDisableCOD() {
+    var grandTotalElement = document.getElementById('grand-total');
+    var codElement = document.getElementById('cod');
+    var grandTotal = parseFloat(grandTotalElement.innerText.replace('$', ''));
+    
+    if (grandTotal > 1000) {
+      codElement.disabled = true;
+      codElement.checked = false;
+    } else {
+      codElement.disabled = false;
+    }
+  }
+  window.onload = checkGrandTotalAndDisableCOD;
+
+  
 
 </script>
 

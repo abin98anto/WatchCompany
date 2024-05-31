@@ -150,6 +150,18 @@ include('../partials/page_header.ejs') %>
     </div>
   </section>
 
+  <% if (orders[0].orderStatus == 'Delivered' || orders[0].orderStatus == 'pending' && orders[0].paymentStatus == 'Success') { %>
+  <section class="d-flex justify-content-center">
+    <button onclick="downloadInvoice('<%= orders[0]._id %>')" class="btn" id="download-invoice" style="width: 200px;" data-order-id="<%= orders[0]._id %>">Download Invoice</button>
+  </section>
+<% } %>
+
+   <% if (orders[0].paymentStatus === 'Failed' && orders[0].paymentMethod === 'razorpay') { %>
+    <section class="d-flex justify-content-center">
+      <button id="retry" class="btn" style="width: 200px;">Retry Payment</button>
+    </section>
+   <% } %>
+
   <!-- Totals Section -->
   <section>
     <div class="container">
@@ -245,17 +257,13 @@ include('../partials/page_header.ejs') %>
                 </div>
                 </div>
               </div>
-              <!-- Checkout Button -->
-              <!-- <a class="btn">
-                Cancel Order
-              </a> -->
               <div class="d-flex justify-content-center p-10">
                     <% if (order.orderStatus === "delivered") { %>
                       <button onclick="returnOrder('<%= order._id %>')" class="btn btn-warning">Return</button>
                       <% } else { %>
                         <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">Cancel</button>
                     <% } %>
-                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -263,9 +271,10 @@ include('../partials/page_header.ejs') %>
     </div>
   </section>
 </main>
-
+<input type="hidden" id="my-order" data-order='<%= JSON.stringify(orders[0]) %>'>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
 
@@ -403,8 +412,125 @@ const returnProduct = async (orderId, productId) => {
   }
 }
 
+// Retry Payment.
+document.getElementById('retry').addEventListener('click', async function(event) {
+  const order = JSON.parse(document.getElementById('my-order').getAttribute('data-order'));
+
+  try {
+    const response = await fetch('/retryPayment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ order })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      const options = {
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'Watch Company',
+        description: data.description,
+        image: '/user_assets/imgs/theme/watchcompany_logo.svg',
+        order_id: data.order_id,
+        handler: async function (response) {
+          await updatePaymentStatus(order._id, 'Success');
+        },
+        prefill: {
+          contact: data.contact,
+          name: data.name,
+          email: data.email
+        },
+        notes: {
+          description: data.description
+        },
+        theme: {
+          color: '#000000'
+        }
+      };
+
+      const razorpayObject = new Razorpay(options);
+      razorpayObject.open();
+      razorpayObject.on('payment.failed', async function (response) {
+        console.error('Payment failed:', response.error);
+        Swal.fire('Payment Failed', 'Payment failed. Please try again.', 'error');
+        await updatePaymentStatus(order._id, 'Failed');
+      });
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Order Placement Failed',
+        text: data.message
+      });
+    }
+  } catch (error) {
+    console.error('Error placing order:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to place order'
+    });
+  }
+});
+
+async function updatePaymentStatus(orderId, status) {
+  try {
+    const response = await fetch('/updatePaymentStatus', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ orderId, status })
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      Swal.fire('Order Placed', 'Payment status updated successfully', 'success').then(() => {
+        window.location.reload();
+      });
+    } else {
+      Swal.fire('Error', data.message || 'Failed to update payment status', 'error');
+    }
+  } catch (error) {
+    console.error('Error updating payment status:', error);
+    Swal.fire('Error', 'Failed to update payment status', 'error');
+  }
+}
+
+async function downloadInvoice(orderId) {
+  try {
+    const response = await fetch(`/download-invoice?orderId=${orderId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/pdf'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = `invoice-${orderId}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          URL.revokeObjectURL(blobUrl);
+          console.log('PDF downloaded successfully');
+  } catch (error) {
+    console.log('error downloading invoice : ',error);
+  }
+}
+
 
 </script>
-
 <%- include('../partials/page_footer.ejs') %> <%-
 include('../partials/footer.ejs')%>

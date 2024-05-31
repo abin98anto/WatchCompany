@@ -7,6 +7,13 @@ const Wallet = require("../models/walletModel");
 const Coupon = require("../models/couponModel");
 require("dotenv").config();
 const crypto = require("crypto");
+// const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
+const sharp = require("sharp");
+const { PDFDocument, rgb } = require("pdf-lib");
+const puppeteer = require("puppeteer");
+const ejs = require("ejs");
 
 const Razorpay = require("razorpay");
 const { RAZORPAY_KEY_ID, RAZORPAY_SECRET_KEY } = process.env;
@@ -17,8 +24,9 @@ const razorpayInstance = new Razorpay({
 
 // Add order.
 const addOrder = async (req, res) => {
+  // console.log("req.body : ", req.body);
   try {
-    const {
+    let {
       user,
       orderId,
       products,
@@ -33,6 +41,15 @@ const addOrder = async (req, res) => {
       showDate,
       coupon,
     } = req.body;
+
+    let noDiscountAmount = 0;
+    products.forEach((product) => {
+      noDiscountAmount += product.price * product.quantity;
+    });
+    let discountAmount = noDiscountAmount - billTotal;;
+    discount === null
+      ? (discount += discountAmount)
+      : (discount = discountAmount);
 
     const newOrder = new Order({
       user,
@@ -209,6 +226,15 @@ const razorpayAddOrder = async (req, res) => {
       createdOn: Date.now(),
       showDate: formattedDate,
     });
+
+    let noDiscountAmount = 0;
+    newOrder.products.forEach((product) => {
+      noDiscountAmount += product.price * product.quantity;
+    });
+    let discountAmount = noDiscountAmount - newOrder.billTotal;
+    newOrder.discount === null
+      ? (newOrder.discount += discountAmount)
+      : (newOrder.discount = discountAmount);
 
     await newOrder.save();
     await Cart.findOneAndDelete({ userID: id });
@@ -627,6 +653,200 @@ const getWalletBalance = async (req, res) => {
   }
 };
 
+// Retry Payment.
+const retryPayment = async (req, res) => {
+  const { order } = req.body;
+
+  try {
+    const payment_capture = 1;
+    const amount = order.billTotal * 100;
+
+    const options = {
+      amount: amount,
+      currency: "INR",
+      receipt: order.orderId,
+      payment_capture,
+    };
+
+    const response = await razorpayInstance.orders.create(options);
+
+    res.json({
+      success: true,
+      order_id: response.id,
+      amount: response.amount,
+      currency: response.currency,
+      key_id: razorpayInstance.key_id,
+      description: "Payment for order " + order.orderId,
+      contact: 8848746391,
+      name: order.name,
+      email: order.email,
+    });
+  } catch (error) {
+    console.error("Error creating Razorpay order:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to create Razorpay order" });
+  }
+};
+
+const updatePayment = async (req, res) => {
+  console.log("updating payment status");
+  const { orderId, status } = req.body;
+  console.log("req.body", req.body);
+
+  try {
+    await Order.findByIdAndUpdate(orderId, { paymentStatus: status });
+    status != "Failed"
+      ? res.json({ success: true })
+      : res.json({ success: false });
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update payment status" });
+  }
+};
+
+// Download Invoice
+// const downloadInvoice = async (req, res) => {
+//   console.log('downloading invoice...');
+//   const {orderId} = req.query;
+
+//   // Fetch order data from the database using orderId
+//   const orderData = await getOrderData(orderId); // Implement this function to fetch order data
+
+//   // Load the template PDF
+//   const templatePath = path.resolve(__dirname, 'path_to_template.pdf');
+//   const templateBytes = fs.readFileSync(templatePath);
+//   const pdfDoc = await PDFDocument.load(templateBytes);
+
+//   const pages = pdfDoc.getPages();
+//   const firstPage = pages[0];
+
+//   // Add order data to the PDF
+//   firstPage.drawText(orderData.name, { x: 100, y: 700, size: 12 });
+//   firstPage.drawText(orderData.address, { x: 100, y: 680, size: 12 });
+//   // Add other order data...
+
+//   const pdfBytes = await pdfDoc.save();
+
+//   res.setHeader('Content-Disposition', `attachment; filename=invoice-${orderId}.pdf`);
+//   res.setHeader('Content-Type', 'application/pdf');
+//   res.send(pdfBytes);
+// };
+
+// const downloadInvoice = async (req, res) => {
+//   try {
+//     const orderId = req.params.orderId;
+
+//     // Create a new PDF document
+//     const pdfDoc = await PDFDocument.create();
+//     const page = pdfDoc.addPage([600, 400]);
+
+//     // Add content to the PDF
+//     page.drawText(`Invoice for Order ID: ${orderId}`, {
+//       x: 50,
+//       y: 350,
+//       size: 20,
+//       color: rgb(0, 0, 0),
+//     });
+
+//     // Add more content as needed
+//     // e.g., order details, customer info, etc.
+
+//     // Serialize the PDFDocument to bytes (a Uint8Array)
+//     const pdfBytes = await pdfDoc.save();
+
+//     // Set the response headers for downloading the PDF
+//     res.setHeader("Content-Type", "application/pdf");
+//     res.setHeader(
+//       "Content-Disposition",
+//       `attachment; filename=invoice-${orderId}.pdf`
+//     );
+
+//     // Send the PDF file as a response
+//     res.send(Buffer.from(pdfBytes));
+//   } catch (error) {
+//     console.error("Error downloading invoice:", error);
+//     res.status(500).send("Failed to download invoice");
+//   }
+// };
+
+const downloadInvoice = async (req, res) => {
+  try {
+    const { orderId } = req.query;
+    // console.log();
+    // Fetch the order details
+    const order = await Order.findById(orderId).populate("products.productId");
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Path to EJS template
+    const templatePath = path.join(__dirname, "../views/users/invoice.ejs");
+
+    // Render the EJS template with order details
+    const html = await ejs.renderFile(templatePath, { order });
+
+    // Launch puppeteer and generate PDF
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(html);
+    const pdfBuffer = await page.pdf({ format: "A4" });
+    await browser.close();
+
+    // Send the PDF buffer as a response
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=invoice-${orderId}.pdf`
+    );
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error("Error generating the invoice:", error);
+    res.status(500).json({ error: "Failed to download the invoice" });
+  }
+};
+
+const getOrderData = async (orderId) => {
+  try {
+    const order = await Order.findOne({ orderId }).populate("user").exec();
+    if (!order) {
+      return null;
+    }
+
+    // Extract relevant order data
+    const orderData = {
+      user: {
+        name: order.user.name, // Assuming the User model has a 'name' field
+        email: order.user.email, // Assuming the User model has an 'email' field
+      },
+      orderId: order.orderId,
+      products: order.products.map((product) => ({
+        name: product.productName,
+        price: product.price,
+        quantity: product.quantity,
+        subtotal: product.subtotal,
+      })),
+      orderStatus: order.orderStatus,
+      billTotal: order.billTotal,
+      discount: order.discount,
+      subTotal: order.subTotal,
+      address: `${order.address.street}, ${order.address.city}, ${order.address.state}, ${order.address.zip}`, // Adjust according to the actual address object structure
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      createdOn: order.createdOn,
+      showDate: order.showDate,
+    };
+
+    return orderData;
+  } catch (error) {
+    console.error("Error fetching order data:", error);
+    return null;
+  }
+};
+
 module.exports = {
   addOrder,
   loadOrderManagement,
@@ -640,4 +860,7 @@ module.exports = {
   changeStatus,
   getWalletBalance,
   razorpayAddOrder,
+  retryPayment,
+  updatePayment,
+  downloadInvoice,
 };

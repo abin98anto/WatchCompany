@@ -355,9 +355,9 @@ include('../partials/page_header.ejs') %>
   }
 
   document.addEventListener('DOMContentLoaded', fetchAndDisplayProducts);
-</script> -->
+</script>  -->
 
-<script>
+<!-- <script>
   let currentSearchQuery = '';
   let currentCategory = '';
   let currentSort = '';
@@ -426,8 +426,119 @@ include('../partials/page_header.ejs') %>
     // Fetch and display products initially
     fetchAndDisplayProducts();
   });
-</script>
+</script> -->
 
+<script>
+  async function addToCart(productId) {
+    try {
+      const response = await fetch("/check_product_in_cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: productId,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to check product in cart");
+      }
+      const data = await response.json();
+      if (data.exists) {
+        Swal.fire({
+          title: "Product Already in Cart",
+          text: "This product is already in your cart.",
+          icon: "warning",
+          confirmButtonText: "Go to Cart",
+          showCancelButton: true,
+        }).then((value) => {
+          if (value.isConfirmed) {
+            window.location.href = "/cart";
+          }
+        });
+      } else {
+        const addToCartResponse = await fetch("/add_to_cart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productId: productId,
+          }),
+        });
+        if (!addToCartResponse.ok) {
+          throw new Error("Failed to add product to cart");
+        }
+        const cartData = await addToCartResponse.json();
+        console.log("Product added to cart successfully:", cartData);
+        window.location.href = "/cart";
+      }
+    } catch (error) {
+      console.error("Error adding product to cart:", error.message);
+      Swal.fire(
+        "Error",
+        "Failed to add product to cart. Please try again later.",
+        "error"
+      );
+    }
+  }
+
+  async function addToWishlist(productId) {
+  console.log(`product id : ${productId}`);
+  try {
+    const response = await fetch('/wishlist_check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        productId: productId
+      })
+    });
+    console.log('response : ',response);
+    if (!response.ok) {
+      throw new Error('Failed to check product in wishlist.');
+    }
+    const data = await response.json();
+    if (data.exists) {
+      Swal.fire({
+        title: 'Product Already in Wishlist',
+        text: 'This product is already in your wishlist.',
+        icon: 'warning',
+        confirmButtonText: 'View Wishlist',
+        showCancelButton: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/wishlist';
+        }
+      });
+    } else {
+      const addToWishlistResponse = await fetch('/add_to_wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: productId
+        })
+      });
+      if (!addToWishlistResponse.ok) {
+        throw new Error('Failed to add product to wishlist.');
+      }
+      const wishlistData = await addToWishlistResponse.json();
+      console.log('Product added to wishlist successfully:', wishlistData);
+      window.location.href = '/wishlist';
+    }
+  } catch (error) {
+    console.error('Error adding product to wishlist:', error);
+    Swal.fire('Error', 'Failed to add product to wishlist. Please try again later.', 'error');
+  }
+}
+
+function goHome(){
+  location.href = '/login';
+}
+</script>
 
 <%- include('../partials/page_footer.ejs') %> <%-
 include('../partials/footer.ejs')%>
