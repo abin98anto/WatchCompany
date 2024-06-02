@@ -46,7 +46,7 @@ const addOrder = async (req, res) => {
     products.forEach((product) => {
       noDiscountAmount += product.price * product.quantity;
     });
-    let discountAmount = noDiscountAmount - billTotal;;
+    let discountAmount = noDiscountAmount - billTotal;
     discount === null
       ? (discount += discountAmount)
       : (discount = discountAmount);
@@ -263,7 +263,8 @@ const loadOrderManagement = async (req, res) => {
     const orders = await Order.find()
       .populate("user")
       .skip(skipIndex)
-      .limit(limit);
+      .limit(limit)
+      .sort({ createdOn: -1 });
 
     res.render("order_management", {
       orders,
