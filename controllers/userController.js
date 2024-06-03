@@ -404,7 +404,7 @@ const loadProduct = async (req, res) => {
 // const loadShop = async (req, res) => {
 //   try {
 //     const page = parseInt(req.query.page) || 1;
-//     const pageSize = 10;
+//     const pageSize = 6;
 
 //     const Products = await Product.find({
 //       isUnlisted: false,
@@ -414,15 +414,14 @@ const loadProduct = async (req, res) => {
 //       .limit(pageSize)
 //       .sort({ createdOn: -1 });
 
-//     const totalProducts = await Product.countDocuments({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//     });
+//     const totalProducts = await Product.countDocuments();
 //     const totalPages = Math.ceil(totalProducts / pageSize);
 
 //     const user = await User.findById(req.session.userData);
+//     let products;
 //     const categories = await Category.find({ isUnlisted: false });
-//     let google = req.user ? true : false;
+//     let google;
+//     req.user ? (google = true) : (google = false);
 
 //     res.render("shopping_page", {
 //       products: Products,
@@ -435,11 +434,10 @@ const loadProduct = async (req, res) => {
 //       hasNextPage: page < totalPages,
 //     });
 //   } catch (error) {
-//     console.log(`error rendering shop page: ${error.message}`);
+//     console.log(`error rendering shop page.`);
 //   }
 // };
 
-// load shop.
 const loadShop = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -462,20 +460,13 @@ const loadShop = async (req, res) => {
     let google;
     req.user ? (google = true) : (google = false);
 
-    // const query = { isUnlisted: false, stock: { $gt: 0 } };
-    // if (req.query.category) {
-    //   products = await Product.find({ ...query, category: req.query.category });
-    // } else {
-    //   products = await Product.find(query);
-    // }
-
     res.render("shopping_page", {
       products: Products,
       categories: categories,
       user: user,
       google,
       currentPage: page,
-      totalPages,
+      totalPages: totalPages, // Pass totalPages here
       hasPreviousPage: page > 1,
       hasNextPage: page < totalPages,
     });
@@ -484,48 +475,23 @@ const loadShop = async (req, res) => {
   }
 };
 
-// Search & Filter with Pagination
-// const searchFilter = async (req, res) => {
-//   const query = req.query.query || "";
-//   const category = req.query.category || "";
-//   const page = parseInt(req.query.page) || 1;
-//   const limit = 6; // Items per page
-
-//   let filter = {};
-
-//   if (query) {
-//     filter.name = { $regex: query, $options: "i" };
-//   }
-
-//   if (category) {
-//     filter.category = category;
-//   }
-
-//   const skip = (page - 1) * limit;
-
-//   const totalProducts = await Product.countDocuments(filter);
-//   const products = await Product.find(filter).skip(skip).limit(limit);
-
-//   res.json({
-//     products,
-//     totalPages: Math.ceil(totalProducts / limit),
-//     currentPage: page,
-//   });
-// };
 
 const searchFilter = async (req, res) => {
   const query = req.query.query || "";
   const category = req.query.category || "";
   const sort = req.query.sort || "";
   const page = parseInt(req.query.page) || 1;
-  const limit = 10;
+  const limit = 6;
 
   let filter = { isUnlisted: false, stock: { $gt: 0 } };
 
   if (query) {
-    filter = [{ name: { $regex: query, $options: "i" } }];
+    filter.$or = [
+      { name: { $regex: query, $options: "i" } },
+      { category: { $regex: query, $options: "i" } },
+    ];
   }
-  console.log("req query ", req.query);
+
   if (category && category !== "Show all") {
     filter.category = category;
   }
@@ -543,16 +509,12 @@ const searchFilter = async (req, res) => {
     sortOption = { name: -1 };
   }
 
-  // console.log("Applied Filter:", filter);
-
   try {
     const totalProducts = await Product.countDocuments(filter);
     const products = await Product.find(filter)
       .sort(sortOption)
       .skip(skip)
       .limit(limit);
-
-    // console.log("Fetched Products:", products); // Debugging log
 
     res.json({
       products,
@@ -950,10 +912,10 @@ const loadWishlist = async (req, res) => {
           return prod;
         })
       );
+      wishProducts = wishProducts.reverse();
     } else {
       wishProducts = [];
     }
-    console.log("wish products : ", wishProducts);
 
     res.render("wishlist", {
       categories,

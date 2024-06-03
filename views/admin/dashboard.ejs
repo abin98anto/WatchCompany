@@ -11,7 +11,7 @@
 <!-- Sidebar -->
 <aside class="navbar-aside" id="offcanvas_aside">
   <div class="aside-top">
-    <a href="index.html" class="brand-wrap">
+    <a href="/admin/" class="brand-wrap">
       <img
         src="/admin_assets/imgs/theme/watchcompany_logo.webp"
         class="logo"
@@ -44,7 +44,7 @@
           <span class="text">User Management</span>
         </a>
       </li>
-      <li class="menu-item ">
+      <li class="menu-item">
         <a class="menu-link" href="/admin/category_management">
           <i class="icon material-icons md-stars"></i>
           <span class="text">Category Management</span>
@@ -58,13 +58,13 @@
       </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/coupon_management">
-          <img src="/fimg/voucher.png">
+          <img src="/fimg/voucher.png" />
           <span class="text ml-10">Coupon Management</span>
         </a>
       </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/sales_report">
-          <img src="/fimg/salesreport.png">
+          <img src="/fimg/salesreport.png" />
           <span class="text ml-10">Sales Report</span>
         </a>
       </li>
@@ -164,16 +164,27 @@
           <article class="card-body">
             <h5 class="card-title">Sale statistics</h5>
             <div>
-              <button id="showDailyChart" class="btn btn-primary chart-btn">Daily</button>
-              <button id="showWeeklyChart" class="btn btn-primary chart-btn">Weekly</button>
-              <button id="showMonthlyChart" class="btn btn-primary chart-btn">Monthly</button>
-              <button id="showYearlyChart" class="btn btn-primary chart-btn">Yearly</button>
+              <button id="showDailyChart" class="btn btn-primary chart-btn">
+                Daily
+              </button>
+              <button id="showWeeklyChart" class="btn btn-primary chart-btn">
+                Weekly
+              </button>
+              <button id="showMonthlyChart" class="btn btn-primary chart-btn">
+                Monthly
+              </button>
+              <button id="showYearlyChart" class="btn btn-primary chart-btn">
+                Yearly
+              </button>
             </div>
-            <div class="chart-container" style="position: relative; height: 50vh; width: 75vw;">
-              <canvas id="dailySalesChart" style="display:none;"></canvas>
-              <canvas id="weeklySalesChart" style="display:none;"></canvas>
-              <canvas id="monthlySalesChart" style="display:none;"></canvas>
-              <canvas id="yearlySalesChart" style="display:none;"></canvas>
+            <div
+              class="chart-container"
+              style="position: relative; height: 50vh; width: 75vw"
+            >
+              <canvas id="dailySalesChart" style="display: none"></canvas>
+              <canvas id="weeklySalesChart" style="display: none"></canvas>
+              <canvas id="monthlySalesChart" style="display: none"></canvas>
+              <canvas id="yearlySalesChart" style="display: none"></canvas>
             </div>
           </article>
         </div>
@@ -282,17 +293,19 @@
   const ctxYearly = document.getElementById('yearlySalesChart').getContext('2d');
 
   const dailySalesChart = new Chart(ctxDaily, {
-    type: 'bar',
-    data: {
-      labels: dailySalesData.labels,
-      datasets: [{
-        label: 'Daily Sales',
-        data: dailySalesData.data,
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 1
-      }]
-    },
+    type: 'line',
+        data: {
+          labels: dailySalesData.labels,
+          datasets: [{
+            label: 'Sales',
+            data: dailySalesData.data,
+            fill: true,
+            backgroundColor: 'rgba(75,192,192,0.2)',
+            borderColor: 'rgba(75,192,192,1)',
+            borderWidth: 1,
+            pointBackgroundColor: 'rgba(75,192,192,1)'
+          }]
+        },
     options: {
       responsive: true,
       scales: {
@@ -310,8 +323,11 @@
       datasets: [{
         label: 'Weekly Sales',
         data: weeklySalesData.data,
+        fill: true,
+        backgroundColor: 'rgba(75,192,192,0.2)',
         borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
+        borderWidth: 1,
+        pointBackgroundColor: 'rgba(75,192,192,1)'
       }]
     },
     options: {
@@ -325,15 +341,17 @@
   });
 
   const monthlySalesChart = new Chart(ctxMonthly, {
-    type: 'bar',
+    type: 'line',
     data: {
       labels: monthlySalesData.labels,
       datasets: [{
         label: 'Monthly Sales',
         data: monthlySalesData.data,
+        fill: true,
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
         borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1
+        borderWidth: 1,
+        pointBackgroundColor: 'rgba(54, 162, 235, 1)'
       }]
     },
     options: {

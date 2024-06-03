@@ -285,7 +285,7 @@ function processYearlySalesData(salesData) {
 // Logging Out Admin (not for google login).
 const logout = async (req, res) => {
   try {
-    req.session.adminData == null;
+    req.session.adminData = null;
     res.redirect("/admin/");
   } catch (error) {
     res.send("Error Logging Out Admin.");

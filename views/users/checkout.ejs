@@ -319,7 +319,7 @@ include('../partials/page_header.ejs') %>
                 </tr>
                 <tr>
                   <th colspan="2">Shipping</th>
-                  <td colspan="3"><em>Free Shipping</em></td>
+                  <td colspan="3" id="shipping-fees">Free Shipping</td>
                 </tr>
                 <tr>
                   <th colspan="2">Total</th>
@@ -609,7 +609,7 @@ include('../partials/page_header.ejs') %>
   });
 
   // Update Cart Total
-  function updateCartTotals() {
+function updateCartTotals() {
   const subtotalElements = document.querySelectorAll(".subtotal-value");
   let newCartTotal = 0;
 
@@ -622,13 +622,28 @@ include('../partials/page_header.ejs') %>
   const discount = document.getElementById("discount-amount")
   const discountAmount = parseFloat(discount.textContent.trim().replace("$", "")) ? parseFloat(discount.textContent.trim().replace("$", "")) : 0;
   const grandTotalElement = document.getElementById("grand-total");
+  const shippingFeesElement = document.getElementById("shipping-fees");
+
+  let shippingFees = 0;
+
+  if (newCartTotal > 500) {
+    shippingFeesElement.textContent = "Free Shipping";
+  } else {
+    shippingFees = 100;
+    shippingFeesElement.textContent = `$${shippingFees}`;
+  }
 
   if (cartTotalElement && grandTotalElement) {
     const formattedTotal = `$${newCartTotal}`;
     cartTotalElement.textContent = formattedTotal;
-    grandTotalElement.textContent = newCartTotal - discountAmount;
+    grandTotalElement.textContent = `$${(newCartTotal - discountAmount + shippingFees).toFixed(2)}`;
   }
 }
+
+// Initial cart total calculation
+document.addEventListener("DOMContentLoaded", () => {
+  updateCartTotals();
+});
 
   // Initial cart total calculation
   document.addEventListener("DOMContentLoaded", () => {

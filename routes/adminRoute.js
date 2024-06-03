@@ -110,6 +110,6 @@ admin_route.get("/sales_report", salesController.loadSalesReport);
 admin_route.get('/sales_report/download', salesController.downloadReport);
 
 // Admin logout.
-admin_route.get("/logout", adminAuth.adminLogin, adminController.logout);
+admin_route.get("/logout", adminController.logout);
 
 module.exports = admin_route;

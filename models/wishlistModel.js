@@ -18,6 +18,10 @@ const wishlistSchema = new mongoose.Schema({
       },
     },
   ],
+  createdOn: {
+    type: Date,
+    default: Date.now(),
+  },
 });
 
 const Wishlist = mongoose.model("Wishlist", wishlistSchema);
