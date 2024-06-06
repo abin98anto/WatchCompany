@@ -400,143 +400,197 @@ const loadProduct = async (req, res) => {
   }
 };
 
-// load shop - OG.
-// const loadShop = async (req, res) => {
-//   try {
-//     const Products = await Product.find({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//     }).sort({ createdOn: -1 });
-
-//     const user = await User.findById(req.session.userData);
-//     const categories = await Category.find({ isUnlisted: false });
-//     let google;
-//     req.user ? (google = true) : (google = false);
-
-//     res.render("shopping_page", {
-//       products: Products,
-//       categories,
-//       user,
-//       google,
-//     });
-//   } catch (error) {
-//     console.log(`error rendering shop page.`);
-//   }
-// };
-
-// load shop -1 : not tested.
-// const loadShop = async (req, res) => {
-//   try {
-//     const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
-//     const limit = parseInt(req.query.limit) || 9; // Default to 9 products per page
-//     const skip = (page - 1) * limit;
-
-//     const [Products, totalProducts] = await Promise.all([
-//       Product.find({ isUnlisted: false, stock: { $gt: 0 } })
-//         .sort({ createdOn: -1 })
-//         .skip(skip)
-//         .limit(limit),
-//       Product.countDocuments({ isUnlisted: false, stock: { $gt: 0 } }),
-//     ]);
-
-//     const user = await User.findById(req.session.userData);
-//     const categories = await Category.find({ isUnlisted: false });
-//     let google;
-//     req.user ? (google = true) : (google = false);
-
-//     const totalPages = Math.ceil(totalProducts / limit);
-
-//     res.render("shopping_page", {
-//       products: Products,
-//       categories,
-//       user,
-//       google,
-//       currentPage: page,
-//       totalPages,
-//     });
-//   } catch (error) {
-//     console.log(`error rendering shop page: ${error}`);
-//   }
-// };
-
-// load shop -2 one with last and first.
-// const loadShop = async (req, res) => {
-//   try {
-//     const perPage = 6; // Number of products per page
-//     const page = parseInt(req.query.page) || 1; // Extract page number from URL
-
-//     const skip = (page - 1) * perPage;
-
-//     const productsCount = await Product.countDocuments({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//     });
-
-//     const Products = await Product.find({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//     })
-//       .sort({ createdOn: -1 })
-//       .skip(skip)
-//       .limit(perPage);
-
-//     const user = await User.findById(req.session.userData);
-//     const categories = await Category.find({ isUnlisted: false });
-//     let google;
-//     req.user ? (google = true) : (google = false);
-
-//     res.render("shopping_page", {
-//       products: Products,
-//       categories,
-//       user,
-//       google,
-//       currentPage: page,
-//       totalPages: Math.ceil(productsCount / perPage),
-//     });
-//   } catch (error) {
-//     console.log(`Error rendering shop page: ${error}`);
-//   }
-// };
-
-// load shop -3.
+// load shop.
 const loadShop = async (req, res) => {
   try {
-    const perPage = 9; // Number of products per page
-    const page = parseInt(req.query.page) || 1; // Extract page number from URL
-
-    const skip = (page - 1) * perPage;
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 6;
 
     const Products = await Product.find({
       isUnlisted: false,
       stock: { $gt: 0 },
     })
-      .sort({ createdOn: -1 })
-      .skip(skip)
-      .limit(perPage);
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .sort({ createdOn: -1 });
 
-    const productsCount = await Product.countDocuments({
-      isUnlisted: false,
-      stock: { $gt: 0 },
-    });
+    // const Products = await Product.find({
+    //   isUnlisted: false,
+    //   stock: { $gt: 0 },
+    // }).sort({ createdOn: -1 });
+
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / pageSize);
+    console.log("total pages", totalPages);
 
     const user = await User.findById(req.session.userData);
+    // let products;
     const categories = await Category.find({ isUnlisted: false });
     let google;
     req.user ? (google = true) : (google = false);
 
     res.render("shopping_page", {
       products: Products,
-      categories,
-      user,
+      categories: categories,
+      user: user,
       google,
       currentPage: page,
-      totalPages: Math.ceil(productsCount / perPage),
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: page < totalPages,
     });
+    // res.render("shopping_page", {
+    //   products: Products,
+    //   categories,
+    //   user,
+    //   google,
+    // });
   } catch (error) {
-    console.log(`Error rendering shop page: ${error}`);
+    console.log(`error rendering shop page.`);
   }
 };
 
+const searchFilter = async (req, res) => {
+  console.log(`search filter running...`);
+  const query = req.query.query || "";
+  const category = req.query.category || "";
+  const sort = req.query.sort || "";
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = 6;
+
+  let filter = { isUnlisted: false, stock: { $gt: 0 } };
+
+  if (query) {
+    filter.$or = [
+      { name: { $regex: query, $options: "i" } },
+      { category: { $regex: query, $options: "i" } },
+    ];
+  }
+
+  if (category && category !== "Show all") {
+    filter.category = category;
+  }
+
+  // const skip = (page - 1) * limit;
+
+  let sortOption = {};
+  if (sort === "price-asc") {
+    sortOption = { price: 1 };
+  } else if (sort === "price-desc") {
+    sortOption = { price: -1 };
+  } else if (sort === "name-asc") {
+    sortOption = { name: 1 };
+  } else if (sort === "name-desc") {
+    sortOption = { name: -1 };
+  }
+
+  try {
+    const totalProducts = await Product.countDocuments(filter);
+    console.log("total products", totalProducts);
+    const products = await Product.find(filter)
+      .sort(sortOption)
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    // const totalPages = Math.ceil(totalProducts / pageSize);
+
+    // console.log('limit', limit);
+    res.json({
+      products,
+      // totalPages,
+      currentPage: page,
+      hasPreviousPage: page > 1,
+      hasNextPage: page < totalPages,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const loadAllProducts = async (req, res) => {
+  try {
+    console.log(`loadAll products...`);
+    const products = await Product.find({
+      isUnlisted: false,
+      stock: { $gt: 0 },
+    }).sort({ createdOn: -1 });
+    const categories = await Category.find({ isUnlisted: false });
+    res.json({ products, categories });
+  } catch (error) {
+    console.error("Error fetching all products:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Get Products
+const getProducts = async (req, res) => {
+  try {
+    console.log(`getting product`);
+    const products = await Product.find({ isUnlisted: false });
+    res.json(products);
+  } catch (error) {
+    console.log(`error getting the products : ${error}`);
+  }
+};
+
+// Sort By Category
+const byCategory = async (req, res) => {
+  try {
+    const { category } = req.query;
+    let products;
+    category != "Show all"
+      ? (products = await Product.find({ category }))
+      : (products = await Product.find());
+    res.json(products);
+  } catch (error) {
+    console.error("Error fetching products by category:", error.message);
+    res.status(500).json({ error: "Failed to fetch products by category" });
+  }
+};
+
+// Sort By Everything
+const sortingProducts = async (req, res) => {
+  try {
+    const { sortBy } = req.query;
+    let sortOption = {};
+    if (sortBy == "lowToHigh") {
+      sortOption = { price: 1 };
+    } else if (sortBy == "highToLow") {
+      sortOption = { price: -1 };
+    } else if (sortBy == "atoz") {
+      sortOption = { name: 1 };
+    } else if (sortBy == "ztoa") {
+      sortOption = { name: -1 };
+    }
+    const sortedProducts = await Product.find({
+      isUnlisted: { $ne: true },
+    }).sort(sortOption);
+    res.json(sortedProducts);
+  } catch (error) {
+    console.log(`error sorting products : ${error}`);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Search Products
+const searchProducts = async (req, res) => {
+  const { query } = req.query;
+
+  try {
+    const searchResults = await Product.find({
+      $or: [
+        { name: { $regex: new RegExp(query, "i") } },
+        { category: { $regex: new RegExp(query, "i") } },
+      ],
+    });
+
+    res.json(searchResults);
+  } catch (error) {
+    console.error("Error searching products:", error);
+    res.status(500).json({ error: "Failed to fetch search results" });
+  }
+};
 
 // Render profile Page.
 const loadMyProfile = async (req, res) => {
@@ -967,8 +1021,14 @@ module.exports = {
   changePassword,
   resetPassword,
   deleteAddress,
+  byCategory,
+  sortingProducts,
+  searchProducts,
+  getProducts,
   loadWishlist,
   addToWishlist,
   checkProductInWishlist,
   removeFromWishlist,
+  searchFilter,
+  loadAllProducts,
 };

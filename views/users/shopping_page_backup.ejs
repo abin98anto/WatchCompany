@@ -1,0 +1,469 @@
+<%- include('../partials/header.ejs') %> 
+<%- include('../partials/page_header.ejs') %>
+    
+<style>
+.product-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
+
+<main class="main">
+  <!-- Breadcrumbs -->
+  <div class="page-header breadcrumb-wrap" style="padding: 5px">
+    <div class="container">
+      <div class="breadcrumb">
+          <a  href="/" rel="unfollow">Home</a>
+          <span><a href="/shop">Shop</a> </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- product lists -->
+  <section class="mt-50 mb-50">
+    <div class="container">
+      <div class="row flex-row-reverse">
+        <div class="col-lg-9">
+            <!-- sorting top bar -->
+          <div class="shop-product-fillter">
+            <!-- We found dash products section -->
+            <div class="totall-product" style="visibility: hidden;">
+              <p>
+                We found
+                <strong class="text-brand"><%= products.length %></strong> items
+                for you!
+              </p>
+            </div>
+            <!-- Sorting Dropdown menu -->
+            <div class="sort-by-product-area">
+              <div class="sort-by-cover">
+                <div class="sort-by-product-wrap">
+                  <div class="sort-by">
+                    <span><i class="fi-rs-apps-sort"></i></span>
+                  </div>
+                  <div class="sort-by-dropdown-wrap">
+                    <select id="sortDropdown" class="form-control">
+                      <option value="">Sort by</option>
+                      <option value="price-asc">Price: Low to High</option>
+                      <option value="price-desc">Price: High to Low</option>
+                      <option value="name-asc">Name: A to Z</option>
+                      <option value="name-desc">Name: Z to A</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- products populations -->
+          <div class="row product-grid-3">
+            <% for(let i=0; i<products.length; i++) { %>
+            <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+              <div class="product-cart-wrap mb-30">
+                <div class="product-img-action-wrap">
+                  <div class="product-img product-img-zoom">
+                    <a href="/load_product?id=<%= products[i]._id %>">
+                      <img
+                        class="default-img"
+                        src="/uploads/<%= products[i].media[0] %>"
+                        alt=""
+                      />
+                      <img
+                        class="hover-img"
+                        src="/uploads/<%= products[i].media[0] %>"
+                        alt=""
+                      />
+                    </a>
+                  </div>
+                </div>
+                <div class="product-content-wrap">
+                  <div class="product-category">
+                    <a href="shop-grid-right.html"><%= products[i].category %></a>
+                  </div>
+                  <h2 class="product-name">
+                    <a href="shop-product-right.html"><%= products[i].name %></a>
+                  </h2>
+                  <div class="rating-result" title="90%">
+                    <span><span>90%</span></span>
+                  </div>
+                  <div class="product-price" style="font-family: sans-serif;">
+                    <% if (products[i].offerPrice != 0 || products[i].categoryDiscountPrice != 0) { %>
+                      <% if (products[i].offerPrice < products[i].categoryDiscountPrice && products[i].offerPrice != 0) { %>
+                          <span>$<%= products[i].offerPrice %></span>
+                          <span class="old-price">$<%= products[i].price %></span>
+                      <% } else { %>
+                          <span>$<%= products[i].categoryDiscountPrice %></span>
+                          <span class="old-price">$<%= products[i].price %></span>
+                      <% } %>
+                    <% } else {%>
+                      <span>$<%= products[i].price %></span>
+                    <% }  %>
+                  </div>
+                  <form action="/"></form>
+                  <div class="product-action-1 show">
+                    <a
+                      aria-label="Add To Cart"
+                      class="action-btn hover-up"
+                      <% if (user) { %>
+                        onclick="addToCart('<%= products[i]._id %>')"
+                        <% } else { %>
+                          onclick="goHome()"
+                          <% } %>
+                      
+                      ><i class="fi-rs-shopping-bag-add"></i
+                    ></a>
+                    <a
+                    aria-label="Add To Wishlist"
+                    class="action-btn hover-up" <% if (user) { %>
+                      onclick="addToWishlist('<%= products[i]._id%>')"
+                      <% } else { %>
+                        onclick="goHome()"
+                        <% } %>
+                    ><i class="fi-rs-heart"></i
+                    ></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- Pagination -->
+          <div style="flex-direction: column; align-items: center" class="d-flex">
+            <nav aria-label="Page navigation example">
+              <ul class="pagination">
+                <li class="page-item <%= !hasPreviousPage ? 'disabled' : '' %>">
+                  <a
+                    class="page-link"
+                    href="#"
+                    tabindex="-1"
+                    aria-disabled="<%= !hasPreviousPage %>"
+                    onclick="changePage(<%= currentPage - 1 %>)"
+                  >Previous</a>
+                </li>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                  <a
+                    class="page-link"
+                    href="#"
+                    onclick="changePage(<%= i %>)"
+                  ><%= i %></a>
+                </li>
+                <% } %>
+                <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
+                  <a
+                    class="page-link"
+                    href="#"
+                    tabindex="-1"
+                    aria-disabled="<%= !hasNextPage %>"
+                    onclick="changePage(<%= currentPage + 1 %>)"
+                  >Next</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- left filters -->
+        <div class="col-lg-3 primary-sidebar sticky-sidebar">
+          <div class="widget-category mb-30">
+            <h5 class="section-title style-1 mb-30 wow fadeIn animated">
+              Category
+            </h5>
+            <ul class="categories">
+              <li><a>Show all</a></li>
+                <% categories.forEach((Category)=>{ %>
+              <li><a><%= Category.name %></a></li>
+              <% }); %>
+            </ul>
+          </div>
+          <!-- Product sidebar Widget -->
+          <div
+            class="sidebar-widget product-sidebar mb-30 p-30 bg-grey border-radius-10"
+          >
+          <div class="widget-header position-relative mb-20 pb-10">
+              <h5 class="widget-title mb-10">New products</h5>
+              <div class="bt-1 border-color-1"></div>
+            </div>
+            <% for(let i=0; i<3; i++) { %>
+            <div class="single-post clearfix">
+              <div class="image">
+                <img src="/uploads/<%= products[i].media[0] %>" alt="#" />
+              </div>
+              <div class="content pt-10">
+                <h5><a href="/load_product?id=<%= products[i]._id %>"> <%= products[i].name %></a></h5>
+                <p class="price mb-0 mt-5">$ <%= products[i].price %></p>
+              </div>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script>
+  let currentSearchQuery = '';
+  let currentCategory = '';
+  let currentSort = '';
+  let currentPage = '<%= currentPage %>';
+
+  const searchInput = document.getElementById('searchInput');
+
+  searchInput.addEventListener('input', (event) => {
+      currentSearchQuery = event.target.value.trim();
+      currentPage = 1;
+      fetchAndDisplayProducts();
+  });
+
+ async function fetchAndDisplayProducts() {
+    try {
+        console.log("Fetching products with:", {
+            query: currentSearchQuery,
+            category: currentCategory,
+            sort: currentSort,
+            page: currentPage
+        });
+
+        const response = await fetch(`/products/searchAndFilter?query=${encodeURIComponent(currentSearchQuery)}&category=${encodeURIComponent(currentCategory)}&sort=${encodeURIComponent(currentSort)}&page=${currentPage}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch products');
+        }
+
+        const data = await response.json();
+
+        displayProducts(data.products);
+        updatePagination(data.totalPages, data.currentPage);
+    } catch (error) {
+        console.error('Error fetching products:', error.message);
+    }
+  }
+
+  function changePage(page) {
+      currentPage = page;
+      fetchAndDisplayProducts();
+  }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const categories = document.querySelectorAll('.widget-category li a');
+  const sortDropdown = document.getElementById('sortDropdown');
+
+  categories.forEach(category => {
+    category.addEventListener('click', (event) => {
+      event.preventDefault();
+      currentCategory = category.textContent.trim();
+      if (currentCategory === "Show All") {
+        currentCategory = "";
+      }
+      currentPage = 1;
+      fetchAndDisplayProducts();
+    });
+  });
+
+  sortDropdown.addEventListener('change', () => {
+    currentSort = sortDropdown.value;
+    fetchAndDisplayProducts();
+  });
+  });
+
+  function displayProducts(products) {
+    const productGrid = document.querySelector('.product-grid-3');
+    productGrid.innerHTML = '';
+    products.forEach(product => {
+      const productHTML = `
+        <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+          <div class="product-cart-wrap mb-30">
+            <div class="product-img-action-wrap">
+              <div class="product-img product-img-zoom">
+                <a href="/load_product?id=${product._id}">
+                  <img class="default-img" src="/uploads/${product.media[0]}" alt="${product.name}" />
+                  <img class="hover-img" src="/uploads/${product.media[0]}" alt="${product.name}" />
+                </a>
+              </div>
+            </div>
+            <div class="product-content-wrap">
+              <div class="product-category">
+                <a href="shop-grid-right.html">${product.category}</a>
+              </div>
+              <h2 class="product-name">
+                <a href="shop-product-right.html">${product.name}</a>
+              </h2>
+              <div class="rating-result" title="90%">
+                <span><span>90%</span></span>
+              </div>
+              <div class="product-price">
+                <span>$${product.price}</span>
+              </div>
+              <div class="product-action-1 show">
+                    <a
+                      aria-label="Add To Cart"
+                      class="action-btn hover-up"
+                      <% if (user) { %>
+                        onclick="addToCart('${product._id}')"
+                        <% } else { %>
+                          onclick="goHome()"
+                          <% } %>
+                      
+                      ><i class="fi-rs-shopping-bag-add"></i
+                    ></a>
+                    <a
+                    aria-label="Add To Wishlist"
+                    class="action-btn hover-up" <% if (user) { %>
+                      onclick="addToWishlist('${product._id}')"
+                      <% } else { %>
+                        onclick="goHome()"
+                        <% } %>
+                    ><i class="fi-rs-heart"></i
+                    ></a>
+                  </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      productGrid.insertAdjacentHTML('beforeend', productHTML);
+    });
+  }
+
+  function updatePagination(totalPages, currentPage) {
+    const paginationContainer = document.querySelector('.pagination');
+    paginationContainer.innerHTML = '';
+
+    const prevPageItem = document.createElement('li');
+    prevPageItem.classList.add('page-item', currentPage === 1 ? 'disabled' : '');
+    prevPageItem.innerHTML = `<a class="page-link" href="#" aria-disabled="${currentPage === 1}" tabindex="-1" onclick="changePage(${currentPage - 1})">Previous</a>`;
+    paginationContainer.appendChild(prevPageItem);
+
+    for (let i = 1; i <= totalPages; i++) {
+      const pageItem = document.createElement('li');
+      pageItem.classList.add('page-item', i === currentPage ? 'active' : '');
+      pageItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+      paginationContainer.appendChild(pageItem);
+    }
+
+    const nextPageItem = document.createElement('li');
+    nextPageItem.classList.add('page-item', currentPage === totalPages ? 'disabled' : '');
+    nextPageItem.innerHTML = `<a class="page-link" href="#" aria-disabled="${currentPage === totalPages}" tabindex="-1" onclick="changePage(${currentPage + 1})">Next</a>`;
+    paginationContainer.appendChild(nextPageItem);
+  }
+
+  document.addEventListener('DOMContentLoaded', fetchAndDisplayProducts);
+
+  async function addToCart(productId) {
+  try {
+    const response = await fetch("/check_product_in_cart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productId: productId,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to check product in cart");
+    }
+    const data = await response.json();
+    if (data.exists) {
+      Swal.fire({
+        title: "Product Already in Cart",
+        text: "This product is already in your cart.",
+        icon: "warning",
+        confirmButtonText: "Go to Cart",
+        showCancelButton: true,
+      }).then((value) => {
+        if (value.isConfirmed) {
+          window.location.href = "/cart";
+        }
+      });
+    } else {
+      const addToCartResponse = await fetch("/add_to_cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: productId,
+        }),
+      });
+      if (!addToCartResponse.ok) {
+        throw new Error("Failed to add product to cart");
+      }
+      const cartData = await addToCartResponse.json();
+      console.log("Product added to cart successfully:", cartData);
+      window.location.href = "/cart";
+    }
+  } catch (error) {
+    console.error("Error adding product to cart:", error.message);
+    Swal.fire(
+      "Error",
+      "Failed to add product to cart. Please try again later.",
+      "error"
+    );
+  }
+  }
+
+  async function addToWishlist(productId) {
+    console.log(`product id : ${productId}`);
+    try {
+      const response = await fetch('/wishlist_check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: productId
+        })
+      });
+      console.log('response : ',response);
+      if (!response.ok) {
+        throw new Error('Failed to check product in wishlist.');
+      }
+      const data = await response.json();
+      if (data.exists) {
+        Swal.fire({
+          title: 'Product Already in Wishlist',
+          text: 'This product is already in your wishlist.',
+          icon: 'warning',
+          confirmButtonText: 'View Wishlist',
+          showCancelButton: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/wishlist';
+          }
+        });
+      } else {
+        const addToWishlistResponse = await fetch('/add_to_wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productId: productId
+          })
+        });
+        if (!addToWishlistResponse.ok) {
+          throw new Error('Failed to add product to wishlist.');
+        }
+        const wishlistData = await addToWishlistResponse.json();
+        console.log('Product added to wishlist successfully:', wishlistData);
+        window.location.href = '/wishlist';
+      }
+    } catch (error) {
+      console.error('Error adding product to wishlist:', error);
+      Swal.fire('Error', 'Failed to add product to wishlist. Please try again later.', 'error');
+    }
+  }
+
+  function goHome(){
+    location.href = '/login';
+  }
+</script>
+
+<%- include('../partials/page_footer.ejs') %> 
+<%- include('../partials/footer.ejs')%>

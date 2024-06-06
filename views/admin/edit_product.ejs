@@ -321,7 +321,7 @@
     }
 
     if (mediaFiles.length > 0) {
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
       for (const file of mediaFiles) {
         if (!allowedTypes.includes(file.type)) {
           Swal.fire({

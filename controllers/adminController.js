@@ -173,7 +173,7 @@ const loadDashboard = async (req, res) => {
 
 async function aggregateSalesData() {
   const startDate = new Date();
-  startDate.setFullYear(startDate.getFullYear() - 1); // 1 year ago
+  startDate.setFullYear(startDate.getFullYear() - 1);
 
   const salesData = await Orders.aggregate([
     {

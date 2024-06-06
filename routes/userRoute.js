@@ -38,11 +38,11 @@ user_route.get("/logout", userController.logoutUser);
 
 // Shop Page.
 user_route.get("/shop", userController.loadShop);
-user_route.get("/products/byCategory", userController.byCategory);
-user_route.get("/products/sort_by", userController.sortingProducts);
-user_route.get("/products/search", userController.searchProducts);
-user_route.get("/get_products", userController.getProducts);
-user_route.get('/products/searchAndFilter', userController.searchFilter);
+// user_route.get("/products/byCategory", userController.byCategory);
+// user_route.get("/products/sort_by", userController.sortingProducts);
+// user_route.get("/products/search", userController.searchProducts);
+// user_route.get("/get_products", userController.getProducts);
+// user_route.get('/products/searchAndFilter', userController.searchFilter);
 
 // Cart functionalities.
 user_route.get("/cart", userAuth.isLogin, cartController.loadCart);
