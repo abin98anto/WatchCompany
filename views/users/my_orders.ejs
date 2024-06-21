@@ -3,30 +3,66 @@ include('../partials/page_header.ejs') %>
 
 <style>
   .btn {
-    padding: 0.25rem 0.5rem; /* Adjust padding to decrease button size */
-    font-size: 0.875rem; /* Adjust font size for smaller buttons */
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
     border-style: none;
     margin: 2px;
   }
 
   .btn-warning {
     background-color: yellow;
-    color: black; /* Optional: Set text color */
+    color: black;
   }
 
-  /* Styling for btn-danger (red background) */
   .btn-danger {
     background-color: red;
-    color: white; /* Optional: Set text color */
+    color: white;
   }
 
   .btn-warning:hover {
-    background-color: #ffea00; /* Darker yellow on hover */
+    background-color: #ffea00;
   }
 
   .btn-danger:hover {
-    background-color: #d32f2f; /* Darker red on hover */
+    background-color: #d32f2f;
   }
+
+  .table-wrapper {
+  max-height: 800px;
+  overflow-y: auto;
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-wrapper thead, .table-wrapper tbody {
+  display: block;
+}
+
+.table-wrapper thead {
+  width: calc(100% - 1em);
+}
+
+.table-wrapper tbody {
+  max-height: 500px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.table-wrapper tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table-wrapper th, .table-wrapper td {
+  padding: 8px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
 </style>
 
 <main class="main d-flex" style="flex-direction: column">
@@ -126,6 +162,7 @@ include('../partials/page_header.ejs') %>
             <!-- Pending Orders -->
             <div class="table-responsive tab-pane fade active show" id="pending" role="tabpanel" aria-labelledby="dashboard-tab">
               <% if(orders.length !== 0) { %>
+                <div class="table-wrapper">
                 <table class="table text-center">
                   <thead>
                     <tr>
@@ -167,6 +204,7 @@ include('../partials/page_header.ejs') %>
                     <% } %>
                   </tbody>
                 </table> 
+                </div>
               <% } else { %>
                 <h1 class="text-center">Nothing ordered yet...</h1>
               <% } %>
@@ -268,6 +306,7 @@ include('../partials/page_header.ejs') %>
             <!-- Delivered Orders -->
             <div class="table-responsive tab-pane fade" id="delivered" role="tabpanel" aria-labelledby="dashboard-tab">
               <% if(orders.length !== 0) { %>
+                <div class="table-wrapper">
                 <table class="table text-center">
                   <thead>
                     <tr>
@@ -309,6 +348,7 @@ include('../partials/page_header.ejs') %>
                     <% } %>
                   </tbody>
                 </table> 
+                </div>
               <% } else { %>
                 <h1 class="text-center">Nothing ordered yet...</h1>
               <% } %>

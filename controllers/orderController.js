@@ -121,8 +121,10 @@ const addOrder = async (req, res) => {
         currency: "INR",
         receipt: newOrder.orderId,
       };
+      console.log("options", options);
       razorpayInstance.orders.create(options, function (err, order) {
         if (!err) {
+          console.log("order :", order);
           res.status(200).json({
             success: true,
             msg: "Order Created",
@@ -285,7 +287,7 @@ const loadSingleOrder = async (req, res) => {
     const products = await Products.find({ isUnlisted: false });
     const categories = await Category.find({ isUnlisted: false });
     const orders = await Order.find({ _id: id }).sort({ createdOn: -1 });
-
+    console.log("single order : ", orders.products);
     let google;
     req.user
       ? ((google = true), (logout = "/auth/logout"))
@@ -307,9 +309,9 @@ const loadSingleOrder = async (req, res) => {
 // Cancel a Product
 const cancelProduct = async (req, res) => {
   console.log(`canceling the product from the order...`);
-  const { orderId, productId } = req.params;
-  const { cancelReason } = req.body;
   try {
+    const { orderId, productId } = req.params;
+    const { cancelReason } = req.body;
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
@@ -341,7 +343,7 @@ const cancelProduct = async (req, res) => {
     }
 
     const userId = req.session.userData || req.user?.id;
-
+    console.log('order : ', order);
     console.log(`payment status : ${order.paymentStatus}`);
 
     if (order.paymentMethod != "cod" && order.paymentStatus == "Success") {
@@ -575,7 +577,7 @@ const returnOrder = async (req, res) => {
 
       const transaction = {
         transactionType: "Credit",
-        amount: order.billTotal,
+        amount: Math.floor(order.billTotal),
         description: `The order ${order.orderId} was returned and ${order.billTotal} was credited to your wallet`,
         orderId: order.orderId,
       };
@@ -709,95 +711,24 @@ const updatePayment = async (req, res) => {
 };
 
 // Download Invoice
-// const downloadInvoice = async (req, res) => {
-//   console.log('downloading invoice...');
-//   const {orderId} = req.query;
-
-//   // Fetch order data from the database using orderId
-//   const orderData = await getOrderData(orderId); // Implement this function to fetch order data
-
-//   // Load the template PDF
-//   const templatePath = path.resolve(__dirname, 'path_to_template.pdf');
-//   const templateBytes = fs.readFileSync(templatePath);
-//   const pdfDoc = await PDFDocument.load(templateBytes);
-
-//   const pages = pdfDoc.getPages();
-//   const firstPage = pages[0];
-
-//   // Add order data to the PDF
-//   firstPage.drawText(orderData.name, { x: 100, y: 700, size: 12 });
-//   firstPage.drawText(orderData.address, { x: 100, y: 680, size: 12 });
-//   // Add other order data...
-
-//   const pdfBytes = await pdfDoc.save();
-
-//   res.setHeader('Content-Disposition', `attachment; filename=invoice-${orderId}.pdf`);
-//   res.setHeader('Content-Type', 'application/pdf');
-//   res.send(pdfBytes);
-// };
-
-// const downloadInvoice = async (req, res) => {
-//   try {
-//     const orderId = req.params.orderId;
-
-//     // Create a new PDF document
-//     const pdfDoc = await PDFDocument.create();
-//     const page = pdfDoc.addPage([600, 400]);
-
-//     // Add content to the PDF
-//     page.drawText(`Invoice for Order ID: ${orderId}`, {
-//       x: 50,
-//       y: 350,
-//       size: 20,
-//       color: rgb(0, 0, 0),
-//     });
-
-//     // Add more content as needed
-//     // e.g., order details, customer info, etc.
-
-//     // Serialize the PDFDocument to bytes (a Uint8Array)
-//     const pdfBytes = await pdfDoc.save();
-
-//     // Set the response headers for downloading the PDF
-//     res.setHeader("Content-Type", "application/pdf");
-//     res.setHeader(
-//       "Content-Disposition",
-//       `attachment; filename=invoice-${orderId}.pdf`
-//     );
-
-//     // Send the PDF file as a response
-//     res.send(Buffer.from(pdfBytes));
-//   } catch (error) {
-//     console.error("Error downloading invoice:", error);
-//     res.status(500).send("Failed to download invoice");
-//   }
-// };
-
 const downloadInvoice = async (req, res) => {
   try {
     const { orderId } = req.query;
-    // console.log();
-    // Fetch the order details
     const order = await Order.findById(orderId).populate("products.productId");
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // Path to EJS template
     const templatePath = path.join(__dirname, "../views/users/invoice.ejs");
-
-    // Render the EJS template with order details
     const html = await ejs.renderFile(templatePath, { order });
 
-    // Launch puppeteer and generate PDF
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.setContent(html);
     const pdfBuffer = await page.pdf({ format: "A4" });
     await browser.close();
 
-    // Send the PDF buffer as a response
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
@@ -807,44 +738,6 @@ const downloadInvoice = async (req, res) => {
   } catch (error) {
     console.error("Error generating the invoice:", error);
     res.status(500).json({ error: "Failed to download the invoice" });
-  }
-};
-
-const getOrderData = async (orderId) => {
-  try {
-    const order = await Order.findOne({ orderId }).populate("user").exec();
-    if (!order) {
-      return null;
-    }
-
-    // Extract relevant order data
-    const orderData = {
-      user: {
-        name: order.user.name, // Assuming the User model has a 'name' field
-        email: order.user.email, // Assuming the User model has an 'email' field
-      },
-      orderId: order.orderId,
-      products: order.products.map((product) => ({
-        name: product.productName,
-        price: product.price,
-        quantity: product.quantity,
-        subtotal: product.subtotal,
-      })),
-      orderStatus: order.orderStatus,
-      billTotal: order.billTotal,
-      discount: order.discount,
-      subTotal: order.subTotal,
-      address: `${order.address.street}, ${order.address.city}, ${order.address.state}, ${order.address.zip}`, // Adjust according to the actual address object structure
-      paymentMethod: order.paymentMethod,
-      paymentStatus: order.paymentStatus,
-      createdOn: order.createdOn,
-      showDate: order.showDate,
-    };
-
-    return orderData;
-  } catch (error) {
-    console.error("Error fetching order data:", error);
-    return null;
   }
 };
 

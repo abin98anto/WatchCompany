@@ -88,7 +88,7 @@ include('../partials/page_header.ejs') %>
                                   <td><%= wallet.transactions[i].description %></td>
                                   <td><%= wallet.transactions[i].createdOn.toDateString() %></td>
                                   <td><%= wallet.transactions[i].transactionType %></td>
-                                  <td><%= wallet.transactions[i].amount %></td>
+                                  <td>₹<%= wallet.transactions[i].amount %></td>
                                 </tr>
                                 <% } %>
                         </tbody>

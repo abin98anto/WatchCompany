@@ -1,6 +1,13 @@
 <%- include('../partials/header.ejs') %> <%-
 include('../partials/page_header.ejs') %>
 
+<style>
+  #errorMessage {
+    display: flex;
+    justify-content: center;
+  }
+</style>
+
 <main class="main">
   <!-- Breadcrumbs -->
   <div class="page-header breadcrumb-wrap pb-5 pt-5" style="padding: 0px">
@@ -69,22 +76,15 @@ include('../partials/page_header.ejs') %>
                     </button>
                   </div>
                 </form>
-                <div id="errorMessage" style="height: 30px">
+                <div id="errorMessage" style="height: 30px;">
                   <% if (message) { %>
-                  <p style="color: red"><%= message %></p>
+                  <p style="color: red;"><%= message %></p>
                   <% } %>
                 </div>
                 <div class="divider-text-center mt-15 mb-15">
                   <span style="color: black"> or</span>
                 </div>
                 <ul class="btn-login list_none text-center mb-15">
-                  <!-- <li>
-                    <a
-                      href="/auth/facebook"
-                      class="btn btn-facebook hover-up mb-lg-0 mb-sm-4"
-                      >Login With Facebook</a
-                    >
-                  </li> -->
                   <li>
                     <a href="/auth/google" class="btn btn-google hover-up"
                       >Login With Google</a
@@ -104,6 +104,27 @@ include('../partials/page_header.ejs') %>
     </div>
   </section>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var email = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value.trim();
+
+    if (email === '' || password === '') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Input fields cannot be empty!',
+      });
+    } else {
+      this.submit();
+    }
+  });
+</script>
+
 
 <%- include('../partials/page_footer.ejs') %> <%-
 include('../partials/footer.ejs')%>

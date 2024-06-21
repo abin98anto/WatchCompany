@@ -64,8 +64,7 @@
                       <option value="">Sort by</option>
                       <option value="price-asc">Price: Low to High</option>
                       <option value="price-desc">Price: High to Low</option>
-                      <option value="name-asc">Name: A to Z</option>
-                      <option value="name-desc">Name: Z to A</option>
+                      <option value="name-asc">Release Date</option>
                     </select>
                   </div>
                 </div>
@@ -98,14 +97,14 @@
                   <div class="product-price" style="font-family: sans-serif;">
                     <% if (products[i].offerPrice != 0 || products[i].categoryDiscountPrice != 0) { %>
                       <% if (products[i].offerPrice < products[i].categoryDiscountPrice && products[i].offerPrice != 0) { %>
-                          <span>$<%= products[i].offerPrice %></span>
-                          <span class="old-price">$<%= products[i].price %></span>
+                          <span>₹<%= products[i].offerPrice %></span>
+                          <span class="old-price">₹<%= products[i].price %></span>
                       <% } else { %>
-                          <span>$<%= products[i].categoryDiscountPrice %></span>
-                          <span class="old-price">$<%= products[i].price %></span>
+                          <span>₹<%= products[i].categoryDiscountPrice %></span>
+                          <span class="old-price">₹<%= products[i].price %></span>
                       <% } %>
                     <% } else { %>
-                      <span>$<%= products[i].price %></span>
+                      <span>₹<%= products[i].price %></span>
                     <% } %>
                   </div>
                   <form action="/"></form>
@@ -137,24 +136,22 @@
             <% } %>
           </div>
 
-          <!-- Pagination Controls -->
-          <div class="pagination" style="justify-content: center;">
-            <% if (currentPage > 1) { %>
-              <a href="?page=<%= currentPage - 1 %>">Previous</a>
-            <% } %>
-
-            <% for (let i = 1; i <= totalPages; i++) { %>
-              <% if (i === currentPage) { %>
-                <a href="?page=<%= i %>" style="background-color: #333; color: #ddd;"><%= i %></a>
-              <% } else { %>
-                <a href="?page=<%= i %>"><%= i %></a>
-              <% } %>
-            <% } %>
-
-            <% if (currentPage < totalPages) { %>
-              <a href="?page=<%= currentPage + 1 %>">Next</a>
-            <% } %>
-          </div>
+          <!--pagination-->
+            <div class="pagination-area mt-15 mb-50 d-flex justify-content-center" >
+              <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-start">
+                  <% for (let i = 1; i <= totalPages; i++) { %>
+                  <li
+                    class="page-item <%= currentPage === i ? 'active' : '' %>"
+                  >
+                    <a class="page-link" href="/shop?page=<%= i %>"
+                      ><%= i %></a
+                    >
+                  </li>
+                  <% } %>
+                </ul>
+              </nav>
+            </div>
 
         </div>
         <!-- left filters -->
@@ -181,7 +178,7 @@
                 </div>
                 <div class="content pt-10">
                   <h5><a href="/load_product?id=<%= products[i]._id %>"> <%= products[i].name %></a></h5>
-                  <p class="price mb-0 mt-5">$ <%= products[i].price %></p>
+                  <p class="price mb-0 mt-5">₹ <%= products[i].price %></p>
                 </div>
               </div>
             <% } %>
@@ -197,5 +194,234 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-<%- include('../partials/page_footer.ejs') %> 
-<%- include('../partials/footer.ejs')%>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const sortDropdown = document.getElementById('sortDropdown');
+    const categories = document.querySelectorAll('.widget-category li a');
+    
+    let currentPage = 1;
+    let selectedCategory = null;
+    let sortOptionValue = null;
+
+    // Event listener for sort dropdown
+    sortDropdown.addEventListener('change', function () {
+      sortOptionValue = sortDropdown.value;
+      currentPage = 1;
+      applyFilters(sortOptionValue, selectedCategory);
+    });
+
+    // Event listener for search input
+    searchInput.addEventListener("input", function () {
+      currentPage = 1;
+      applyFilters(sortOptionValue, selectedCategory);
+    });
+
+    // Event listener for category filters
+    categories.forEach((cat) => {
+      cat.addEventListener("click", (event) => {
+        event.preventDefault();
+        selectedCategory = cat.innerText.trim();
+        currentPage = 1;
+        applyFilters(sortOptionValue, selectedCategory);
+      });
+    });
+
+    function applyFilters(sortOption, category) {
+      const searchQuery = searchInput.value.trim();
+
+      fetch(`/shop/filter?sort=${sortOption}&category=${category}&search=${searchQuery}&page=${currentPage}`)
+        .then(response => response.json())
+        .then(data => {
+          updateProducts(data.products);
+          updatePagination(data.totalPages);
+        })
+        .catch(error => {
+          console.error("Error fetching filtered data:", error);
+        });
+    }
+
+    function updateProducts(products) {
+      const productGrid = document.querySelector(".product-grid-3");
+      productGrid.innerHTML = "";
+
+      products.forEach(product => {
+        const productHTML = `
+          <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+            <div class="product-cart-wrap mb-30">
+              <div class="product-img-action-wrap">
+                <div class="product-img product-img-zoom">
+                  <a href="/load_product?id=${product._id}">
+                    <img class="default-img" src="/uploads/${product.media[0]}" alt="" />
+                    <img class="hover-img" src="/uploads/${product.media[0]}" alt="" />
+                  </a>
+                </div>
+              </div>
+              <div class="product-content-wrap">
+                <div class="product-category">
+                  <a href="shop-grid-right.html">${product.category}</a>
+                </div>
+                <h2 class="product-name">
+                  <a href="shop-product-right.html">${product.name}</a>
+                </h2>
+                <div class="rating-result" title="90%">
+                  <span><span>90%</span></span>
+                </div>
+                <div class="product-price" style="font-family: sans-serif;">
+                  ${product.offerPrice != 0 || product.categoryDiscountPrice != 0 ? `
+                    ${product.offerPrice < product.categoryDiscountPrice && product.offerPrice != 0 ? `
+                        <span>₹${product.offerPrice}</span>
+                        <span class="old-price">₹${product.price}</span>
+                    ` : `
+                        <span>₹${product.categoryDiscountPrice}</span>
+                        <span class="old-price">₹${product.price}</span>
+                    `}
+                  ` : `
+                    <span>₹${product.price}</span>
+                  `}
+                </div>
+                <form action="/"></form>
+                <div class="product-action-1 show">
+                  <a aria-label="Add To Cart" class="action-btn hover-up" <% user ? onclick="addToCart('${product._id}')" : onclick="goHome()" %>><i class="fi-rs-shopping-bag-add"></i></a>
+                  <a aria-label="Add To Wishlist" class="action-btn hover-up"  <% user ? onclick="addToWishlist('${product._id}')" : onclick="goHome()"%>}><i class="fi-rs-heart"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        productGrid.innerHTML += productHTML;
+      });
+    }
+
+    function updatePagination(totalPages) {
+      const pagination = document.querySelector(".pagination");
+      pagination.innerHTML = "";
+
+      for (let i = 1; i <= totalPages; i++) {
+        const pageItem = document.createElement("li");
+        pageItem.className = `page-item ${currentPage === i ? "active" : ""}`;
+        pageItem.innerHTML = `<a class="page-link" href="/shop?page=${i}">${i}</a>`;
+        pageItem.addEventListener("click", (event) => {
+          event.preventDefault();
+          currentPage = i;
+          applyFilters(sortOptionValue, selectedCategory);
+        });
+        pagination.appendChild(pageItem);
+      }
+    }
+  });
+</script>
+
+<script>
+  async function addToCart(productId) {
+  try {
+    const response = await fetch("/check_product_in_cart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productId: productId,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to check product in cart");
+    }
+    const data = await response.json();
+    if (data.exists) {
+      Swal.fire({
+        title: "Product Already in Cart",
+        text: "This product is already in your cart.",
+        icon: "warning",
+        confirmButtonText: "Go to Cart",
+        showCancelButton: true,
+      }).then((value) => {
+        if (value.isConfirmed) {
+          window.location.href = "/cart";
+        }
+      });
+    } else {
+      const addToCartResponse = await fetch("/add_to_cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: productId,
+        }),
+      });
+      if (!addToCartResponse.ok) {
+        throw new Error("Failed to add product to cart");
+      }
+      const cartData = await addToCartResponse.json();
+      console.log("Product added to cart successfully:", cartData);
+      window.location.href = "/cart";
+    }
+  } catch (error) {
+    console.error("Error adding product to cart:", error.message);
+    Swal.fire(
+      "Error",
+      "Failed to add product to cart. Please try again later.",
+      "error"
+    );
+  }
+  }
+
+  async function addToWishlist(productId) {
+    console.log(`product id : ${productId}`);
+    try {
+      const response = await fetch('/wishlist_check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: productId
+        })
+      });
+      console.log('response : ',response);
+      if (!response.ok) {
+        throw new Error('Failed to check product in wishlist.');
+      }
+      const data = await response.json();
+      if (data.exists) {
+        Swal.fire({
+          title: 'Product Already in Wishlist',
+          text: 'This product is already in your wishlist.',
+          icon: 'warning',
+          confirmButtonText: 'View Wishlist',
+          showCancelButton: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/wishlist';
+          }
+        });
+      } else {
+        const addToWishlistResponse = await fetch('/add_to_wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productId: productId
+          })
+        });
+        if (!addToWishlistResponse.ok) {
+          throw new Error('Failed to add product to wishlist.');
+        }
+        const wishlistData = await addToWishlistResponse.json();
+        console.log('Product added to wishlist successfully:', wishlistData);
+        window.location.href = '/wishlist';
+      }
+    } catch (error) {
+      console.error('Error adding product to wishlist:', error);
+      Swal.fire('Error', 'Failed to add product to wishlist. Please try again later.', 'error');
+    }
+  }
+
+  function goHome(){
+    location.href = '/login';
+  }
+</script>
+
+<%- include('../partials/footer.ejs') %>

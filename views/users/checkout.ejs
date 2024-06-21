@@ -290,22 +290,22 @@ include('../partials/page_header.ejs') %>
                   </td>
                   <% if (prod.productID.offerPrice != 0 || prod.productID.categoryDiscountPrice != 0) { %>
                       <% if (prod.productID.offerPrice < prod.productID.categoryDiscountPrice && prod.productID.offerPrice != 0) { %>
-                          <td class="productPrice">$<%= prod.productID.offerPrice %></td>
+                          <td class="productPrice">₹<%= prod.productID.offerPrice %></td>
                       <% } else { %>
-                          <td class="productPrice">$<%= prod.productID.categoryDiscountPrice %></td>
+                          <td class="productPrice">₹<%= prod.productID.categoryDiscountPrice %></td>
                       <% } %>
                     <% } else {%>
-                      <td class="price">$<%= prod.productID.price %></td>
+                      <td class="price">₹<%= prod.productID.price %></td>
                     <% }  %>
                   <td><span id="<%= prod.productID.name %>" data-product-id="<%= prod.productID._id %>" class="product-qty"><%= prod.quantity %></span></td>
                   <% if (prod.productID.offerPrice != 0 || prod.productID.categoryDiscountPrice != 0) { %>
                       <% if (prod.productID.offerPrice < prod.productID.categoryDiscountPrice && prod.productID.offerPrice != 0) { %>
-                          <td class="subtotal-value">$<%= prod.quantity * prod.productID.offerPrice %></td>
+                          <td class="subtotal-value">₹<%= prod.quantity * prod.productID.offerPrice %></td>
                       <% } else { %>
-                          <td class="subtotal-value">$<%= prod.quantity * prod.productID.categoryDiscountPrice %></td>
+                          <td class="subtotal-value">₹<%= prod.quantity * prod.productID.categoryDiscountPrice %></td>
                       <% } %>
                     <% } else {%>
-                      <td class="subtotal-value">$<%= prod.quantity * prod.productID.price %></td>
+                      <td class="subtotal-value">₹<%= prod.quantity * prod.productID.price %></td>
                     <% }  %>
                 </tr>
                 <% }); %>
@@ -614,13 +614,13 @@ function updateCartTotals() {
   let newCartTotal = 0;
 
   subtotalElements.forEach((subEl) => {
-    const subValue = parseFloat(subEl.textContent.trim().replace("$", ""));
+    const subValue = parseFloat(subEl.textContent.trim().replace("₹", ""));
     newCartTotal += subValue;
   });
 
   const cartTotalElement = document.getElementById("cart-total");
   const discount = document.getElementById("discount-amount")
-  const discountAmount = parseFloat(discount.textContent.trim().replace("$", "")) ? parseFloat(discount.textContent.trim().replace("$", "")) : 0;
+  const discountAmount = parseFloat(discount.textContent.trim().replace("₹", "")) ? parseFloat(discount.textContent.trim().replace("₹", "")) : 0;
   const grandTotalElement = document.getElementById("grand-total");
   const shippingFeesElement = document.getElementById("shipping-fees");
 
@@ -630,23 +630,18 @@ function updateCartTotals() {
     shippingFeesElement.textContent = "Free Shipping";
   } else {
     shippingFees = 100;
-    shippingFeesElement.textContent = `$${shippingFees}`;
+    shippingFeesElement.textContent = `₹${shippingFees}`;
   }
 
   if (cartTotalElement && grandTotalElement) {
-    const formattedTotal = `$${newCartTotal}`;
+    const formattedTotal = `₹${newCartTotal}`;
     cartTotalElement.textContent = formattedTotal;
-    grandTotalElement.textContent = `$${(newCartTotal - discountAmount + shippingFees).toFixed(2)}`;
+    grandTotalElement.textContent = `₹${(newCartTotal - discountAmount + shippingFees).toFixed(2)}`;
   }
 }
 
 // Initial cart total calculation
 document.addEventListener("DOMContentLoaded", () => {
-  updateCartTotals();
-});
-
-  // Initial cart total calculation
-  document.addEventListener("DOMContentLoaded", () => {
   updateCartTotals();
 });
 
@@ -714,7 +709,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const minPurchase = parseFloat(this.getAttribute('data-min-purchase'));
       const maxDiscount = parseFloat(this.getAttribute('data-max-discount'));
 
-      const subtotal = parseFloat(document.getElementById('cart-total').textContent.replace('$', ''));
+      const subtotal = parseFloat(document.getElementById('cart-total').textContent.replace('₹', ''));
 
       if (subtotal < minPurchase) {
         Swal.fire({
@@ -732,7 +727,7 @@ document.addEventListener("DOMContentLoaded", () => {
       discountRow.classList.remove("hidden");
 
       const discTh = document.getElementById("discount-amount");
-      discTh.textContent = `$${discountAmount}`;
+      discTh.textContent = `₹${discountAmount}`;
 
       updateCartTotals();
 
@@ -804,9 +799,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('$', ''));
-      const discount = parseFloat(document.getElementById("discount-amount").textContent.replace('$', ''));
-      const subTotal = parseFloat(document.getElementById("cart-total").textContent.replace('$', ''));
+      const billTotal = parseFloat(document.getElementById("grand-total").textContent.replace('₹', ''));
+      const discount = parseFloat(document.getElementById("discount-amount").textContent.replace('₹', ''));
+      const subTotal = parseFloat(document.getElementById("cart-total").textContent.replace('₹', ''));
       const userId = document.querySelector("#userId").textContent.trim();
 
       const productRows = document.querySelectorAll('.products');
@@ -1093,7 +1088,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function checkGrandTotalAndDisableCOD() {
     var grandTotalElement = document.getElementById('grand-total');
     var codElement = document.getElementById('cod');
-    var grandTotal = parseFloat(grandTotalElement.innerText.replace('$', ''));
+    var grandTotal = parseFloat(grandTotalElement.innerText.replace('₹', ''));
     
     if (grandTotal > 1000) {
       codElement.disabled = true;

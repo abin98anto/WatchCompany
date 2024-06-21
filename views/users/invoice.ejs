@@ -161,28 +161,28 @@
         <tr class="item">
           <td style="text-align: center; width: 20px;" ><%= i+1 %></td>
           <td style="text-align: center;"><%= order.products[i].productName %></td>
-          <td style="text-align: center;">$ <%= order.products[i].price %></td>
+          <td style="text-align: center;">₹ <%= order.products[i].price %></td>
           <td style="text-align: center;"><%= order.products[i].quantity %></td>
-          <td style="text-align: end;" class="sub-total">$ <%= order.products[i].price * order.products[i].quantity %></td>
+          <td style="text-align: end;" class="sub-total">₹ <%= order.products[i].price * order.products[i].quantity %></td>
         </tr>
         <% } %>
 
         <tr>
           <td colspan="4"></td>
 
-          <td> Sub-Total : $ <span id="total"></span></td>
+          <td> Sub-Total : ₹ <span id="total"></span></td>
         </tr>
 
         <tr>
           <td colspan="4"></td>
 
-          <td> Discount : $ <%= order.discount %></td>
+          <td> Discount : ₹ <%= order.discount %></td>
         </tr>
         
         <tr class="total">
           <td colspan="4"></td>
 
-          <td>Grand Total: $ <%= order.billTotal %></td>
+          <td>Grand Total: ₹ <%= order.billTotal %></td>
         </tr>
       </table>
       <br>
@@ -196,7 +196,7 @@
       let subTotal = 0;
 
       subs.forEach((sub) => {
-        const subValue = parseInt(sub.textContent.trim().replace('$',''));
+        const subValue = parseInt(sub.textContent.trim().replace('₹',''));
         subTotal += subValue;
       });
 

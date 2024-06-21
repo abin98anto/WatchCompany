@@ -89,14 +89,14 @@
                   <div class="product-price" style="font-family: sans-serif;">
                     <% if (products[i].offerPrice != 0 || products[i].categoryDiscountPrice != 0) { %>
                       <% if (products[i].offerPrice < products[i].categoryDiscountPrice && products[i].offerPrice != 0) { %>
-                          <span>$<%= products[i].offerPrice %></span>
-                          <span class="old-price">$<%= products[i].price %></span>
+                          <span>₹<%= products[i].offerPrice %></span>
+                          <span class="old-price">₹<%= products[i].price %></span>
                       <% } else { %>
-                          <span>$<%= products[i].categoryDiscountPrice %></span>
-                          <span class="old-price">$<%= products[i].price %></span>
+                          <span>₹<%= products[i].categoryDiscountPrice %></span>
+                          <span class="old-price">₹<%= products[i].price %></span>
                       <% } %>
                     <% } else {%>
-                      <span>$<%= products[i].price %></span>
+                      <span>₹<%= products[i].price %></span>
                     <% }  %>
                   </div>
                   <form action="/"></form>
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span><span>90%</span></span>
               </div>
               <div class="product-price">
-                <span>$${product.price}</span>
+                <span>₹${product.price}</span>
               </div>
               <div class="product-action-1 show">
                     <a

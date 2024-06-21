@@ -70,12 +70,12 @@ include('../partials/page_header.ejs') %>
                   <td data-title="Price">
                     <% if (prod.productID.offerPrice != 0 || prod.productID.categoryDiscountPrice != 0) { %>
                       <% if (prod.productID.offerPrice < prod.productID.categoryDiscountPrice && prod.productID.offerPrice != 0) { %>
-                          <span class="price">$<%= prod.productID.offerPrice %></span>
+                          <span class="price">₹<%= prod.productID.offerPrice %></span>
                       <% } else { %>
-                          <span class="price">$<%= prod.productID.categoryDiscountPrice %></span>
+                          <span class="price">₹<%= prod.productID.categoryDiscountPrice %></span>
                       <% } %>
                     <% } else {%>
-                      <span class="price">$<%= prod.productID.price %></span>
+                      <span class="price">₹<%= prod.productID.price %></span>
                     <% }  %>
                   </td>
                   <td class="text-center" data-title="Stock">
@@ -100,12 +100,12 @@ include('../partials/page_header.ejs') %>
                   <td class="text-right subtotal" data-title="Cart">
                   <% if (prod.productID.offerPrice != 0 || prod.productID.categoryDiscountPrice != 0) { %>
                       <% if (prod.productID.offerPrice < prod.productID.categoryDiscountPrice && prod.productID.offerPrice != 0) { %>
-                          <span class="subtotal-value">$ <%= prod.quantity * prod.productID.offerPrice %></span>
+                          <span class="subtotal-value">₹ <%= prod.quantity * prod.productID.offerPrice %></span>
                       <% } else { %>
-                          <span class="subtotal-value">$ <%= prod.quantity * prod.productID.categoryDiscountPrice %></span>
+                          <span class="subtotal-value">₹ <%= prod.quantity * prod.productID.categoryDiscountPrice %></span>
                       <% } %>
                     <% } else {%>
-                      <span class="subtotal-value">$ <%= prod.quantity * prod.productID.price %></span>
+                      <span class="subtotal-value">₹ <%= prod.quantity * prod.productID.price %></span>
                     <% }  %>
                   </td>
                   <td class="action" data-title="Remove">
@@ -242,14 +242,14 @@ include('../partials/page_header.ejs') %>
     const subtotalElements = document.querySelectorAll(".subtotal-value");
     let newCartTotal = 0;
     subtotalElements.forEach((subEl) => {
-      const subValue = parseFloat(subEl.textContent.replace("$ ", ""));
+      const subValue = parseFloat(subEl.textContent.replace("₹ ", ""));
       newCartTotal += subValue;
     });
 
     const cartTotalElement = document.getElementById("cart-total");
     const grandTotalElement = document.getElementById("grand-total");
     if (cartTotalElement && grandTotalElement) {
-      const formattedTotal = `$ ${newCartTotal}`;
+      const formattedTotal = `₹ ${newCartTotal}`;
       cartTotalElement.textContent = formattedTotal;
       grandTotalElement.textContent = formattedTotal;
     }
@@ -320,14 +320,14 @@ include('../partials/page_header.ejs') %>
           `tr[data-product-id="${productId}"] .price`
         );
         const productPrice = parseFloat(
-          priceElement.textContent.replace("$", "")
+          priceElement.textContent.replace("₹", "")
         );
         const subtotal = updatedProduct.quantity * productPrice;
         const subtotalElement = document.querySelector(
           `tr[data-product-id="${productId}"] .subtotal-value`
         );
 
-        subtotalElement.textContent = `$ ${subtotal}`;
+        subtotalElement.textContent = `₹ ${subtotal}`;
         updateCartTotals();
 
         qtElement.textContent = updatedProduct.quantity;

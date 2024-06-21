@@ -197,6 +197,41 @@
                   <% } %>
                 </tbody>
               </table>
+
+                      <!-- Pagination -->
+              <div style="flex-direction: column; align-items: center" class="d-flex">
+                <nav aria-label="Page navigation example">
+                  <ul class="pagination">
+                    <li class="page-item <%= !hasPreviousPage ? 'disabled' : '' %>">
+                      <a
+                        class="page-link"
+                        href="/admin/coupon_management?page=<%= currentPage - 1 %>"
+                        tabindex="-1"
+                        aria-disabled="<%= !hasPreviousPage %>"
+                        >Previous</a
+                      >
+                    </li>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                      <a
+                        class="page-link"
+                        href="/admin/coupon_management?page=<%= i %>"
+                        ><%= i %></a
+                      >
+                    </li>
+                    <% } %>
+                    <li class="page-item <%= !hasNextPage ? 'disabled' : '' %>">
+                      <a
+                        class="page-link"
+                        href="/admin/coupon_management?page=<%= currentPage + 1 %>"
+                        tabindex="-1"
+                        aria-disabled="<%= !hasNextPage %>"
+                        >Next</a
+                      >
+                    </li>
+                  </ul>
+                </nav>
+              </div>
             </div>
             <% } else { %>
               <h1>No coupons added.</h1>

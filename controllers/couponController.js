@@ -3,8 +3,24 @@ const Coupon = require("../models/couponModel");
 // Load Coupon management.
 const loadCouponManangement = async (req, res) => {
   try {
-    const coupons = await Coupon.find();
-    res.render("coupon_management", { coupons });
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 7;
+
+    const coupons = await Coupon.find()
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .sort({ createdOn: -1 });
+
+    const totalCoupons = await Coupon.countDocuments();
+    const totalPages = Math.ceil(totalCoupons / pageSize);
+
+    res.render("coupon_management", {
+      coupons,
+      currentPage: page,
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: page < totalPages,
+    });
   } catch (error) {
     console.log(`error rendering the coupon management page : ${error}`);
   }

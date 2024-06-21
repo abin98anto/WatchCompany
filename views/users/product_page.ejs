@@ -95,10 +95,10 @@ include('../partials/page_header.ejs') %>
                   <div class="clearfix product-price-cover">
                     <div class="product-price primary-color float-left">
                       <ins><% if (product.offerPrice) { %>
-                      <span>$<%= product.offerPrice %></span>
-                      <span class="old-price">$<%= product.price %></span>
+                      <span>₹<%= product.offerPrice %></span>
+                      <span class="old-price">₹<%= product.price %></span>
                     <% } else { %>
-                      <span>$<%= product.price %></span>
+                      <span>₹<%= product.price %></span>
                     <% } %></span></ins>
                     </div>
                   </div>
@@ -169,7 +169,8 @@ include('../partials/page_header.ejs') %>
   </div>
   <div class="col-12">
     <div class="row related-products">
-    <% relatedProd.forEach((product) => { %>
+    <% relatedProd.forEach((product, index) => { %>
+      <% if (index < 4) { %>
         <div class="col-lg-3 col-md-4 col-12 col-sm-6">
           <div class="product-cart-wrap mb-30">
             <div class="product-img-action-wrap">
@@ -189,7 +190,7 @@ include('../partials/page_header.ejs') %>
                 <span>90%</span>
               </div>
               <div class="product-price">
-                <span>$<%= product.price %></span>
+                <span>₹<%= product.price %></span>
               </div>
               <div class="product-action-1 show">
                 <a aria-label="Add To Cart" class="action-btn hover-up"
@@ -212,6 +213,7 @@ include('../partials/page_header.ejs') %>
             </div>
           </div>
         </div>
+        <% } %>
         <% }); %>
       </div>
   </div>
