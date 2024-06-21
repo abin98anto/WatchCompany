@@ -8,7 +8,7 @@ const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
-const { google } = require("../config/keys");
+// const { google } = require("../config/keys");
 const Wishlist = require("../models/wishlistModel");
 const Wallet = require("../models/walletModel");
 const Referral = require("../models/referralModel");
@@ -418,31 +418,7 @@ const loadProduct = async (req, res) => {
   }
 };
 
-// load shop - OG.
-// const loadShop = async (req, res) => {
-//   try {
-//     const Products = await Product.find({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//     }).sort({ createdOn: -1 });
-
-//     const user = await User.findById(req.session.userData);
-//     const categories = await Category.find({ isUnlisted: false });
-//     let google;
-//     req.user ? (google = true) : (google = false);
-
-//     res.render("shopping_page", {
-//       products: Products,
-//       categories,
-//       user,
-//       google,
-//     });
-//   } catch (error) {
-//     console.log(`error rendering shop page.`);
-//   }
-// };
-
-// load shop - vis.
+// load shop.
 const loadShop = async (req, res) => {
   try {
     const user = await User.findById(req.session.userData);
@@ -473,43 +449,7 @@ const loadShop = async (req, res) => {
   }
 };
 
-// const filterProducts = async (req, res) => {
-//   try {
-//     const { search, sortOption, filterOption, prevSearchResults } = req.query;
-//     const page = parseInt(req.query.page) || 1;
-//     const perPage = 6;
-//     let query = { isUnlisted: false };
-//     if (search) {
-//       query.title = { $regex: search, $options: "i" };
-//     }
-//     if (filterOption && filterOption.trim().length > 0) {
-//       query.category = filterOption.trim();
-//     }
-
-//     let sort = {};
-//     if (sortOption === "Price: High to Low") {
-//       sort.price = -1;
-//     } else if (sortOption === "Price: Low to High") {
-//       sort.price = 1;
-//     } else if (sortOption === "Release Date") {
-//       sort.createdAt = -1;
-//     }
-
-//     console.log("sort", sort);
-
-//     const skip = (page - 1) * perPage;
-//     const totalProductCount = await Product.countDocuments(query);
-//     const totalPages = Math.ceil(totalProductCount / perPage);
-//     const products = await Product.find(query)
-//       .sort(sort)
-//       .skip(skip)
-//       .limit(perPage);
-//     res.json({ products, totalPages, currentPage: page });
-//   } catch (error) {
-//     console.log(`error filtering the products : ${error}`);
-//   }
-// };
-
+// Search, Sort, filter and pagination backend.
 const filter = async (req, res) => {
   try {
     const { sort, category, search, page } = req.query;
@@ -549,170 +489,6 @@ const filter = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
-// load shop - Simple Pagination.
-// const loadShop = async (req, res) => {
-//   try {
-//     const perPage = 6;
-//     const page = parseInt(req.query.page) || 1;
-
-//     const skip = (page - 1) * perPage;
-
-//     const Products = await Product.find({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//     })
-//       .sort({ createdOn: -1 })
-//       .skip(skip)
-//       .limit(perPage);
-
-//     const productsCount = await Product.countDocuments({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//     });
-
-//     const user = await User.findById(req.session.userData);
-//     const categories = await Category.find({ isUnlisted: false });
-//     let google;
-//     req.user ? (google = true) : (google = false);
-
-//     res.render("shopping_page", {
-//       products: Products,
-//       categories,
-//       user,
-//       google,
-//       currentPage: page,
-//       totalPages: Math.ceil(productsCount / perPage),
-//     });
-//   } catch (error) {
-//     console.log(`Error rendering shop page: ${error}`);
-//   }
-// };
-
-// load shop - search.
-// const loadShop = async (req, res) => {
-//   try {
-//     const perPage = 6;
-//     const page = parseInt(req.query.page) || 1;
-//     const skip = (page - 1) * perPage;
-//     const searchQuery = req.query.search || "";
-
-//     // MongoDB query to filter products based on search query
-//     const Products = await Product.find({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//       name: { $regex: new RegExp(searchQuery, "i") }, // Case-insensitive search
-//     })
-//       .sort({ createdOn: -1 })
-//       .skip(skip)
-//       .limit(perPage);
-
-//     // Count total products based on search query
-//     const productsCount = await Product.countDocuments({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//       name: { $regex: new RegExp(searchQuery, "i") },
-//     });
-
-//     const user = await User.findById(req.session.userData);
-//     const categories = await Category.find({ isUnlisted: false });
-//     let google;
-//     req.user ? (google = true) : (google = false);
-
-//     // Pass search query to template
-//     res.render("shopping_page", {
-//       products: Products,
-//       categories,
-//       user,
-//       google,
-//       currentPage: page,
-//       totalPages: Math.ceil(productsCount / perPage),
-//       searchQuery: req.query.search,
-//     });
-//   } catch (error) {
-//     console.log(`Error rendering shop page: ${error}`);
-//   }
-// };
-
-// Search Products
-// const searchProducts = async (req, res) => {
-//   try {
-//     const perPage = 6;
-//     const page = parseInt(req.query.page) || 1;
-//     const skip = (page - 1) * perPage;
-//     const searchQuery = req.query.search || "";
-
-//     // MongoDB query to filter products based on search query
-//     const Products = await Product.find({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//       name: { $regex: new RegExp(searchQuery, "i") },
-//     })
-//       .sort({ createdOn: -1 })
-//       .skip(skip)
-//       .limit(perPage);
-
-//     // Count total products based on search query
-//     const productsCount = await Product.countDocuments({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//       name: { $regex: new RegExp(searchQuery, "i") },
-//     });
-
-//     const user = await User.findById(req.session.userData);
-//     const categories = await Category.find({ isUnlisted: false });
-//     let google;
-//     req.user ? (google = true) : (google = false);
-
-//     // Render product list and pagination
-//     res.render("shopping_page", {
-//       products: Products,
-//       categories,
-//       user,
-//       google,
-//       currentPage: page,
-//       totalPages: Math.ceil(productsCount / perPage),
-//       searchQuery: req.query.search,
-//     });
-//   } catch (error) {
-//     console.log(`Error searching products: ${error}`);
-//     res.status(500).send("Internal Server Error");
-//   }
-// };
-
-// load shop - YouTube.
-// const loadShop = async (req, res) => {
-//   try {
-//     const page = parseInt(req.query.page) -1 || 0;
-//     const limit = parseInt(req.query.limit) || 6;
-//     const search = req.query.search || '';
-//     let sort = req.query.sort || "";
-//     let filter = req.query.filter || "All";
-
-//     const categories = await Category.find({ isUnlisted: false });
-
-//     filter === "All" ? filter = [...categories] : filter = req.query.filter;
-
-//     // let sortBy =
-//     const Products = await Product.find({
-//       isUnlisted: false,
-//       stock: { $gt: 0 },
-//     }).sort({ createdOn: -1 });
-
-//     const user = await User.findById(req.session.userData);
-//     let google;
-//     req.user ? (google = true) : (google = false);
-
-//     res.render("shopping_page", {
-//       products: Products,
-//       categories,
-//       user,
-//       google,
-//     });
-//   } catch (error) {
-//     console.log(`error rendering shop page.`);
-//   }
-// };
 
 // Render profile Page.
 const loadMyProfile = async (req, res) => {
@@ -1131,9 +907,7 @@ module.exports = {
   logoutUser,
   loadProduct,
   loadShop,
-  // filterProducts,
   filter,
-  // searchProducts,
   loadMyProfile,
   loadMyAddress,
   loadMyOrders,

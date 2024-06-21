@@ -39,14 +39,7 @@ user_route.get("/logout", userController.logoutUser);
 
 // Shop Page.
 user_route.get("/shop", blockUser.blockUser, userController.loadShop);
-// user_route.get("/filter_product", userController.filterProducts);
 user_route.get("/shop/filter", userController.filter);
-// user_route.get("/search", blockUser.blockUser, userController.searchProducts);
-// user_route.get("/products/byCategory", userController.byCategory);
-// user_route.get("/products/sort_by", userController.sortingProducts);
-// user_route.get("/products/search", userController.searchProducts);
-// user_route.get("/get_products", userController.getProducts);
-// user_route.get('/products/searchAndFilter', userController.searchFilter);
 
 // Cart functionalities.
 user_route.get(
