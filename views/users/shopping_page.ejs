@@ -215,6 +215,7 @@
     // Event listener for search input
     searchInput.addEventListener("input", function () {
       currentPage = 1;
+      console.log('search input recieved...');
       applyFilters(sortOptionValue, selectedCategory);
     });
 

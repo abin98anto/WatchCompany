@@ -1,6 +1,37 @@
 <%- include('../partials/header.ejs') %> 
 <%-include('../partials/page_header.ejs') %>
 
+<style>
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+    }
+    
+    #toast.show {
+      visibility: visible;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+    
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+    
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
+</style>
 
 <main class="main d-flex" style="flex-direction: column">
   <!-- breadcrumbs -->
@@ -105,6 +136,12 @@
                 </div>
               </div>
             </form>
+            <div class="mt-30">
+                  <label class="mr-20">Referral Code:</label>
+                  <input id="referralCodeInput" type="text" style="text-align: center; width: 150px; font-family: 'Courier New', Courier, monospace;" value="<%= referralCode %>" readonly>
+                  <button id="copyButton" style="cursor: pointer; margin-left: 5px;">&#x1F4CB;</button>
+            </div>
+            <div id="toast">Referral code copied to clipboard!</div>
           </div>
         </div>
         <!-- Reset password -->
@@ -271,6 +308,21 @@ document.getElementById('passwordForm').addEventListener('submit', async functio
     console.error(error);
     Swal.fire("Error", "Failed to reset password", "error");
   }
+});
+
+// Referal Code Copy
+document.getElementById('copyButton').addEventListener('click', function() {
+  let referralCodeInput = document.getElementById('referralCodeInput');
+  referralCodeInput.select();
+  referralCodeInput.setSelectionRange(0, 99999); // For mobile devices
+
+  navigator.clipboard.writeText(referralCodeInput.value).then(function() {
+  let toast = document.getElementById('toast');
+  toast.className = "show";
+  setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+  }, function(err) {
+  console.error('Could not copy text: ', err);
+  });
 });
 
 </script>

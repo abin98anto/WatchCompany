@@ -141,12 +141,13 @@ const sendOTP = async (req, res) => {
 const verifyOTP = async (req, res) => {
   try {
     const referral = await Referral.findOne();
-    // console.log(`referral : ${referral}`)
+    console.log(`referral : ${referral}`);
     const { offerAmount } = referral;
-    // console.log(`offer amount : ${offerAmount}`);
+    console.log(`referal offer amount : ${offerAmount}`);
     const enteredOTP = req.body.otp;
     const generatedOTP = req.session.newOTP;
     let { referralCode } = req.session.formData;
+    console.log(`referal code : ${referralCode}`);
 
     if (enteredOTP === generatedOTP) {
       const { username, email, password } = req.session.formData;
@@ -161,8 +162,10 @@ const verifyOTP = async (req, res) => {
       await newUser.save();
 
       if (referralCode) {
+        console.log(`user signed up using a referal code...`);
         const user = await User.findOne({ referralCode });
         if (user) {
+          console.log(`crediting referal bonus to ${user.name}`);
           let referredUserWallet = await Wallet.findOne({ userId: user.id });
           if (!referredUserWallet) {
             referredUserWallet = new Wallet({
@@ -172,18 +175,25 @@ const verifyOTP = async (req, res) => {
             });
           }
           referredUserWallet.walletBalance += offerAmount;
+          referredUserWallet.transactions.push(
+            `Rs. ${offerAmount} credited as referal bonus from ${username}`
+          );
+          console.log("refered user wallet : ", referredUserWallet);
           await referredUserWallet.save();
           referralCode = true;
         }
       }
 
       if (referralCode === true) {
+        console.log(`creditin referal user bonus...`);
         const user = await User.find({ email });
         const wallet = new Wallet({
           userId: user.id,
-          walletBalance: offerAmount,
+          walletBalance: 0,
           transactions: [],
         });
+        wallet.walletBalance += offerAmount;
+        wallet.transactions.push(`Rs. ${offerAmount} credited as referal bonus.`);
         await wallet.save();
       }
       res.json({ success: true });
@@ -506,6 +516,7 @@ const loadMyProfile = async (req, res) => {
       user: user,
       google: google,
       logout,
+      referralCode: user.referralCode,
     });
   } catch (error) {
     console.log(`Error loading setting.`);
