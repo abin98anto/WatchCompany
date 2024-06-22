@@ -468,7 +468,7 @@ const filter = async (req, res) => {
 
     const query = {};
 
-    if (category && category !== "Show all") {
+    if (category !== "Show all") {
       query.category = category;
     }
 

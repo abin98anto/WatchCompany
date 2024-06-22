@@ -196,6 +196,7 @@
 
 <!-- Search, Sort, Filter and pagination -->
 <script>
+  // let category = "Show all";
   document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("searchInput");
     const sortDropdown = document.getElementById('sortDropdown');
@@ -215,7 +216,6 @@
     // Event listener for search input
     searchInput.addEventListener("input", function () {
       currentPage = 1;
-      console.log('search input recieved...');
       applyFilters(sortOptionValue, selectedCategory);
     });
 
@@ -230,8 +230,9 @@
     });
 
     function applyFilters(sortOption, category) {
+      if(!category) category= "Show all" 
       const searchQuery = searchInput.value.trim();
-
+      
       fetch(`/shop/filter?sort=${sortOption}&category=${category}&search=${searchQuery}&page=${currentPage}`)
         .then(response => response.json())
         .then(data => {
