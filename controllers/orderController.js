@@ -7,7 +7,6 @@ const Wallet = require("../models/walletModel");
 const Coupon = require("../models/couponModel");
 require("dotenv").config();
 const crypto = require("crypto");
-// const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
@@ -16,6 +15,7 @@ const puppeteer = require("puppeteer");
 const ejs = require("ejs");
 
 const Razorpay = require("razorpay");
+const Product = require("../models/productModel");
 const { RAZORPAY_KEY_ID, RAZORPAY_SECRET_KEY } = process.env;
 const razorpayInstance = new Razorpay({
   key_id: RAZORPAY_KEY_ID,
@@ -24,7 +24,6 @@ const razorpayInstance = new Razorpay({
 
 // Add order.
 const addOrder = async (req, res) => {
-  // console.log("req.body : ", req.body);
   try {
     let {
       user,
@@ -32,8 +31,7 @@ const addOrder = async (req, res) => {
       products,
       orderStatus,
       billTotal,
-      discount,
-      subTotal,
+      shippingCharge,
       address,
       paymentMethod,
       paymentStatus,
@@ -42,11 +40,36 @@ const addOrder = async (req, res) => {
       coupon,
     } = req.body;
 
+    let discount = null;
+
     let noDiscountAmount = 0;
-    products.forEach((product) => {
+    let prods = [];
+
+    for (const product of products) {
+      let dataProd = await Product.findById(product.productId);
+      let price;
+
+      if (dataProd.price == 0) {
+        price = Math.min(dataProd.offerPrice, dataProd.categoryDiscountPrice);
+      } else if (dataProd.offerPrice == 0) {
+        price = Math.min(dataProd.price, dataProd.categoryDiscountPrice);
+      } else if (dataProd.categoryDiscountPrice == 0) {
+        price = Math.min(dataProd.price, dataProd.offerPrice);
+      } else {
+        price = Math.min(
+          dataProd.price,
+          dataProd.offerPrice,
+          dataProd.categoryDiscountPrice
+        );
+      }
+
+      product.price = price;
+      product.subtotal = price * product.quantity;
       noDiscountAmount += product.price * product.quantity;
-    });
-    let discountAmount = noDiscountAmount - billTotal;
+      prods.push(product);
+    }
+
+    let discountAmount = noDiscountAmount + shippingCharge - billTotal;
     discount === null
       ? (discount += discountAmount)
       : (discount = discountAmount);
@@ -54,11 +77,12 @@ const addOrder = async (req, res) => {
     const newOrder = new Order({
       user,
       orderId,
-      products,
+      products: prods,
       orderStatus,
       billTotal,
+      beforeDiscount: noDiscountAmount,
+      shippingCharge: shippingCharge || 0,
       discount,
-      subTotal,
       address,
       paymentMethod,
       paymentStatus,
@@ -121,7 +145,7 @@ const addOrder = async (req, res) => {
         currency: "INR",
         receipt: newOrder.orderId,
       };
-      console.log("options", options);
+      
       razorpayInstance.orders.create(options, function (err, order) {
         if (!err) {
           console.log("order :", order);
@@ -343,7 +367,7 @@ const cancelProduct = async (req, res) => {
     }
 
     const userId = req.session.userData || req.user?.id;
-    console.log('order : ', order);
+    console.log("order : ", order);
     console.log(`payment status : ${order.paymentStatus}`);
 
     if (order.paymentMethod != "cod" && order.paymentStatus == "Success") {

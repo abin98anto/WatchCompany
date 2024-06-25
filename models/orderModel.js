@@ -60,7 +60,13 @@ const orderSchema = new mongoose.Schema({
   billTotal: {
     type: Number,
   },
+  beforeDiscount: {
+    type: Number,
+  },
   discount: {
+    type: Number,
+  },
+  shippingCharge: {
     type: Number,
   },
   subTotal: {

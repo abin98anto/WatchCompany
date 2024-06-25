@@ -68,64 +68,101 @@
 </div>
 
 <script>
-    let countdown = 60;
-    const timerDisplay = document.getElementById("timer");
-    const submitButton = document.getElementById("submitBtn");
-    const resendButton = document.getElementById("resendBtn");
+  let countdown = 60;
+  const timerDisplay = document.getElementById("timer");
+  const submitButton = document.getElementById("submitBtn");
+  const resendButton = document.getElementById("resendBtn");
 
-    // Timer functionality.
-    function startTimer() {
-      let minutes, seconds;
+  // Timer functionality.
+  function startTimer() {
+    let minutes, seconds;
 
-      const timer = setInterval(function () {
-        minutes = parseInt(countdown / 60, 10);
-        seconds = parseInt(countdown % 60, 10);
+    const timer = setInterval(function () {
+      minutes = parseInt(countdown / 60, 10);
+      seconds = parseInt(countdown % 60, 10);
 
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      seconds = seconds < 10 ? "0" + seconds : seconds;
 
-        timerDisplay.textContent = minutes + ":" + seconds;
+      timerDisplay.textContent = minutes + ":" + seconds;
 
-        if (--countdown < 0) {
-          clearInterval(timer);
-          timerDisplay.textContent = "Time's up!";
-          submitButton.disabled = true;
-          resendButton.disabled = false;
+      if (--countdown < 0) {
+        clearInterval(timer);
+        timerDisplay.textContent = "Time's up!";
+        submitButton.disabled = true;
+        resendButton.disabled = false;
+      }
+    }, 1000);
+  }
+  startTimer();
+
+  // Resend OTP functionality.
+  document.getElementById("resendBtn").addEventListener("click", function () {
+    fetch("/resend-otp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
         }
-      }, 1000);
-    }
-    startTimer();
+        throw new Error("Failed to resend OTP");
+      })
+      .then((data) => {
+        if (data.success) {
+          displayMessage("New OTP sent successfully!", "text-success");
+          countdown = 60;
+          startTimer();
+          submitButton.disabled = false;
+          resendButton.disabled = true;
+        } else {
+          displayMessage(
+            "Failed to resend OTP. Please try again later.",
+            "text-danger"
+          );
+        }
+      })
+      .catch((error) => {
+        console.log("Error:", error);
+        displayMessage(
+          "An error occurred. Please try again later.",
+          "text-danger"
+        );
+      });
+  });
 
-    // Resend OTP functionality.
-    document.getElementById("resendBtn").addEventListener("click", function () {
-      fetch("/resend-otp", {
+  document.getElementById("otpInput").addEventListener("input", function () {
+    submitButton.disabled = this.value.trim() === "";
+  });
+
+  // OTP submission functionality.
+  document
+    .getElementById("otpForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+      const enteredOTP = document.getElementById("otpInput").value;
+      fetch("/otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ otp: enteredOTP }),
       })
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          }
-          throw new Error("Failed to resend OTP");
-        })
+        .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            displayMessage("New OTP sent successfully!", "text-success");
-            countdown = 60;
-            startTimer();
-            submitButton.disabled = false;
-            resendButton.disabled = true;
+            displayMessage("OTP verification successful!", "text-success");
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 1000);
           } else {
-            displayMessage(
-              "Failed to resend OTP. Please try again later.",
-              "text-danger"
-            );
+            displayMessage("Wrong OTP. Please try again.", "text-danger");
           }
         })
         .catch((error) => {
-          console.log("Error:", error);
+          console.error("Error:", error);
           displayMessage(
             "An error occurred. Please try again later.",
             "text-danger"
@@ -133,50 +170,10 @@
         });
     });
 
-    document.getElementById("otpInput").addEventListener("input", function () {
-      submitButton.disabled = this.value.trim() === "";
-    });
-
-    // OTP submission functionality.
-    document
-      .getElementById("otpForm")
-      .addEventListener("submit", function (event) {
-        event.preventDefault();
-        const enteredOTP = document.getElementById("otpInput").value;
-        fetch("/otp", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ otp: enteredOTP }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              displayMessage("OTP verification successful!", "text-success");
-              setTimeout(() => {
-                window.location.href = "/login";
-              }, 1000);
-            } else {
-              displayMessage(
-                "Wrong OTP. Please try again.",
-                "text-danger"
-              );
-            }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            displayMessage(
-              "An error occurred. Please try again later.",
-              "text-danger"
-            );
-          });
-      });
-
-    function displayMessage(message, className) {
-      const otpStatusElement = document.getElementById("otpStatus");
-      otpStatusElement.textContent = message;
-      otpStatusElement.className = className;
-    }
-  </script>
+  function displayMessage(message, className) {
+    const otpStatusElement = document.getElementById("otpStatus");
+    otpStatusElement.textContent = message;
+    otpStatusElement.className = className;
+  }
+</script>
 <%- include('../partials/footer.ejs') %>

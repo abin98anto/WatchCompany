@@ -4,7 +4,7 @@
   "description": "The first project using bootstrap, node JS and mongodb.",
   "main": "index.js",
   "scripts": {
-    "start": "sudo systemctl start mongod && node --watch index"
+    "start": "node --watch index"
   },
   "repository": {
     "type": "git",

@@ -100,36 +100,36 @@ const sendOTP = async (req, res) => {
       },
     });
 
-    const mailOptions = {
-      from: process.env.AUTH_EMAIL,
-      to: req.body.email,
-      subject: "Welcome to Watch Company! Verify your Account",
-      preheader: "Complete your registration and unlock exclusive benefits.",
-      text: `This is a verification email sent from Watch Company.`,
-      html: `
-    <div style="background-color: #f5f5f5; padding: 20px;">
-      <header style="background-color: #333; color: #fff; padding: 10px;">
-        <h1>Watch Company</h1>
-      </header>
-      <p>Hi ${req.body.username},</p>
-      <p>Thank you for creating an account with Watch Company!</p>
-      <p>To complete your registration and unlock all the benefits of being a Watch Company member, please verify your email address using the OTP below:</p>
-      <p><b>Your OTP is: ${newOTP}</b></p>
-      <p>This OTP expires in 2 minutes.</p>
-      <p>Thanks,</p>
-      <p>The Watch Company Team</p>
-    </div>
-  `,
-    };
+      const mailOptions = {
+        from: process.env.AUTH_EMAIL,
+        to: req.body.email,
+        subject: "Welcome to Watch Company! Verify your Account",
+        preheader: "Complete your registration and unlock exclusive benefits.",
+        text: `This is a verification email sent from Watch Company.`,
+        html: `
+      <div style="background-color: #f5f5f5; padding: 20px;">
+        <header style="background-color: #333; color: #fff; padding: 10px;">
+          <h1>Watch Company</h1>
+        </header>
+        <p>Hi ${req.body.username},</p>
+        <p>Thank you for creating an account with Watch Company!</p>
+        <p>To complete your registration and unlock all the benefits of being a Watch Company member, please verify your email address using the OTP below:</p>
+        <p><b>Your OTP is: ${newOTP}</b></p>
+        <p>This OTP expires in 2 minutes.</p>
+        <p>Thanks,</p>
+        <p>The Watch Company Team</p>
+      </div>
+    `,
+      };
 
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         console.log(error);
         res.status(500).send("Error sending email.The errror is");
       } else {
-        req.session.newOTP = newOTP;
-        req.session.email = email;
-        res.render("otp");
+    req.session.newOTP = newOTP;
+    req.session.email = email;
+    res.render("otp");
       }
     });
   } catch (error) {
@@ -140,17 +140,17 @@ const sendOTP = async (req, res) => {
 // to verify OTP.
 const verifyOTP = async (req, res) => {
   try {
+    const { username, email, password } = req.session.formData;
+
     const referral = await Referral.findOne();
-    console.log(`referral : ${referral}`);
+
     const { offerAmount } = referral;
-    console.log(`referal offer amount : ${offerAmount}`);
+
     const enteredOTP = req.body.otp;
     const generatedOTP = req.session.newOTP;
     let { referralCode } = req.session.formData;
-    console.log(`referal code : ${referralCode}`);
 
     if (enteredOTP === generatedOTP) {
-      const { username, email, password } = req.session.formData;
       const sPassword = await hashPassword(password);
       const newUser = new User({
         name: username,
@@ -162,10 +162,8 @@ const verifyOTP = async (req, res) => {
       await newUser.save();
 
       if (referralCode) {
-        console.log(`user signed up using a referal code...`);
         const user = await User.findOne({ referralCode });
         if (user) {
-          console.log(`crediting referal bonus to ${user.name}`);
           let referredUserWallet = await Wallet.findOne({ userId: user.id });
           if (!referredUserWallet) {
             referredUserWallet = new Wallet({
@@ -175,25 +173,33 @@ const verifyOTP = async (req, res) => {
             });
           }
           referredUserWallet.walletBalance += offerAmount;
-          referredUserWallet.transactions.push(
-            `Rs. ${offerAmount} credited as referal bonus from ${username}`
-          );
-          console.log("refered user wallet : ", referredUserWallet);
+          referredUserWallet.transactions.push({
+            transactionType: "Credit",
+            amount: offerAmount,
+            // createdOn: new Date(),
+            description: `Referal bonus amount of ${offerAmount} credited.`,
+          });
+
           await referredUserWallet.save();
           referralCode = true;
         }
       }
 
       if (referralCode === true) {
-        console.log(`creditin referal user bonus...`);
-        const user = await User.find({ email });
+        const user = await User.findOne({ email: email });
+
         const wallet = new Wallet({
           userId: user.id,
           walletBalance: 0,
           transactions: [],
         });
         wallet.walletBalance += offerAmount;
-        wallet.transactions.push(`Rs. ${offerAmount} credited as referal bonus.`);
+        wallet.transactions.push({
+          transactionType: "Credit",
+          amount: offerAmount,
+          // createdOn: new Date.now(),
+          description: `Referal bonus amount of ${offerAmount} credited.`,
+        });
         await wallet.save();
       }
       res.json({ success: true });
@@ -201,6 +207,7 @@ const verifyOTP = async (req, res) => {
       res.json({ success: false });
     }
   } catch (error) {
+    console.log("error verifying otp", error);
     res.send(`Error Verifying OTP. ${error}`);
   }
 };

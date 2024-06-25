@@ -803,6 +803,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const discount = parseFloat(document.getElementById("discount-amount").textContent.replace('₹', ''));
       const subTotal = parseFloat(document.getElementById("cart-total").textContent.replace('₹', ''));
       const userId = document.querySelector("#userId").textContent.trim();
+      const shippingCharge = parseFloat(document.getElementById("shipping-fees").textContent.replace('₹', ''));
 
       const productRows = document.querySelectorAll('.products');
       const outOfStockProducts = [];
@@ -887,6 +888,7 @@ document.addEventListener("DOMContentLoaded", () => {
         orderId,
         orderStatus: 'pending',
         billTotal,
+        shippingCharge,
         discount,
         subTotal,
         address,
