@@ -1,3 +1,0 @@
-Algrithm design manual.
-readings in database systems.
-design and evolution of c++.

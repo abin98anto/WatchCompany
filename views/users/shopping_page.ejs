@@ -1,5 +1,260 @@
 <%- include('../partials/header.ejs') %> 
-<%- include('../partials/page_header.ejs') %>
+<header class="header-area header-style-5">
+  <div class="header-bottom sticky-bar sticky-white-bg">
+    <div class="container">
+      <div class="header-wrap header-space-between position-relative">
+        <!-- logo -->
+        <div class="logo">
+          <a href="/">
+            <img
+              src="/user_assets/imgs/theme/watchcompany_logo.svg"
+              alt="logo"
+              style="width: 90px"
+            />
+          </a>
+        </div>
+
+        <!-- header links -->
+        <div
+          class="main-menu main-menu-grow main-menu-padding-1 main-menu-lh-1 main-menu-mrg-1 hm3-menu-padding d-none d-lg-block hover-boder"
+        >
+          <nav>
+            <ul>
+              <li>
+                <a class="active" href="/">Home</a>
+              </li>
+
+              <!-- Categories page -->
+              <!-- <li class="position">
+                <div class="dropdown">
+                  <button
+                    class="btn dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    style="background-color: white; border: none; color: black"
+                  >
+                    Categories
+                  </button>
+                  <ul class="dropdown-menu text-center">
+                    <li>
+                      <a class="dropdown-item" href="#"> All Categories</a>
+                    </li>
+                    <% categories.forEach((category) => { %>
+                    <li>
+                      <a class="dropdown-item" href="#"><%= category.name %></a>
+                    </li>
+                    <% }); %>
+                  </ul>
+                </div>
+              </li> -->
+
+              <!-- Shop page -->
+              <li>
+                <a href="/shop">Shop</a>
+              </li>
+
+              <!-- Contact page -->
+              <!-- <li>
+                <a href="#">Contact</a>
+              </li> -->
+            </ul>
+          </nav>
+        </div>
+
+        <!-- Search -->
+        <div class="header-action-right">
+          <div class="search-style-2">
+            <form action="#">
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Search for items…"
+              />
+            </form>
+          </div>
+
+
+          <!-- Wishlist -->
+          <div class="header-action-2">
+            <div class="header-action-icon-2">
+              <a href="/wishlist">
+                <img
+                  class="svgInject"
+                  alt="Evara"
+                  src="/user_assets/imgs/theme/icons/icon-heart.svg"
+                />
+                <!-- <span class="pro-count blue">4</span> -->
+              </a>
+            </div>
+
+            <!-- Cart -->
+            <div class="header-action-icon-2">
+              <a class="mini-cart-icon" href="/cart">
+                <img
+                  alt="Watch Company"
+                  src="/user_assets/imgs/theme/icons/icon-cart.svg"
+                />
+                <!-- <span class="pro-count blue">2</span> -->
+              </a>
+            </div>
+
+            <!-- Account Icon -->
+            <div class="header-action-icon-2">
+              <% if (user) { %>
+              <div class="dropdown text-center">
+                <a
+                  class="btn dropdown-toggle"
+                  style="
+                    background-color: white;
+                    color: black;
+                    border-style: none;
+                  "
+                  href="#"
+                  role="button"
+                  id="userDropdown"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i class="material-icons align-middle">account_circle</i>
+                  <span id="headerUserName"><%= user.name %></span>
+                </a>
+                <ul
+                  class="dropdown-menu text-center"
+                  aria-labelledby="userDropdown"
+                >
+                  <li>
+                    <a class="dropdown-item" href="/my_profile">Settings</a>
+                  </li>
+                  <% if (google) { %>
+                  <li>
+                    <a class="dropdown-item" href="/auth/logout">Logout</a>
+                  </li>
+                  <% } else { %>
+                  <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                  <% } %>
+                </ul>
+              </div>
+              <% } else { %>
+              <div class="dropdown text-center">
+                <a
+                  class="btn dropdown-toggle"
+                  style="
+                    background-color: white;
+                    color: black;
+                    border-style: none;
+                  "
+                  href="#"
+                  role="button"
+                  id="userDropdown"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i class="material-icons align-middle">account_circle</i>
+                  Guest
+                </a>
+                <ul
+                  class="dropdown-menu text-center"
+                  aria-labelledby="userDropdown"
+                >
+                  <li>
+                    <a class="dropdown-item" href="/signup">Signup</a>
+                  </li>
+                  <li><a class="dropdown-item" href="/login">Login</a></li>
+                </ul>
+              </div>
+              <% } %>
+            </div>
+
+            <!-- Dropdown list for account -->
+
+            <div class="header-action-icon d-block d-lg-none">
+              <div class="burger-icon">
+                <span class="burger-icon-top"></span>
+                <span class="burger-icon-mid"></span>
+                <span class="burger-icon-bottom"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- mobile view -->
+<div class="mobile-header-active mobile-header-wrapper-style">
+  <div class="mobile-header-wrapper-inner">
+    <div class="mobile-header-top">
+      <div class="mobile-header-logo">
+        <a href="index.html"
+          ><img src="/user_assets/imgs/theme/logo.svg" alt="logo"
+        /></a>
+      </div>
+      <div
+        class="mobile-menu-close close-style-wrap close-style-position-inherit"
+      >
+        <button class="close-style search-close">
+          <i class="icon-top"></i>
+          <i class="icon-bottom"></i>
+        </button>
+      </div>
+    </div>
+    <div class="mobile-header-content-area">
+      <div class="mobile-search search-style-3 mobile-header-border">
+        <form action="#">
+          <input type="text" placeholder="Search for items…" />
+          <button type="submit"><i class="fi-rs-search"></i></button>
+        </form>
+      </div>
+      <div class="mobile-menu-wrap mobile-header-border">
+        <div class="main-categori-wrap mobile-header-border">
+          <a class="categori-button-active-2" href="#">
+            <span class="fi-rs-apps"></span> Browse Categories
+          </a>
+          <div class="categori-dropdown-wrap categori-dropdown-active-small">
+            <ul>
+              <li>
+                <a href="shop-grid-right.html"
+                  ><i class="evara-font-dress"></i>Women's Clothing</a
+                >
+              </li>
+              <!-- Add more categories as needed -->
+            </ul>
+          </div>
+        </div>
+        <!-- mobile menu start -->
+        <nav>
+          <ul class="mobile-menu">
+            <!-- Navigation Menu -->
+          </ul>
+        </nav>
+        <!-- mobile menu end -->
+      </div>
+      <div class="mobile-header-info-wrap mobile-header-border">
+        <div class="single-mobile-header-info mt-30">
+          <a href="page-contact.html"> Our location </a>
+        </div>
+        <div class="single-mobile-header-info">
+          <a href="/signup">Log In / Sign Up </a>
+        </div>
+        <div class="single-mobile-header-info">
+          <a href="#">(+01) - 2345 - 6789 </a>
+        </div>
+      </div>
+      <div class="mobile-social-icon">
+        <h5 class="mb-15 text-grey-4">Follow Us</h5>
+        <a href="#"
+          ><img src="/user_assets/imgs/theme/icons/icon-facebook.svg" alt=""
+        /></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@floating-ui/core@1.6.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.3"></script>
+
     
 <style>
 .product-name {
@@ -428,4 +683,5 @@
   }
 </script>
 
+<%- include('../partials/page_footer.ejs') %>
 <%- include('../partials/footer.ejs') %>
