@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node --watch index.js",
-    "postinstall": "npx puppeteer install"
+    "postinstall": "npx puppeteer install --path=/opt/render/.cache/puppeteer"
   },
   "repository": {
     "type": "git",
