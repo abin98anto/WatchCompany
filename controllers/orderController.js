@@ -145,7 +145,7 @@ const addOrder = async (req, res) => {
         currency: "INR",
         receipt: newOrder.orderId,
       };
-      
+
       razorpayInstance.orders.create(options, function (err, order) {
         if (!err) {
           console.log("order :", order);
@@ -311,7 +311,7 @@ const loadSingleOrder = async (req, res) => {
     const products = await Products.find({ isUnlisted: false });
     const categories = await Category.find({ isUnlisted: false });
     const orders = await Order.find({ _id: id }).sort({ createdOn: -1 });
-    console.log("single order : ", orders.products);
+
     let google;
     req.user
       ? ((google = true), (logout = "/auth/logout"))
@@ -735,6 +735,116 @@ const updatePayment = async (req, res) => {
 };
 
 // Download Invoice
+// const downloadInvoice = async (req, res) => {
+//   try {
+//     const { orderId } = req.query;
+//     const order = await Order.findById(orderId).populate("products.productId");
+
+//     if (!order) {
+//       return res.status(404).json({ error: "Order not found" });
+//     }
+
+//     const templatePath = path.join(__dirname, "../views/users/invoice.ejs");
+//     const html = await ejs.renderFile(templatePath, { order });
+
+//     const browser = await puppeteer.launch();
+//     const page = await browser.newPage();
+//     await page.setContent(html);
+//     const pdfBuffer = await page.pdf({ format: "A4" });
+//     await browser.close();
+
+//     res.setHeader("Content-Type", "application/pdf");
+//     res.setHeader(
+//       "Content-Disposition",
+//       `attachment; filename=invoice-${orderId}.pdf`
+//     );
+//     res.send(pdfBuffer);
+//   } catch (error) {
+//     console.error("Error generating the invoice:", error);
+//     res.status(500).json({ error: "Failed to download the invoice" });
+//   }
+// };
+
+// const downloadInvoice = async (req, res) => {
+//   try {
+//     const { orderId } = req.query;
+//     const order = await Order.findById(orderId).populate("products.productId");
+//     console.log("first", order);
+//     if (!order) {
+//       return res.status(404).json({ error: "Order not found" });
+//     }
+
+//     const templatePath = path.join(__dirname, "../views/users/invoice.ejs");
+//     const html = await ejs.renderFile(templatePath, { order });
+
+//     const browser = await puppeteer.launch({
+//       args: ["--no-sandbox", "--disable-setuid-sandbox"],
+//       executablePath: puppeteer.executablePath(),
+//     });
+
+//     const page = await browser.newPage();
+//     await page.setContent(html);
+//     const pdfBuffer = await page.pdf({ format: "A4" });
+//     await browser.close();
+
+//     res.setHeader("Content-Type", "application/pdf");
+//     res.setHeader(
+//       "Content-Disposition",
+//       `attachment; filename=invoice-${orderId}.pdf`
+//     );
+//     res.send(pdfBuffer);
+//   } catch (error) {
+//     console.error("Error generating the invoice:", error);
+//     res.status(500).json({ error: "Failed to download the invoice" });
+//   }
+// };
+
+// const downloadInvoice = async (req, res) => {
+//   try {
+//     const { orderId } = req.query;
+//     const order = await Order.findById(orderId).populate("products.productId");
+//     console.log("Order:", order);
+
+//     if (!order) {
+//       return res.status(404).json({ error: "Order not found" });
+//     }
+
+//     const templatePath = path.resolve(__dirname, "../views/users/invoice.ejs");
+//     const html = await ejs.renderFile(templatePath, { order });
+//     console.log("Rendered HTML:", html);
+
+//     const browser = await puppeteer.launch({
+//       args: ["--no-sandbox", "--disable-setuid-sandbox"],
+//       executablePath: puppeteer.executablePath(),
+//     });
+
+//     const page = await browser.newPage();
+//     await page.setContent(html);
+
+//     // Debug rendering with a screenshot
+//     await page.screenshot({ path: "rendered_page.png" });
+
+//     const pdfBuffer = await page.pdf({
+//       format: "A4",
+//       printBackground: true,
+//       preferCSSPageSize: true,
+//     });
+
+//     await browser.close();
+
+//     res.setHeader("Content-Type", "application/pdf");
+//     res.setHeader(
+//       "Content-Disposition",
+//       `attachment; filename=invoice-${orderId}.pdf`
+//     );
+//     res.setHeader("Content-Length", pdfBuffer.length);
+//     res.send(pdfBuffer);
+//   } catch (error) {
+//     console.error("Error generating the invoice:", error);
+//     res.status(500).json({ error: "Failed to download the invoice" });
+//   }
+// };
+
 const downloadInvoice = async (req, res) => {
   try {
     const { orderId } = req.query;
@@ -744,13 +854,34 @@ const downloadInvoice = async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    const templatePath = path.join(__dirname, "../views/users/invoice.ejs");
-    const html = await ejs.renderFile(templatePath, { order });
+    const templatePath = path.resolve(__dirname, "../views/users/invoice.ejs");
+    if (!fs.existsSync(templatePath)) {
+      throw new Error(`Template not found: ${templatePath}`);
+    }
 
-    const browser = await puppeteer.launch();
+    const html = await ejs.renderFile(templatePath, { order });
+    // console.log("Rendered HTML:", html);
+
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: puppeteer.executablePath(),
+    });
+
     const page = await browser.newPage();
     await page.setContent(html);
-    const pdfBuffer = await page.pdf({ format: "A4" });
+    // await page.screenshot({ path: "debug_rendered_page.png" }); // Debug screenshot
+
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      preferCSSPageSize: true,
+    });
+
+    console.log("PDF Buffer Length:", pdfBuffer.length);
+    if (pdfBuffer.length === 0) {
+      throw new Error("Generated PDF buffer is empty.");
+    }
+
     await browser.close();
 
     res.setHeader("Content-Type", "application/pdf");
@@ -758,7 +889,8 @@ const downloadInvoice = async (req, res) => {
       "Content-Disposition",
       `attachment; filename=invoice-${orderId}.pdf`
     );
-    res.send(pdfBuffer);
+    res.setHeader("Content-Length", pdfBuffer.length);
+    res.end(pdfBuffer);
   } catch (error) {
     console.error("Error generating the invoice:", error);
     res.status(500).json({ error: "Failed to download the invoice" });

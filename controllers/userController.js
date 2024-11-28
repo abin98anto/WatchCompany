@@ -99,13 +99,13 @@ const sendOTP = async (req, res) => {
       },
     });
 
-      const mailOptions = {
-        from: process.env.AUTH_EMAIL,
-        to: req.body.email,
-        subject: "Welcome to Watch Company! Verify your Account",
-        preheader: "Complete your registration and unlock exclusive benefits.",
-        text: `This is a verification email sent from Watch Company.`,
-        html: `
+    const mailOptions = {
+      from: process.env.AUTH_EMAIL,
+      to: req.body.email,
+      subject: "Welcome to Watch Company! Verify your Account",
+      preheader: "Complete your registration and unlock exclusive benefits.",
+      text: `This is a verification email sent from Watch Company.`,
+      html: `
       <div style="background-color: #f5f5f5; padding: 20px;">
         <header style="background-color: #333; color: #fff; padding: 10px;">
           <h1>Watch Company</h1>
@@ -119,16 +119,16 @@ const sendOTP = async (req, res) => {
         <p>The Watch Company Team</p>
       </div>
     `,
-      };
+    };
 
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         console.log(error);
-        res.status(500).send("Error sending email.The errror is");
+        res.status(500).send("Error sending email.The errror is", error);
       } else {
-    req.session.newOTP = newOTP;
-    req.session.email = email;
-    res.render("otp");
+        req.session.newOTP = newOTP;
+        req.session.email = email;
+        res.render("otp");
       }
     });
   } catch (error) {

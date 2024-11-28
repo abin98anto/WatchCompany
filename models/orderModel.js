@@ -68,6 +68,7 @@ const orderSchema = new mongoose.Schema({
   },
   shippingCharge: {
     type: Number,
+    default: 0
   },
   subTotal: {
     type: Number,
