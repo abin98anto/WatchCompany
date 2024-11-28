@@ -8,7 +8,6 @@ const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
-// const { google } = require("../config/keys");
 const Wishlist = require("../models/wishlistModel");
 const Wallet = require("../models/walletModel");
 const Referral = require("../models/referralModel");

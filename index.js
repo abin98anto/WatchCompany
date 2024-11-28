@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const user_route = require("./routes/userRoute");
 const admin_route = require("./routes/adminRoute");
 mongoose.connect(process.env.MONGO_URL);
-const secretKey = process.env.SECRET_KEY;
+const secretKey = process.env.SECRET_KEY || "secret-key";
 const nocache = require("nocache");
 
 // OAuth
