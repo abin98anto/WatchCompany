@@ -3,7 +3,6 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy; // Import Go
 const { keys } = require("./keys");
 const User = require("../models/userModel");
 
-
 // Serialize user to session
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -25,8 +24,8 @@ passport.use(
   new GoogleStrategy(
     {
       callbackURL: "/auth/google/redirect",
-      clientID: keys.google.clientID,
-      clientSecret: keys.google.clientSecret,
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_SECRET,
     },
     (accessToken, refreshToken, profile, done) => {
       User.findOne({ email: profile.emails[0].value })
