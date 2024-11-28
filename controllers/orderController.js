@@ -735,115 +735,6 @@ const updatePayment = async (req, res) => {
 };
 
 // Download Invoice
-// const downloadInvoice = async (req, res) => {
-//   try {
-//     const { orderId } = req.query;
-//     const order = await Order.findById(orderId).populate("products.productId");
-
-//     if (!order) {
-//       return res.status(404).json({ error: "Order not found" });
-//     }
-
-//     const templatePath = path.join(__dirname, "../views/users/invoice.ejs");
-//     const html = await ejs.renderFile(templatePath, { order });
-
-//     const browser = await puppeteer.launch();
-//     const page = await browser.newPage();
-//     await page.setContent(html);
-//     const pdfBuffer = await page.pdf({ format: "A4" });
-//     await browser.close();
-
-//     res.setHeader("Content-Type", "application/pdf");
-//     res.setHeader(
-//       "Content-Disposition",
-//       `attachment; filename=invoice-${orderId}.pdf`
-//     );
-//     res.send(pdfBuffer);
-//   } catch (error) {
-//     console.error("Error generating the invoice:", error);
-//     res.status(500).json({ error: "Failed to download the invoice" });
-//   }
-// };
-
-// const downloadInvoice = async (req, res) => {
-//   try {
-//     const { orderId } = req.query;
-//     const order = await Order.findById(orderId).populate("products.productId");
-//     console.log("first", order);
-//     if (!order) {
-//       return res.status(404).json({ error: "Order not found" });
-//     }
-
-//     const templatePath = path.join(__dirname, "../views/users/invoice.ejs");
-//     const html = await ejs.renderFile(templatePath, { order });
-
-//     const browser = await puppeteer.launch({
-//       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-//       executablePath: puppeteer.executablePath(),
-//     });
-
-//     const page = await browser.newPage();
-//     await page.setContent(html);
-//     const pdfBuffer = await page.pdf({ format: "A4" });
-//     await browser.close();
-
-//     res.setHeader("Content-Type", "application/pdf");
-//     res.setHeader(
-//       "Content-Disposition",
-//       `attachment; filename=invoice-${orderId}.pdf`
-//     );
-//     res.send(pdfBuffer);
-//   } catch (error) {
-//     console.error("Error generating the invoice:", error);
-//     res.status(500).json({ error: "Failed to download the invoice" });
-//   }
-// };
-
-// const downloadInvoice = async (req, res) => {
-//   try {
-//     const { orderId } = req.query;
-//     const order = await Order.findById(orderId).populate("products.productId");
-//     console.log("Order:", order);
-
-//     if (!order) {
-//       return res.status(404).json({ error: "Order not found" });
-//     }
-
-//     const templatePath = path.resolve(__dirname, "../views/users/invoice.ejs");
-//     const html = await ejs.renderFile(templatePath, { order });
-//     console.log("Rendered HTML:", html);
-
-//     const browser = await puppeteer.launch({
-//       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-//       executablePath: puppeteer.executablePath(),
-//     });
-
-//     const page = await browser.newPage();
-//     await page.setContent(html);
-
-//     // Debug rendering with a screenshot
-//     await page.screenshot({ path: "rendered_page.png" });
-
-//     const pdfBuffer = await page.pdf({
-//       format: "A4",
-//       printBackground: true,
-//       preferCSSPageSize: true,
-//     });
-
-//     await browser.close();
-
-//     res.setHeader("Content-Type", "application/pdf");
-//     res.setHeader(
-//       "Content-Disposition",
-//       `attachment; filename=invoice-${orderId}.pdf`
-//     );
-//     res.setHeader("Content-Length", pdfBuffer.length);
-//     res.send(pdfBuffer);
-//   } catch (error) {
-//     console.error("Error generating the invoice:", error);
-//     res.status(500).json({ error: "Failed to download the invoice" });
-//   }
-// };
 
 const downloadInvoice = async (req, res) => {
   try {
@@ -860,7 +751,7 @@ const downloadInvoice = async (req, res) => {
     }
 
     const html = await ejs.renderFile(templatePath, { order });
-    // console.log("Rendered HTML:", html);
+    console.log("Rendered HTML:", html);
 
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -869,7 +760,7 @@ const downloadInvoice = async (req, res) => {
 
     const page = await browser.newPage();
     await page.setContent(html);
-    // await page.screenshot({ path: "debug_rendered_page.png" }); // Debug screenshot
+    await page.screenshot({ path: "debug_rendered_page.png" }); // Debug screenshot
 
     const pdfBuffer = await page.pdf({
       format: "A4",
