@@ -13,7 +13,7 @@ const nocache = require("nocache");
 const authRoutes = require("./routes/auth-routes");
 const passportSetup = require("./config/passport-setup");
 const passport = require("passport");
-const keys = require("./config/keys");
+// const keys = require("./config/keys");
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -52,21 +52,21 @@ app.use("/", user_route);
 
 app.use("/admin", admin_route);
 
-// // Middleware to handle undefined routes
-// app.use((req, res, next) => {
-//   const error = new Error("Not Found");
-//   error.status = 404;
-//   next(error);
-// });
+// Middleware to handle undefined routes
+app.use((req, res, next) => {
+  const error = new Error("Not Found");
+  error.status = 404;
+  next(error);
+});
 
-// // Error handling middleware
-// app.use((err, req, res, next) => {
-//   let url = "";
-//   let folder = "";
-//   req.url.split("/")[1] == "admin" ? (folder = "admin") : (folder = "user");
-//   req.url.split("/")[1] == "admin" ? (url = "/admin") : (url = "/");
-//   res.status(err.status || 500);
-//   res.render("404", { error: err, url: url, folder: folder });
-// });
+// Error handling middleware
+app.use((err, req, res, next) => {
+  let url = "";
+  let folder = "";
+  req.url.split("/")[1] == "admin" ? (folder = "admin") : (folder = "user");
+  req.url.split("/")[1] == "admin" ? (url = "/admin") : (url = "/");
+  res.status(err.status || 500);
+  res.render("404", { error: err, url: url, folder: folder });
+});
 
 app.listen(port, () => console.log(`http://localhost:${port}`));
