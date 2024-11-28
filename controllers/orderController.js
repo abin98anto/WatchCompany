@@ -13,6 +13,7 @@ const sharp = require("sharp");
 const { PDFDocument, rgb } = require("pdf-lib");
 const puppeteer = require("puppeteer");
 const ejs = require("ejs");
+const launchBrowser = require("../utils/puppeteerHelper");
 
 const Razorpay = require("razorpay");
 const Product = require("../models/productModel");
@@ -751,12 +752,16 @@ const downloadInvoice = async (req, res) => {
     }
 
     const html = await ejs.renderFile(templatePath, { order });
-    console.log("Rendered HTML:", html);
+    // console.log("Rendered HTML:", html);
 
-    const browser = await puppeteer.launch({
+    const browser = await launchBrowser({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
       executablePath: puppeteer.executablePath(),
     });
+    // const browser = await puppeteer.launch({
+    //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    //   executablePath: puppeteer.executablePath(),
+    // });
 
     const page = await browser.newPage();
     await page.setContent(html);
@@ -768,7 +773,7 @@ const downloadInvoice = async (req, res) => {
       preferCSSPageSize: true,
     });
 
-    console.log("PDF Buffer Length:", pdfBuffer.length);
+    // console.log("PDF Buffer Length:", pdfBuffer.length);
     if (pdfBuffer.length === 0) {
       throw new Error("Generated PDF buffer is empty.");
     }
