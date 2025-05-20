@@ -517,12 +517,13 @@ async function downloadInvoice(orderId) {
               'Content-Type': 'application/pdf'
             }
           });
-
+console.log("the response 1 ",response);
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
-
           const blob = await response.blob();
+          console.log("response",blob);
+
           const blobUrl = URL.createObjectURL(blob);
 
           const link = document.createElement('a');

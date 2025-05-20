@@ -304,7 +304,6 @@ const loadOrderManagement = async (req, res) => {
   }
 };
 
-// View individual orders
 const loadSingleOrder = async (req, res) => {
   try {
     const { id } = req.query;
@@ -331,7 +330,6 @@ const loadSingleOrder = async (req, res) => {
   }
 };
 
-// Cancel a Product
 const cancelProduct = async (req, res) => {
   console.log(`canceling the product from the order...`);
   try {
@@ -372,15 +370,10 @@ const cancelProduct = async (req, res) => {
     console.log(`payment status : ${order.paymentStatus}`);
 
     if (order.paymentMethod != "cod" && order.paymentStatus == "Success") {
-      console.log(`refunding the user...`);
       let wallet = await Wallet.findOne({ userId: userId });
       if (!wallet) {
-        console.log(
-          `no wallet found for the user, creating new wallet for the user..`
-        );
         wallet = new Wallet({ userId: userId, transactions: [] });
       }
-      console.log(`user wallet : ${wallet}`);
 
       wallet.walletBalance += firstBill - order.billTotal;
 
@@ -392,7 +385,6 @@ const cancelProduct = async (req, res) => {
       };
 
       wallet.transactions.push(transaction);
-      console.log(`user wallet after entering the transaction : ${wallet}`);
 
       wallet.save();
     }
@@ -409,13 +401,11 @@ const cancelProduct = async (req, res) => {
   }
 };
 
-// Cancel a Order
 const cancelOrder = async (req, res) => {
   try {
     const id = req.query.id;
     const { cancelReason } = req.body;
     const order = await Order.findById(id);
-    // console.log(`orders : ${order}`);
 
     const firstBill = order.billTotal;
 
@@ -426,7 +416,6 @@ const cancelOrder = async (req, res) => {
     order.products.forEach(async function (product) {
       const existingProduct = await Products.findById(product.productId);
       existingProduct.stock += product.quantity;
-      // console.log(`existing product : ${existingProduct}`);
       await existingProduct.save();
     });
 
@@ -439,16 +428,10 @@ const cancelOrder = async (req, res) => {
 
     if (order.paymentMethod != "cod" && order.paymentStatus == "Success") {
       const userId = req.session.userData;
-      // console.log(`refunding the user...`);
-      // const existingProduct = await Products.findById(productId);
       let wallet = await Wallet.findOne({ userId: userId });
       if (!wallet) {
-        // console.log(
-        //   `no wallet found for the user, creating new wallet for the user..`
-        // );
         wallet = new Wallet({ userId: userId, transactions: [] });
       }
-      // console.log(`user wallet : ${wallet}`);
 
       const transaction = {
         transactionType: "Credit",
@@ -459,7 +442,6 @@ const cancelOrder = async (req, res) => {
 
       wallet.walletBalance += firstBill;
       wallet.transactions.push(transaction);
-      // console.log(`user wallet after entering the transaction : ${wallet}`);
 
       wallet.save();
     }
@@ -473,7 +455,6 @@ const cancelOrder = async (req, res) => {
   }
 };
 
-// Return Single Order Page
 const loadReturnSingleOrder = async (req, res) => {
   try {
     const { id } = req.query;
@@ -500,7 +481,6 @@ const loadReturnSingleOrder = async (req, res) => {
   }
 };
 
-// Return a Product
 const returnProduct = async (req, res) => {
   try {
     const { orderId, productId } = req.query;
@@ -519,18 +499,11 @@ const returnProduct = async (req, res) => {
     }
 
     const firstBill = order.billTotal;
-
-    // Update the product within the order
     product.returnProduct = true;
     product.returnReason = returnReason;
-    // console.log("product : ", product);
     order.orderStatus = "partially-returned";
     order.billTotal -= product.price * product.quantity;
-
-    // Check if all products in the order are returned
     const allProductsReturned = order.products.every((p) => p.returnProduct);
-
-    // Update order status if necessary
     if (allProductsReturned) {
       order.orderStatus = "returned";
       order.returnAll = true;
@@ -539,16 +512,11 @@ const returnProduct = async (req, res) => {
     const userId = req.session.userData || req.user?.id;
 
     if (order.paymentMethod != "cod") {
-      // console.log(`refunding the user...`);
       const existingProduct = await Products.findById(productId);
       let wallet = await Wallet.findOne({ userId: userId });
       if (!wallet) {
-        // console.log(
-        //   `no wallet found for the user, creating new wallet for the user..`
-        // );
         wallet = new Wallet({ userId: userId, transactions: [] });
       }
-      // console.log(`user wallet : ${wallet}`);
 
       const transaction = {
         transactionType: "Credit",
@@ -559,12 +527,9 @@ const returnProduct = async (req, res) => {
 
       wallet.walletBalance += firstBill - order.billTotal;
       wallet.transactions.push(transaction);
-      // console.log(`user wallet after entering the transaction : ${wallet}`);
-
       wallet.save();
     }
 
-    // Save changes to the product and order
     await order.save();
 
     res
@@ -576,7 +541,6 @@ const returnProduct = async (req, res) => {
   }
 };
 
-// Retrun a Order
 const returnOrder = async (req, res) => {
   try {
     const id = req.query.id;
@@ -623,7 +587,6 @@ const returnOrder = async (req, res) => {
   }
 };
 
-// Load order details in order management.
 const loadOrderDetails = async (req, res) => {
   const { id } = req.query;
   const user = req.session.adminData;
@@ -643,7 +606,6 @@ const loadOrderDetails = async (req, res) => {
   });
 };
 
-// Change order status in admin side.
 const changeStatus = async (req, res) => {
   const { orderId, status, productId } = req.query;
 
@@ -664,7 +626,6 @@ const changeStatus = async (req, res) => {
   }
 };
 
-// Check wallet balance.
 const getWalletBalance = async (req, res) => {
   try {
     const userId = req.query.userId;
@@ -681,7 +642,6 @@ const getWalletBalance = async (req, res) => {
   }
 };
 
-// Retry Payment.
 const retryPayment = async (req, res) => {
   const { order } = req.body;
 
@@ -735,8 +695,6 @@ const updatePayment = async (req, res) => {
   }
 };
 
-// Download Invoice
-
 const downloadInvoice = async (req, res) => {
   try {
     const { orderId } = req.query;
@@ -752,20 +710,11 @@ const downloadInvoice = async (req, res) => {
     }
 
     const html = await ejs.renderFile(templatePath, { order });
-    // console.log("Rendered HTML:", html);
-
-    const browser = await launchBrowser({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: puppeteer.executablePath(),
-    });
-    // const browser = await puppeteer.launch({
-    //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    //   executablePath: puppeteer.executablePath(),
-    // });
+    const browser = await launchBrowser();
 
     const page = await browser.newPage();
     await page.setContent(html);
-    await page.screenshot({ path: "debug_rendered_page.png" }); // Debug screenshot
+    await page.screenshot({ path: "debug_rendered_page.png" });
 
     const pdfBuffer = await page.pdf({
       format: "A4",
@@ -773,7 +722,6 @@ const downloadInvoice = async (req, res) => {
       preferCSSPageSize: true,
     });
 
-    // console.log("PDF Buffer Length:", pdfBuffer.length);
     if (pdfBuffer.length === 0) {
       throw new Error("Generated PDF buffer is empty.");
     }
@@ -788,8 +736,13 @@ const downloadInvoice = async (req, res) => {
     res.setHeader("Content-Length", pdfBuffer.length);
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("Error generating the invoice:", error);
-    res.status(500).json({ error: "Failed to download the invoice" });
+    console.error("Error generating the invoice:", error.message, error.stack);
+    res
+      .status(500)
+      .json({
+        error: "Failed to download the invoice",
+        details: error.message,
+      });
   }
 };
 

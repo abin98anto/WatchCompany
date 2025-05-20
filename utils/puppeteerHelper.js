@@ -14,6 +14,7 @@ const launchBrowser = async () => {
     });
   } else {
     return puppeteer.launch({
+      executablePath: "/usr/bin/google-chrome",
       headless: true,
     });
   }
