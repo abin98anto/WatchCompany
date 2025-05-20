@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node --watch index.js",
+    "build": "./build.sh",
     "postinstall": "npx puppeteer install --path=/opt/render/.cache/puppeteer"
   },
   "repository": {

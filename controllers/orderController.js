@@ -696,53 +696,93 @@ const updatePayment = async (req, res) => {
 };
 
 const downloadInvoice = async (req, res) => {
+  let browser = null;
   try {
+    console.log("Starting invoice download process");
     const { orderId } = req.query;
+    console.log(`Fetching order with ID: ${orderId}`);
+
     const order = await Order.findById(orderId).populate("products.productId");
 
     if (!order) {
+      console.log(`Order not found: ${orderId}`);
       return res.status(404).json({ error: "Order not found" });
     }
 
+    console.log("Found order, rendering template");
     const templatePath = path.resolve(__dirname, "../views/users/invoice.ejs");
+
     if (!fs.existsSync(templatePath)) {
+      console.error(`Template not found at path: ${templatePath}`);
       throw new Error(`Template not found: ${templatePath}`);
     }
 
+    console.log("Template found, rendering EJS");
     const html = await ejs.renderFile(templatePath, { order });
-    const browser = await launchBrowser();
+
+    console.log("Launching browser");
+    browser = await launchBrowser();
+    console.log("Browser launched successfully");
 
     const page = await browser.newPage();
-    await page.setContent(html);
-    await page.screenshot({ path: "debug_rendered_page.png" });
+    console.log("New page created");
 
+    await page.setContent(html);
+    console.log("Content set");
+
+    // Debug: Save a screenshot of what's being rendered
+    if (process.env.NODE_ENV !== "production") {
+      await page.screenshot({ path: "debug_rendered_page.png" });
+      console.log("Debug screenshot saved");
+    }
+
+    console.log("Generating PDF");
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
       preferCSSPageSize: true,
+      timeout: 60000, // Increase timeout to 60 seconds
     });
+
+    console.log(`PDF generated with size: ${pdfBuffer.length} bytes`);
 
     if (pdfBuffer.length === 0) {
       throw new Error("Generated PDF buffer is empty.");
     }
 
+    console.log("Closing browser");
     await browser.close();
+    browser = null;
 
+    console.log("Setting response headers");
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
       `attachment; filename=invoice-${orderId}.pdf`
     );
     res.setHeader("Content-Length", pdfBuffer.length);
+
+    console.log("Sending PDF response");
     res.end(pdfBuffer);
+    console.log("PDF sent successfully");
   } catch (error) {
-    console.error("Error generating the invoice:", error.message, error.stack);
-    res
-      .status(500)
-      .json({
-        error: "Failed to download the invoice",
-        details: error.message,
-      });
+    console.error("Error generating the invoice:", error.message);
+    console.error("Full error stack:", error.stack);
+
+    // Make sure browser is closed if there's an error
+    if (browser) {
+      try {
+        await browser.close();
+        console.log("Browser closed after error");
+      } catch (closeError) {
+        console.error("Error closing browser:", closeError);
+      }
+    }
+
+    res.status(500).json({
+      error: "Failed to download the invoice",
+      details: error.message,
+    });
   }
 };
 

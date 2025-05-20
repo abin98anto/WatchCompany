@@ -6,16 +6,28 @@ const launchBrowser = async () => {
     process.env.RENDER || process.env.AWS_LAMBDA_FUNCTION_NAME;
 
   if (isRenderEnv) {
-    return chromium.puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: "/opt/render/.cache/puppeteer/chrome-linux/chrome",
-      headless: chromium.headless,
+    // Use the recommended Render setup for Puppeteer
+    return puppeteer.launch({
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process",
+        "--disable-gpu",
+      ],
+      headless: "new",
+      executablePath:
+        process.env.PUPPETEER_EXECUTABLE_PATH ||
+        (await chromium.executablePath),
     });
   } else {
+    // Local development configuration
     return puppeteer.launch({
-      executablePath: "/usr/bin/google-chrome",
-      headless: true,
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
   }
 };
