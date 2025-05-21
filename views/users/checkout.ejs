@@ -204,6 +204,7 @@ include('../partials/page_header.ejs') %>
 </style>
 
 <!-- Coupon Modal -->
+<!-- Coupon Modal with Date Filtering -->
 <div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered custom-modal-width">
     <div class="modal-content">
@@ -212,29 +213,40 @@ include('../partials/page_header.ejs') %>
       </div>
       <div class="modal-body" style="background-color: black; overflow-y: auto;">
         <div class="coupons-grid">
-          <% for (let i=0; i<coupons.length; i++) { %>
-          <div class="container2 d-flex mb-20 mt-20" data-coupon-id="<%= coupons[i].id %>" data-disc-pecentage="<%= coupons[i].discountPercentage %>" data-min-purchase="<%= coupons[i].minPurchase %>" data-max-discount="<%= coupons[i].maxDiscount %>">
-            <div class="card2">
-                  <div class="main2">
-                      <div class="co-img ml-20">
-                          <img
-                          src="/user_assets/imgs/theme/watchcompany_logo.svg"
-                          alt=""
-                          />
-                      </div>
-                      <div class="vertical"></div>
-                      <div class="content2">
-                          <h2 class="pb-10"><%= coupons[i].couponCode %></h2>
-                          <h1><%= coupons[i].discountPercentage %>% <span>Coupon</span></h1>
-                          <p>Valid till <%= coupons[i].endDate.toDateString() %></p>
-                      </div>
-                  </div>
-                  <div class="copy-button">
-                  <img class="barcode" src="/fimg/barcode.png" alt="Barcode" />
-                  </div>
+          <% 
+          const currentDate = new Date();
+          // Filter coupons to only show those that haven't expired
+          const validCoupons = coupons.filter(coupon => new Date(coupon.endDate) >= currentDate);
+          
+          if (validCoupons.length === 0) { %>
+            <div class="text-center p-5" style="color: white; grid-column: span 3;">
+              <h4>No valid coupons available at this time.</h4>
             </div>
-          </div>
-          <% } %>
+          <% } else {
+            for (let i=0; i<validCoupons.length; i++) { %>
+            <div class="container2 d-flex mb-20 mt-20" data-coupon-id="<%= validCoupons[i].id %>" data-disc-pecentage="<%= validCoupons[i].discountPercentage %>" data-min-purchase="<%= validCoupons[i].minPurchase %>" data-max-discount="<%= validCoupons[i].maxDiscount %>">
+              <div class="card2">
+                    <div class="main2">
+                        <div class="co-img ml-20">
+                            <img
+                            src="/user_assets/imgs/theme/watchcompany_logo.svg"
+                            alt=""
+                            />
+                        </div>
+                        <div class="vertical"></div>
+                        <div class="content2">
+                            <h2 class="pb-10"><%= validCoupons[i].couponCode %></h2>
+                            <h1><%= validCoupons[i].discountPercentage %>% <span>Coupon</span></h1>
+                            <p>Valid till <%= validCoupons[i].endDate.toDateString() %></p>
+                        </div>
+                    </div>
+                    <div class="copy-button">
+                    <img class="barcode" src="/fimg/barcode.png" alt="Barcode" />
+                    </div>
+              </div>
+            </div>
+            <% }
+          } %>
         </div>
       </div>
       <div class="modal-footer align-items-center" style="justify-content: center;">
@@ -249,7 +261,7 @@ include('../partials/page_header.ejs') %>
   <div class="page-header breadcrumb-wrap pb-5 pt-5"  style="padding: 0px">
     <div class="container">
       <div class="breadcrumb">
-        <a href="index.html" rel="nofollow">Home</a>
+        <a rel="nofollow">Home</a>
         <span> Shop </span><span> Checkout</span>
       </div>
     </div>

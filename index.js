@@ -42,24 +42,22 @@ app.set("views", [
   path.join(__dirname, "views/admin"),
   path.join(__dirname, "views/partials"),
 ]);
-
 app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  "/admin_assets",
+  express.static(path.join(__dirname, "public/admin_assets"))
+);
 
-// OAuth set up routes
 app.use("/auth", authRoutes);
-
 app.use("/", user_route);
-
 app.use("/admin", admin_route);
 
-// Middleware to handle undefined routes
 app.use((req, res, next) => {
   const error = new Error("Not Found");
   error.status = 404;
   next(error);
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   let url = "";
   let folder = "";

@@ -80,6 +80,7 @@ user_route.get(
   couponController.getCoupons
 );
 
+
 // Profile page.
 user_route.get(
   "/my_profile",

@@ -10,11 +10,6 @@
         alt="Watch Company Dashboard"
       />
     </a>
-    <div>
-      <button class="btn btn-icon btn-aside-minimize">
-        <i class="text-muted material-icons md-menu_open"></i>
-      </button>
-    </div>
   </div>
   <nav>
     <ul class="menu-aside">
@@ -50,25 +45,19 @@
       </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/coupon_management">
-          <img src="/fimg/voucher.png">
+          <img src="/fimg/voucher.png" />
           <span class="text ml-10">Coupon Management</span>
         </a>
       </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/sales_report">
-          <img src="/fimg/salesreport.png">
+          <img src="/fimg/salesreport.png" />
           <span class="text ml-10">Sales Report</span>
         </a>
       </li>
     </ul>
     <hr />
     <ul class="menu-aside">
-      <li class="menu-item">
-        <a class="menu-link" href="/admin/settings">
-          <i class="icon material-icons md-settings"></i>
-          <span class="text">Settings</span>
-        </a>
-      </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/logout">
           <i class="icon material-icons md-local_offer"></i>
@@ -94,7 +83,13 @@
             <input type="text" placeholder="Search..." id="searchInput" />
           </div>
           <div class="col-lg-2 col-md-3 col-6">
-            <button class="btn" style="background-color: black; color: white;" id="editButton">Edit Referral Bonus</button>
+            <button
+              class="btn"
+              style="background-color: black; color: white"
+              id="editButton"
+            >
+              Edit Referral Bonus
+            </button>
           </div>
           <div class="col-lg-2 col-md-3 col-6">
             <select class="form-select">
@@ -340,18 +335,18 @@
 
     editReferralButton.addEventListener("click", () => {
       Swal.fire({
-        title: 'Edit Referral Bonus',
-        input: 'number',
-        inputLabel: 'Enter new referral bonus amount',
-        inputPlaceholder: 'Enter amount',
+        title: "Edit Referral Bonus",
+        input: "number",
+        inputLabel: "Enter new referral bonus amount",
+        inputPlaceholder: "Enter amount",
         showCancelButton: true,
-        confirmButtonText: 'Save',
+        confirmButtonText: "Save",
         preConfirm: (amount) => {
           if (!amount) {
-            Swal.showValidationMessage('Please enter a valid amount');
+            Swal.showValidationMessage("Please enter a valid amount");
           }
           return amount;
-        }
+        },
       }).then((result) => {
         if (result.isConfirmed) {
           const offerAmount = result.value;
@@ -362,29 +357,29 @@
 
     const saveReferralBonus = async (offerAmount) => {
       try {
-        const response = await fetch('/admin/edit_referral_bonus', {
-          method: 'POST',
+        const response = await fetch("/admin/edit_referral_bonus", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ offerAmount }),
         });
 
         if (!response.ok) {
-          throw new Error('Failed to save referral bonus');
+          throw new Error("Failed to save referral bonus");
         }
 
         Swal.fire({
-          icon: 'success',
-          title: 'Saved!',
-          text: 'Referral bonus updated successfully',
+          icon: "success",
+          title: "Saved!",
+          text: "Referral bonus updated successfully",
         });
       } catch (error) {
-        console.error('Error saving referral bonus:', error);
+        console.error("Error saving referral bonus:", error);
         Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Failed to save referral bonus. Please try again later.',
+          icon: "error",
+          title: "Oops...",
+          text: "Failed to save referral bonus. Please try again later.",
         });
       }
     };

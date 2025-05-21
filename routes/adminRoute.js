@@ -104,10 +104,15 @@ admin_route.post("/check_coupon", couponController.duplicateCheck);
 admin_route.post("/update_coupon_status", couponController.updateCouponStatus);
 admin_route.delete("/delete_coupon", couponController.deleteCoupon);
 admin_route.put("/update_coupon", couponController.updateCoupon);
+admin_route.get(
+  "/getCoupons",
+  adminAuth.adminLogin,
+  couponController.getCoupons
+);
 
 // Sales Report
 admin_route.get("/sales_report", salesController.loadSalesReport);
-admin_route.get('/sales_report/download', salesController.downloadReport);
+admin_route.get("/sales_report/download", salesController.downloadReport);
 
 // Admin logout.
 admin_route.get("/logout", adminController.logout);

@@ -10,11 +10,6 @@
         alt="Watch Company Dashboard"
       />
     </a>
-    <div>
-      <button class="btn btn-icon btn-aside-minimize">
-        <i class="text-muted material-icons md-menu_open"></i>
-      </button>
-    </div>
   </div>
   <nav>
     <ul class="menu-aside">
@@ -63,12 +58,6 @@
     </ul>
     <hr />
     <ul class="menu-aside">
-      <li class="menu-item">
-        <a class="menu-link" href="/admin/settings">
-          <i class="icon material-icons md-settings"></i>
-          <span class="text">Settings</span>
-        </a>
-      </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/logout">
           <i class="icon material-icons md-local_offer"></i>
@@ -472,17 +461,17 @@
     });
   });
 
-  // Edit coupon
-  document.querySelectorAll('.edit-button').forEach(button => {
+// Edit coupon
+document.querySelectorAll('.edit-button').forEach(button => {
   button.addEventListener('click', function() {
     const couponId = this.previousElementSibling.value;
 
-    fetch(`/getCoupons?couponId=${couponId}`,{
+    fetch(`/admin/getCoupons?couponId=${couponId}`, {
       method: "GET"
     })
       .then(response => response.json())
       .then(coupon => {
-        console.log('coupon',coupon.couponCode);
+        console.log('coupon', coupon.couponCode);
         const today = new Date().toISOString().split('T')[0];
 
         Swal.fire({
@@ -579,7 +568,6 @@
       });
   });
 });
-
 </script>
 
 
