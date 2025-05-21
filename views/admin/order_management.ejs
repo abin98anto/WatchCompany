@@ -164,25 +164,16 @@
 <script>
 
   document.addEventListener("DOMContentLoaded", () => {
-  // Get the status filter dropdown
   const statusFilter = document.querySelector('.form-select');
   const orderRows = document.querySelectorAll('tbody tr');
-  
-  // Add change event listener to the status dropdown
   statusFilter.addEventListener('change', function() {
     const selectedStatus = this.value;
-    
-    // Loop through all order rows
     orderRows.forEach(row => {
-      // Get the status cell of the current row (it's the 6th column, index 5)
       const statusCell = row.querySelector('td:nth-child(6)');
       const orderStatus = statusCell.textContent.trim();
-      
-      // If "Show all" is selected or status matches the filter, show the row
       if (selectedStatus === "Show all" || selectedStatus === "Status" || orderStatus === selectedStatus) {
         row.style.display = "";
       } else {
-        // Otherwise hide the row
         row.style.display = "none";
       }
     });
