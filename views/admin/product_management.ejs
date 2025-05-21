@@ -45,13 +45,13 @@
       </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/coupon_management">
-          <img src="/fimg/voucher.png">
+          <img src="/fimg/voucher.png" />
           <span class="text ml-10">Coupon Management</span>
         </a>
       </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/sales_report">
-          <img src="/fimg/salesreport.png">
+          <img src="/fimg/salesreport.png" />
           <span class="text ml-10">Sales Report</span>
         </a>
       </li>
@@ -85,27 +85,6 @@
       </div>
     </div>
     <div class="card mb-4 d-flex">
-      <!-- Table header -->
-      <header class="card-header">
-        <div class="row align-items-center">
-          <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
-            <select class="form-select">
-              <option selected>All</option>
-              <% categories.forEach((category)=>{ %>
-              <option><%= category.name %></option>
-              <% }); %>
-            </select>
-          </div>
-          <div class="col-md-2 col-6">
-            <select class="form-select">
-              <option selected>Show all</option>
-              <option>Unlisted</option>
-              <option>Listed</option>
-            </select>
-          </div>
-        </div>
-      </header>
-
       <!-- Populating products -->
       <div class="card-body" style="height: 500px">
         <% products.forEach((product)=>{ %>

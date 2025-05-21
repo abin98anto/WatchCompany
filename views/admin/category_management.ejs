@@ -45,13 +45,13 @@
       </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/coupon_management">
-          <img src="/fimg/voucher.png">
+          <img src="/fimg/voucher.png" />
           <span class="text ml-10">Coupon Management</span>
         </a>
       </li>
       <li class="menu-item">
         <a class="menu-link" href="/admin/sales_report">
-          <img src="/fimg/salesreport.png">
+          <img src="/fimg/salesreport.png" />
           <span class="text ml-10">Sales Report</span>
         </a>
       </li>
@@ -416,78 +416,98 @@
 
 <!-- Edit Category -->
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const editButtons = document.querySelectorAll(".edit-button");
+  document.addEventListener("DOMContentLoaded", () => {
+    const editButtons = document.querySelectorAll(".edit-button");
 
-  editButtons.forEach((button) => {
-    button.addEventListener("click", async (event) => {
-      event.preventDefault();
+    editButtons.forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        event.preventDefault();
 
-      const categoryName = event.target
-        .closest("tr")
-        .querySelector("td:nth-child(2)").innerText;
-      const categoryDiscount = event.target
-        .closest("tr")
-        .querySelector("td:nth-child(3)").innerText;
-      const categoryId = event.target
-        .closest("tr")
-        .querySelector('input[name="id"]').value;
+        const categoryName = event.target
+          .closest("tr")
+          .querySelector("td:nth-child(2)").innerText;
+        const categoryDiscount = event.target
+          .closest("tr")
+          .querySelector("td:nth-child(3)").innerText;
+        const categoryId = event.target
+          .closest("tr")
+          .querySelector('input[name="id"]').value;
 
-      const { value: formValues } = await Swal.fire({
-        title: "Edit Category",
-        html:
-          `<input id="swal-input1" class="swal2-input" value="${categoryName}" placeholder="Enter new category name">` +
-          `<input id="swal-input2" class="swal2-input" value="${categoryDiscount}" placeholder="Enter new category discount">`,
-        focusConfirm: false,
-        preConfirm: () => {
-          return [
-            document.getElementById('swal-input1').value,
-            document.getElementById('swal-input2').value
-          ]
-        },
-        showCancelButton: true,
-        confirmButtonText: "Save changes",
-        showLoaderOnConfirm: true,
-      });
-
-      const newCategoryName = formValues[0].trim();
-      const newCategoryDiscount = formValues[1].trim();
-
-      if (!newCategoryName) {
-        Swal.fire("Error!", "Category name cannot be empty.", "error");
-        return;
-      }
-
-      if (isNaN(newCategoryDiscount) || newCategoryDiscount < 0 || newCategoryDiscount > 100) {
-        Swal.fire("Error!", "Discount must be a number between 0 and 100.", "error");
-        return;
-      }
-
-      const catName = newCategoryName.charAt(0).toUpperCase() + newCategoryName.slice(1).toLowerCase();
-
-      try {
-        const response = await fetch(`/admin/edit_category?id=${categoryId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const { value: formValues } = await Swal.fire({
+          title: "Edit Category",
+          html:
+            `<input id="swal-input1" class="swal2-input" value="${categoryName}" placeholder="Enter new category name">` +
+            `<input id="swal-input2" class="swal2-input" value="${categoryDiscount}" placeholder="Enter new category discount">`,
+          focusConfirm: false,
+          preConfirm: () => {
+            return [
+              document.getElementById("swal-input1").value,
+              document.getElementById("swal-input2").value,
+            ];
           },
-          body: JSON.stringify({ new_name: catName, new_discount: newCategoryDiscount }),
+          showCancelButton: true,
+          confirmButtonText: "Save changes",
+          showLoaderOnConfirm: true,
         });
 
-        if (response.ok) {
-          Swal.fire("Success!", "Category updated successfully.", "success").then(() => {
-            window.location.reload();
-          });
-        } else {
-          throw new Error("Failed to edit category");
+        const newCategoryName = formValues[0].trim();
+        const newCategoryDiscount = formValues[1].trim();
+
+        if (!newCategoryName) {
+          Swal.fire("Error!", "Category name cannot be empty.", "error");
+          return;
         }
-      } catch (error) {
-        console.error("Error:", error);
-        Swal.fire("Error!", "Failed to update category.", "error");
-      }
+
+        if (
+          isNaN(newCategoryDiscount) ||
+          newCategoryDiscount < 0 ||
+          newCategoryDiscount > 100
+        ) {
+          Swal.fire(
+            "Error!",
+            "Discount must be a number between 0 and 100.",
+            "error"
+          );
+          return;
+        }
+
+        const catName =
+          newCategoryName.charAt(0).toUpperCase() +
+          newCategoryName.slice(1).toLowerCase();
+
+        try {
+          const response = await fetch(
+            `/admin/edit_category?id=${categoryId}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                new_name: catName,
+                new_discount: newCategoryDiscount,
+              }),
+            }
+          );
+
+          if (response.ok) {
+            Swal.fire(
+              "Success!",
+              "Category updated successfully.",
+              "success"
+            ).then(() => {
+              window.location.reload();
+            });
+          } else {
+            throw new Error("Failed to edit category");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          Swal.fire("Error!", "Failed to update category.", "error");
+        }
+      });
     });
   });
-});
 </script>
 
 <!-- Create category from validation -->
@@ -530,6 +550,30 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error checking category:", error);
         Swal.fire("Error!", "Failed to check category existence.", "error");
       }
+    });
+  });
+
+  // Search functionality for categories
+  document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("searchInput");
+    const categoryTable = document.getElementById("categoryTableBody");
+    const tableRows = categoryTable.querySelectorAll("tr");
+
+    searchInput.addEventListener("keyup", function () {
+      const searchTerm = searchInput.value.toLowerCase();
+
+      tableRows.forEach((row) => {
+        const categoryName = row
+          .querySelector("td:nth-child(2)")
+          .textContent.toLowerCase();
+
+        // Check if the category name contains the search term
+        if (categoryName.includes(searchTerm)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
     });
   });
 </script>
